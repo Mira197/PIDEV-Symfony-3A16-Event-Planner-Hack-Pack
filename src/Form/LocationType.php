@@ -13,6 +13,7 @@ use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\NumberType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\Constraints as Assert;
 
 class LocationType extends AbstractType
 {
@@ -54,6 +55,13 @@ class LocationType extends AbstractType
                 'mapped' => false,
                 'required' => false,
                 'label' => 'Image',
+                'constraints' => [
+                    new Assert\Image([
+                        'maxSize' => '5M',
+                        'mimeTypes' => ['image/jpeg', 'image/png', 'image/webp'],
+                        'mimeTypesMessage' => 'Please upload a valid image (JPEG, PNG, WEBP)',
+                    ]),
+                ],
             ])
             //->add('image_data')
             //->add('image_filename')
