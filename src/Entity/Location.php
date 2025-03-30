@@ -6,6 +6,7 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use App\Enum\City;
 
 use App\Repository\LocationRepository;
 
@@ -57,19 +58,19 @@ class Location
         return $this;
     }
 
-    #[ORM\Column(type: 'string', nullable: false)]
-    private ?string $city = null;
+    #[ORM\Column(type: 'string', enumType: City::class)]
+    private ?City $city = null;
 
-    public function getCity(): ?string
+    public function getCity(): ?City
     {
         return $this->city;
     }
 
-    public function setCity(string $city): self
-    {
-        $this->city = $city;
-        return $this;
-    }
+    public function setCity(?City $city): self
+{
+    $this->city = $city;
+    return $this;
+}
 
     #[ORM\Column(type: 'integer', nullable: false)]
     private ?int $capacity = null;
@@ -142,9 +143,9 @@ class Location
     }
 
     #[ORM\Column(type: 'blob', nullable: true)]
-    private ?string $image_data = null;
+    private $image_data = null;
 
-    public function getImage_data(): ?string
+    public function getImage_data()
     {
         return $this->image_data;
     }

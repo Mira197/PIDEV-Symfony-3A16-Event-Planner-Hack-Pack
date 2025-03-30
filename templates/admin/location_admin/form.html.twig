@@ -1,0 +1,147 @@
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        {{ form_start(form) }}
+        <div class="input-style-1">
+            {{ form_label(form.name) }}
+            {{ form_widget(form.name, {'attr': {'placeholder': 'Location Name'}}) }}
+            {{ form_errors(form.name) }}
+        </div>
+        <div class="input-style-1">
+            {{ form_label(form.address) }}
+            {{ form_widget(form.address, {'attr': {'placeholder': 'Address'}}) }}
+            {{ form_errors(form.address) }}
+        </div>
+        <div class="select-style-1">
+            {{ form_label(form.city) }}
+            <div class="select-position">
+                {{ form_widget(form.city) }}
+            </div>
+            {{ form_errors(form.city) }}
+        </div>
+        <div class="input-style-1">
+            {{ form_label(form.capacity) }}
+            {{ form_widget(form.capacity, {'attr': {'placeholder': 'Capacity (Number of People)'}}) }}
+            {{ form_errors(form.capacity) }}
+        </div>
+        <div class="select-style-1">
+            {{ form_label(form.status) }}
+            <div class="select-position">
+                {{ form_widget(form.status) }}
+            </div>
+            {{ form_errors(form.status) }}
+        </div>
+        <div class="input-style-1">
+            {{ form_label(form.description) }}
+            {{ form_widget(form.description, {'attr': {'placeholder': 'Location Description'}}) }}
+            {{ form_errors(form.description) }}
+        </div>
+        <div class="input-style-1">
+            {{ form_label(form.dimension) }}
+            {{ form_widget(form.dimension, {'attr': {'placeholder': 'Dimension (eg: 20m x 30m)'}}) }}
+            {{ form_errors(form.dimension) }}
+        </div>
+        <div class="input-style-1">
+            {{ form_label(form.price) }}
+            <div class="input-group">
+                {{ form_widget(form.price, {'attr': {'placeholder': 'Price'}}) }}
+                <span class="input-group-text">DT</span>
+            </div>
+            {{ form_errors(form.price) }}
+        </div>
+        <div class="input-style-1">
+            {{ form_label(form.image) }}
+            {# 🔥 Affichage de l'image actuelle #}
+            {% if location.imageFilename is defined and location.imageFilename %}
+                <div class="mb-2">
+                    <img src="{{ asset('uploads/' ~ location.imageFilename) }}" alt="Current Image" class="img-fluid rounded" style="max-width: 300px;">
+                </div>
+             {% endif %}
+            {{ form_widget(form.image) }}
+            {{ form_errors(form.image) }}
+        </div> {# Le champ image ici est crucial ! #}
+
+        <hr class="my-4" />
+        <h5 class="mb-3">3D Tour Settings</h5>
+        <div class="form-check form-switch toggle-switch mb-3">
+            {{ form_widget(form.has_3d_tour, {'attr': {'class': 'form-check-input'}}) }}
+            {{ form_label(form.has_3d_tour, null, {'label_attr': {'class': 'form-check-label'}}) }}
+        </div>
+        <div id="tour-3d-section">
+            <div class="input-style-1">
+                {{ form_label(form.table_set_count) }}
+                {{ form_widget(form.table_set_count) }}
+                {{ form_errors(form.table_set_count) }}
+            </div>
+            <div class="form-check checkbox-style mb-3">
+                {{ form_widget(form.include_corner_plants) }}
+                {{ form_label(form.include_corner_plants) }}
+                {{ form_errors(form.include_corner_plants) }}
+            </div>
+            <div class="select-style-1">
+                {{ form_label(form.window_style) }}
+                <div class="select-position">
+                    {{ form_widget(form.window_style) }}
+                </div>
+                {{ form_errors(form.window_style) }}
+            </div>
+
+            <div class="select-style-1">
+                {{ form_label(form.door_style) }}
+                <div class="select-position">
+                    {{ form_widget(form.door_style) }}
+                </div>
+                {{ form_errors(form.door_style) }}
+            </div>
+
+            <div class="form-check checkbox-style mb-3">
+                {{ form_widget(form.include_ceiling_lights) }}
+                {{ form_label(form.include_ceiling_lights) }}
+                {{ form_errors(form.include_ceiling_lights) }}
+            </div>
+            {{ form_row(form.light_color) }}
+        </div>
+            <button class="btn btn-primary">Save </button>
+        {{ form_end(form) }}
+         {# ✅ Script placé ici pour agir sur les champs déjà affichés #}
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+            const toggle3D = document.querySelector('#location_has_3d_tour');
+            const tourSection = document.getElementById('tour-3d-section');
+
+            function update3DVisibility() {
+                if (toggle3D.checked) {
+                     tourSection.style.display = '';
+                } else {
+                tourSection.style.display = 'none';
+                }
+            }
+
+            if (toggle3D && tourSection) {
+                toggle3D.addEventListener('change', update3DVisibility);
+                update3DVisibility(); // Initial state
+            }   
+            });
+        </script>
+<style>
+    .input-style-1,
+    .select-style-1,
+    .form-check {
+        margin-bottom: 10px !important; /* réduit l’espace entre les champs */
+    }
+    /* Tu peux aussi jouer sur la taille des labels */
+    .input-style-1 label,
+    .select-style-1 label {
+        font-size: 14px;
+        margin-bottom: 3px;
+    }
+
+    .form-check label {
+        margin-left: 6px;
+    }
+
+
+</style>
+
+
+    </div>
+</div>
