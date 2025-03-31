@@ -11,10 +11,22 @@
                     </div>
                 </div>
                 <div class="col-md-6 text-end">
-                    <a href="{{ path('location_admin_new') }}" class="btn btn-success">Add a location</a>
+                    <a href="{{ path('location_admin_new') }}" class="main-btn success-btn-outline btn-hover px-4 py-2">Add a location</a>
                 </div>
             </div>
         </div>
+        
+        {# 👉 INSERT SEARCH FORM HERE #}
+<div class="row mt-3">
+    <div class="col-md-6 offset-md-3">
+        <form action="{{ path('location_admin_search') }}" method="get" class="input-group">
+            <input type="text" name="q" class="form-control" placeholder="Search location..." value="{{ query|default('') }}">
+            <button class="btn btn-outline-primary" type="submit">
+                <i class="lni lni-search-alt"></i>
+            </button>
+        </form>
+    </div>
+</div>
 
         <div class="row mt-4">
             <div class="col-12">
@@ -56,8 +68,8 @@
                                 <td>{{ location.price }}DT</td>
                                 <td>{{ location.status }}</td>
                                 <td>
-                                    <a href="{{ path('location_admin_show', {'id': location.idLocation}) }}" class="btn btn-sm btn-primary">Show</a>
-                                    <a href="{{ path('location_admin_edit', {'id': location.idLocation}) }}" class="btn btn-warning">Edit</a>
+                                    <a href="{{ path('location_admin_show', {'id': location.idLocation}) }}" class="main-btn secondary-btn-outline btn-hover px-4 py-2">Show</a>
+                                    <a href="{{ path('location_admin_edit', {'id': location.idLocation}) }}" class="main-btn warning-btn-outline btn-hover px-4 py-2">Edit</a>
                                 </td>
                             </tr>
                         {% else %}

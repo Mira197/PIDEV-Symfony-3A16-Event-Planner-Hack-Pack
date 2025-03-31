@@ -40,4 +40,15 @@ class LocationRepository extends ServiceEntityRepository
 //            ->getOneOrNullResult()
 //        ;
 //    }
+public function searchByKeyword(string $keyword): array
+{
+    return $this->createQueryBuilder('l')
+        ->where('l.name LIKE :kw OR l.city LIKE :kw OR l.address LIKE :kw')
+        ->setParameter('kw', '%' . $keyword . '%')
+        ->orderBy('l.name', 'ASC')
+        ->getQuery()
+        ->getResult();
+}
+
+
 }

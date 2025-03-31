@@ -49,9 +49,9 @@
                 </table>
 
                 <div class="mt-3">
-                    <a href="{{ path('location_admin') }}" class="btn btn-secondary">Back to List</a>
-                    <a href="{{ path('location_admin_edit', {'id': location.idLocation}) }}" class="btn btn-warning">Edit</a>
-                    {{ include('admin/location_admin/delete_form.html.twig') }}
+                    <a href="{{ path('location_admin') }}" class="main-btn dark-btn-outline btn-hover px-4 py-2 me-2">Back to List</a>
+                    <a href="{{ path('location_admin_edit', {'id': location.idLocation}) }}" class="main-btn warning-btn-outline btn-hover px-4 py-2 me-2">Edit</a>
+                    {{ include('admin/location_admin/delete_form.html.twig')|raw  }}
 
 
                 </div>

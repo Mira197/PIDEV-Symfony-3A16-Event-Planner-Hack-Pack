@@ -22,6 +22,17 @@ class LocationAdminController extends AbstractController
             'locations' => $locationRepository->findAll(),
         ]);
     }
+    #[Route('/search', name: 'location_admin_search', methods: ['GET'])]
+    public function search(Request $request, LocationRepository $locationRepository): Response
+    {
+        $keyword = $request->query->get('q', '');
+        $locations = $locationRepository->searchByKeyword($keyword);
+
+        return $this->render('admin/location_admin/indexLocation.html.twig', [
+            'locations' => $locations,
+            'query' => $keyword,
+        ]);
+    }
 
     #[Route('/new', name: 'location_admin_new', methods: ['GET', 'POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager): Response
@@ -109,9 +120,9 @@ class LocationAdminController extends AbstractController
         'form' => $form,
     ]);
 }
-#[Route('/{id}', name: 'location_admin_delete', methods: ['POST'])]
-public function delete(Request $request, Location $location, EntityManagerInterface $entityManager): Response
-{
+    #[Route('/{id}', name: 'location_admin_delete', methods: ['POST'])]
+    public function delete(Request $request, Location $location, EntityManagerInterface $entityManager): Response
+    {
     if ($this->isCsrfTokenValid('delete'.$location->getIdLocation(), $request->request->get('_token'))) {
         $entityManager->remove($location);
         $entityManager->flush();
@@ -119,7 +130,9 @@ public function delete(Request $request, Location $location, EntityManagerInterf
     }
 
     return $this->redirectToRoute('location_admin', [], Response::HTTP_SEE_OTHER);
-}
+    }
+
+   
 
 
 }
