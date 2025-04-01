@@ -42,6 +42,35 @@ class Publication
         $this->title = $title;
         return $this;
     }
+    #[ORM\Column(type: 'blob', nullable: true)]
+    private $image;
+
+    public function getImage()
+    {
+    return $this->image;
+    }
+
+    public function setImage($image): self
+    {
+    $this->image = $image;
+    return $this;
+    }
+
+    public function getBase64Image(): ?string
+    {
+        if (!$this->image) {
+            return null;
+        }
+    
+        if (is_resource($this->image)) {
+            return base64_encode(stream_get_contents($this->image));
+        }
+    
+        return base64_encode($this->image);
+    }
+
+
+
 
     #[ORM\Column(type: 'text', nullable: true)]
     private ?string $description = null;
@@ -204,5 +233,6 @@ class Publication
 
         return $this;
     }
+    
 
 }
