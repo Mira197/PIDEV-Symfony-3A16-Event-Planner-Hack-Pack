@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Enum\City;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -129,9 +130,9 @@ class Event
     }
 
     #[ORM\Column(type: 'blob', nullable: true)]
-    private ?string $image_data = null;
+    private $image_data = null;
 
-    public function getImage_data(): ?string
+    public function getImage_data()
     {
         return $this->image_data;
     }
