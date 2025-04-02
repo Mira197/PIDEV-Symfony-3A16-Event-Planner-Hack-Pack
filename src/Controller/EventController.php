@@ -2,15 +2,20 @@
 
 namespace App\Controller;
 
+use App\Entity\User;
+use App\Entity\Event;
+use App\Form\EventType;
 use App\Repository\EventRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
+#[Route('/events')]
 final class EventController extends AbstractController
 {
-    #[Route('/events', name: 'app_events')]
+    #[Route(name: 'app_events', methods: ['GET'])]
     public function index(EventRepository $eventRepository, Request $request): Response
     {
         $events = $eventRepository->findAll();
@@ -22,6 +27,49 @@ final class EventController extends AbstractController
 
         return $this->render('event/events.html.twig', [
             'events' => $events,
+        ]);
+    }
+
+
+    #[Route('/new', name: 'event_new', methods: ['GET', 'POST'])]
+    public function new(Request $request, EntityManagerInterface $em): Response
+    {
+        $event = new Event();
+        $form = $this->createForm(EventType::class, $event);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+
+            // 🔥 Gérer l'image (upload facultatif)
+            $imageFile = $form->get('image')->getData();
+            if ($imageFile) {
+                $binary = file_get_contents($imageFile->getPathname());
+                $event->setImageData($binary);
+
+                $newFilename = uniqid().'.'.$imageFile->guessExtension();
+                $event->setImageFilename($newFilename);
+
+                $imageFile->move(
+                    $this->getParameter('uploads_directory'),
+                    $newFilename
+                );
+            }
+
+            // 👤 Lier l'utilisateur connecté (provisoire)
+            $user = $this->getUser() ?? $em->getRepository(User::class)->find(3); // à remplacer plus tard
+            $event->setUser($user);
+
+            $em->persist($event);
+            $em->flush();
+
+            $this->addFlash('success', 'Event created successfully!');
+
+            return $this->redirectToRoute('app_events', [], Response::HTTP_SEE_OTHER);
+        }
+
+        return $this->renderForm('event/newEvent.html.twig', [
+            'event' => $event,
+            'form' => $form,
         ]);
     }
 }

@@ -1,0 +1,23 @@
+{% extends 'base.html.twig' %}
+{% block title %}Create New Event{% endblock %}
+
+{% block content %}
+    <header id="fh5co-header" class="fh5co-cover fh5co-cover-sm" role="banner" style="background-image:url('{{ asset('images/eventspage.jpg') }}');">
+        <div class="overlay"></div>
+        <div class="fh5co-container">
+            <div class="row">
+                <div class="col-md-8 col-md-offset-2 text-center">
+                    <div class="display-t">
+                        <div class="display-tc animate-box" data-animate-effect="fadeIn">
+                            <h1>Events Page</h1>
+                            <h2>You can now create your events here freely.</h2>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    {{ include('event/formEvent.html.twig') }}
+
+{% endblock %}

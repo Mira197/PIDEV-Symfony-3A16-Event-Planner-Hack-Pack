@@ -45,6 +45,20 @@
                                 <li><strong>🕒Start:</strong> {{ event.startDate|date('d/m/Y H:i') }}</li>
                                 <li><strong>🕔End:</strong> {{ event.endDate|date('d/m/Y H:i') }}</li>
                             </ul>
+                            <!-- Action Buttons -->
+                            <div class="event-card-actions">
+                                <button class="action-btn edit" title="Edit">
+                                    ✏️
+                                </button>
+                                <button class="action-btn delete" title="Delete" onclick="return confirm('Are you sure you want to delete this event?');">
+                                    🗑️
+                                </button>
+                                <button class="action-btn details" title="Details">
+                                    ℹ️
+                                </button>
+                            </div>
+
+
                         </div>
                     </div>
                 </div>

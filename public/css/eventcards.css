@@ -42,3 +42,35 @@
 .event-card-content ul li {
     margin-bottom: 5px;
 }
+
+.event-card-actions {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.event-card-actions button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 45px;
+    height: 45px;
+    font-size: 18px;
+    background-color: #533C56 !important;
+    color: white !important;
+    border-radius: 10px;
+    border: none;
+    text-decoration: none;
+    transition: background 0.3s ease;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    cursor: pointer;
+}
+
+.event-card-actions button:hover {
+    background-color: #3a204a !important;
+}
+
+
+
+

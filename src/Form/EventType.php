@@ -7,6 +7,7 @@ use App\Entity\User;
 use App\Enum\City;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\EnumType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -26,10 +27,12 @@ class EventType extends AbstractType
                 'widget' => 'single_text',
             ])
             ->add('capacity')
-            ->add('city', EnumType::class, [
-                'class' => City::class,
-                'label' => 'City',
-                'choice_label' => fn (City $city) => ucwords(strtolower(str_replace('_', ' ', $city->value))),
+            ->add('city', ChoiceType::class, [
+                'choices' => array_map(
+                    fn (City $c) => $c->value,
+                    City::cases()
+                ),
+                'choice_label' => fn (string $city) => ucwords(strtolower(str_replace('_', ' ', $city))),
                 'placeholder' => 'Select city',
             ])
             ->add('image', FileType::class, [
@@ -39,10 +42,10 @@ class EventType extends AbstractType
             ])
             //->add('image_data')
             //->add('image_filename')
-            ->add('user', EntityType::class, [
+            /*->add('user', EntityType::class, [
                 'class' => User::class,
                 'choice_label' => 'id',
-            ])
+            ])*/
         ;
     }
 
