@@ -15,9 +15,8 @@ class Cart
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column(type: 'integer')]
+    #[ORM\Column(name: 'cart_id', type: 'integer')]
     private ?int $cart_id = null;
-
     public function getCart_id(): ?int
     {
         return $this->cart_id;
@@ -58,19 +57,20 @@ class Cart
         return $this;
     }
 
-    #[ORM\Column(type: 'decimal', nullable: true)]
-    private ?float $total_price = null;
+    #[ORM\Column(type: 'decimal', precision: 10, scale: 2, nullable: true)]
+    private ?string $total_price = null;  // ✅ Type string obligatoire en Symfony pour DECIMAL
 
-    public function getTotal_price(): ?float
+    public function getTotalPrice(): ?string
     {
         return $this->total_price;
     }
 
-    public function setTotal_price(?float $total_price): self
+    public function setTotalPrice(?string $total_price): static
     {
         $this->total_price = $total_price;
         return $this;
     }
+
 
     #[ORM\OneToOne(targetEntity: Order::class, mappedBy: 'cart')]
     private ?Order $order = null;
@@ -89,30 +89,19 @@ class Cart
     #[ORM\ManyToMany(targetEntity: Product::class, inversedBy: 'carts')]
     #[ORM\JoinTable(
         name: 'cart_product',
-        joinColumns: [
-            new ORM\JoinColumn(name: 'cart_id', referencedColumnName: 'cart_id')
-        ],
-        inverseJoinColumns: [
-            new ORM\JoinColumn(name: 'product_id', referencedColumnName: 'product_id')
-        ]
+        joinColumns: [new ORM\JoinColumn(name: 'cart_id', referencedColumnName: 'cart_id')],
+        inverseJoinColumns: [new ORM\JoinColumn(name: 'product_id', referencedColumnName: 'product_id')]
     )]
     private Collection $products;
-
-    public function __construct()
-    {
+    
+    public function __construct() {
         $this->products = new ArrayCollection();
     }
-
-    /**
-     * @return Collection<int, Product>
-     */
-    public function getProducts(): Collection
-    {
-        if (!$this->products instanceof Collection) {
-            $this->products = new ArrayCollection();
-        }
+    
+    public function getProducts(): Collection {
         return $this->products;
     }
+    
 
     public function addProduct(Product $product): self
     {
@@ -144,17 +133,4 @@ class Cart
 
         return $this;
     }
-
-    public function getTotalPrice(): ?string
-    {
-        return $this->total_price;
-    }
-
-    public function setTotalPrice(?string $total_price): static
-    {
-        $this->total_price = $total_price;
-
-        return $this;
-    }
-
 }

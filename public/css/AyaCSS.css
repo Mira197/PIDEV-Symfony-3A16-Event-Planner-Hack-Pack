@@ -1,0 +1,101 @@
+#aya-cart-hover {
+    position: relative;
+}
+
+.aya-cart-preview {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: 40px;
+    background: #fff;
+    border: 1px solid #ccc;
+    width: 300px;
+    padding: 15px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    z-index: 1000;
+    color: #333;
+    font-size: 14px;
+    font-family: 'Work Sans', sans-serif;
+}
+
+#aya-cart-hover:hover .aya-cart-preview {
+    display: block;
+}
+
+.aya-cart-preview .preview-item {
+    margin-bottom: 10px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+}
+
+.aya-cart-preview .preview-empty {
+    text-align: center;
+    color: #333;
+}
+
+.aya-cart-preview a {
+    color: #533C56 !important;
+    text-decoration: underline;
+    font-weight: bold;
+}
+.aya-cart-preview a:hover {
+    color: #ff3399 !important; /* rose vif comme dans ta charte */
+}
+
+.aya-cart-empty-container {
+    text-align: center;
+    padding: 80px 20px;
+    background-color: #fff;
+}
+
+.aya-cart-empty-icon {
+    width: 100px;
+    margin-bottom: 20px;
+    opacity: 0.8;
+}
+
+.aya-cart-empty-title {
+    font-weight: bold;
+    font-size: 22px;
+    margin-bottom: 15px;
+    color: #222;
+}
+
+.aya-cart-empty-message {
+    font-size: 16px;
+    color: #666;
+    margin-bottom: 30px;
+}
+
+.aya-cart-empty-buttons {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.aya-cart-btn {
+    text-decoration: none;
+    padding: 10px 30px;
+    border-radius: 4px;
+    font-weight: bold;
+    width: 220px;
+    text-align: center;
+    transition: all 0.3s ease-in-out;
+    margin-bottom: 0%;
+}
+
+.aya-cart-btn.primary {
+    background-color: #533C56;
+    color: #fff;
+}
+
+.aya-cart-btn.outline {
+    border: 2px solid #533C56;
+    color: #533C56;
+    background: transparent;
+}
+
+.aya-cart-btn:hover {
+    opacity: 0.85;
+}

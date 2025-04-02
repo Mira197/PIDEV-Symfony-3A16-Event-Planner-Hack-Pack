@@ -10,12 +10,12 @@ use Doctrine\Common\Collections\Collection;
 use App\Repository\OrderRepository;
 
 #[ORM\Entity(repositoryClass: OrderRepository::class)]
-#[ORM\Table(name: 'order')]
+#[ORM\Table(name: '`order`')]
 class Order
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column(type: 'integer')]
+    #[ORM\Column(name: 'order_id', type: 'integer')]
     private ?int $order_id = null;
 
     public function getOrder_id(): ?int
