@@ -6,7 +6,7 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
-
+use Symfony\Component\Validator\Constraints as Assert;
 use App\Repository\OrderRepository;
 
 #[ORM\Entity(repositoryClass: OrderRepository::class)]
@@ -74,6 +74,7 @@ class Order
     }
 
     #[ORM\Column(type: 'string', nullable: false)]
+    #[Assert\NotBlank]
     private ?string $payment_method = null;
 
     public function getPayment_method(): ?string
@@ -88,6 +89,8 @@ class Order
     }
 
     #[ORM\Column(type: 'text', nullable: false)]
+    #[Assert\NotBlank]
+    #[Assert\Length(min: 10)]
     private ?string $exact_address = null;
 
     public function getExact_address(): ?string
@@ -102,6 +105,8 @@ class Order
     }
 
     #[ORM\Column(type: 'datetime', nullable: false)]
+    #[Assert\NotNull]
+    #[Assert\GreaterThan("today")]
     private ?\DateTimeInterface $event_date = null;
 
     public function getEvent_date(): ?\DateTimeInterface
@@ -207,5 +212,4 @@ class Order
 
         return $this;
     }
-
 }
