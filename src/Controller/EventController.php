@@ -72,4 +72,16 @@ final class EventController extends AbstractController
             'form' => $form,
         ]);
     }
+    #[Route('/{id}', name: 'event_show', methods: ['GET'])]
+public function show(Event $event): Response
+{
+    if ($event->getImageData()) {
+        $event->base64Image = base64_encode(stream_get_contents($event->getImageData()));
+    }
+
+    return $this->render('event/showEvent.html.twig', [
+        'event' => $event,
+    ]);
+}
+
 }

@@ -1,5 +1,5 @@
 {% extends 'base.html.twig' %}
-{% block title %}Create New Event{% endblock %}
+{% block title %}Edit Event{% endblock %}
 
 {% block stylesheets %}
     {{ parent() }}
@@ -25,10 +25,11 @@
     <div class="title-wrapper pt-30">
     <div class="title-bar">
         <div class="title">
-            <h2>Create New Event</h2>
+            <h2>Edit Event</h2>
         </div>
         <a href="{{ path('app_events') }}" class="main-btn dark-btn-outline btn-hover px-4 py-2">Back to list</a>
+        {#{{ include('admin/location_admin/delete_form.html.twig') }}#}
     </div>
 </div>
-    {{ include('event/formEvent.html.twig') }}
+    {{ include('event/formEvent.html.twig', {'button_label': 'Update'}) }}
 {% endblock %}
