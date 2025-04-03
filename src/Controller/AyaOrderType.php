@@ -21,8 +21,11 @@ class AyaOrderType extends AbstractType
             ])
             ->add('event_date', DateTimeType::class, [
                 'label' => 'Event Date',
-                'widget' => 'single_text'
-            ])
+                'widget' => 'single_text',
+                'input' => 'datetime', // ← important
+                'html5' => true,
+                'attr' => ['placeholder' => 'Select event date']
+            ])                       
             ->add('payment_method', ChoiceType::class, [
                 'label' => 'Payment Method',
                 'choices' => [

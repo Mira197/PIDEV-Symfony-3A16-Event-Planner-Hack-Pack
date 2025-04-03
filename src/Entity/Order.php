@@ -89,8 +89,11 @@ class Order
     }
 
     #[ORM\Column(type: 'text', nullable: false)]
-    #[Assert\NotBlank]
-    #[Assert\Length(min: 10)]
+    #[Assert\NotBlank(message: "Delivery address is required.")]
+    #[Assert\Length(
+        min: 10,
+        minMessage: "This value is too short. It should have {{ limit }} characters or more."
+    )]
     private ?string $exact_address = null;
 
     public function getExact_address(): ?string
@@ -106,6 +109,7 @@ class Order
 
     #[ORM\Column(type: 'datetime', nullable: false)]
     #[Assert\NotNull]
+    #[Assert\NotNull(message: "Please select a valid event date.")]
     #[Assert\GreaterThan("today")]
     private ?\DateTimeInterface $event_date = null;
 

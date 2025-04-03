@@ -27,10 +27,11 @@ class AyaOrderController extends AbstractController
 
         if (!$cart) {
             $this->addFlash('warning', 'No cart found.');
-            return $this->redirectToRoute('aya_cart');
+            return $this->redirectToRoute('aya_order_confirmation');
         }
 
         $order = new Order();
+        $order->setEventDate(new \DateTime());
         $form = $this->createForm(AyaOrderType::class, $order);
         $form->handleRequest($request);
 
@@ -51,15 +52,30 @@ class AyaOrderController extends AbstractController
             $em->persist($order);
             $em->flush();
 
+            // 🧹 Vider le panier
+            foreach ($cartProducts as $item) {
+                $em->remove($item);
+            }
+            $em->flush();
+
             $this->addFlash('success', 'Order placed successfully!');
 
-            // 🚀 TODO: Redirect to payment later
-            return $this->redirectToRoute('aya_cart');
+            return $this->redirectToRoute('aya_order_confirm', [
+                'id' => $order->getOrderId()
+            ]);
         }
+
 
         return $this->render('aya_order/aya_order.html.twig', [
             'form' => $form->createView(),
             'cart' => $cart
+        ]);
+    }
+    #[Route('/aya/order/confirm/{id}', name: 'aya_order_confirm')]
+    public function confirm(Order $order): Response
+    {
+        return $this->render('aya_order/ayaconfirmation.html.twig', [
+            'order' => $order,
         ]);
     }
 }

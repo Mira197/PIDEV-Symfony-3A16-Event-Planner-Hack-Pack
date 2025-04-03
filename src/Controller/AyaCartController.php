@@ -36,7 +36,6 @@ class AyaCartController extends AbstractController
     ): Response {
         //$user = $this->getUser();
         $user = $this->getUser() ?? $em->getRepository(User::class)->find(3);
-
         $cartProducts = [];
         $total = 0;
 
@@ -67,7 +66,6 @@ class AyaCartController extends AbstractController
         $user = $this->getUser();
         $cartProducts = [];
         $total = 0;
-
         if ($user) {
             $cart = $cartRepository->findOneBy(['user' => $user]);
             if ($cart) {
@@ -160,8 +158,6 @@ class AyaCartController extends AbstractController
         ]);
     }
 
-
-    #[Route('/aya/cart/update/{id}', name: 'aya_cart_update', methods: ['PUT'])]
     #[Route('/aya/cart/update/{id}', name: 'aya_cart_update', methods: ['PUT'])]
     public function updateQuantity(
         int $id,

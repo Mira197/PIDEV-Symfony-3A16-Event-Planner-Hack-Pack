@@ -47,14 +47,19 @@
 		<div
 			class="row aya-order-wrapper justify-content-center">
 			<!-- 🧾 Formulaire commande -->
-			<div class="col-md-6">
+			<div class="col-md-7">
 				<div class="order-form-container">
 					<h2 class="mb-4 text-center">🧾 Validate Your Order</h2>
-					{{ form_start(form) }}
+					{{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
 					<div class="form-group">
 						{{ form_label(form.exact_address) }}
-						{{ form_widget(form.exact_address, {'attr': {'class': 'form-control', 'placeholder': 'Enter exact delivery address'}}) }}
-						{{ form_errors(form.exact_address) }}
+						{{ form_widget(form.exact_address, {
+        'attr': {
+            'class': 'form-control' ~ (form_errors(form.exact_address) ? ' is-invalid' : ''),
+            'placeholder': 'Enter exact delivery address'
+        }
+    }) }}
+                    {{ form_errors(form.exact_address) }} {# ← important ! #}
 					</div>
 					<div class="form-group mt-3">
 						{{ form_label(form.event_date) }}
@@ -72,7 +77,7 @@
 			</div>
 
 			<!-- 💳 Section coupon & options -->
-			<div class="col-md-6 ">
+			<div class="col-md-5 ">
 				<div class="order-summary-box">
 					<div class="form-group">
 						<label>Coupon Code</label>
@@ -120,3 +125,8 @@
 		</div>
 	</div>
 {% endblock %}
+{% block javascripts %}
+    {{ parent() }}
+    <script src="{{ asset('assetsAya/js/order_validation.js') }}"></script>
+{% endblock %}
+
