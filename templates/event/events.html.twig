@@ -50,17 +50,18 @@
                             </ul>
                             <!-- Action Buttons -->
                             <div class="event-card-actions">
-                                <button class="action-btn edit" title="Edit">
+                                <button
+                                    class="action-btn edit"
+                                    title="Edit"
+                                    onclick="window.location.href='{{ path('event_edit', {'id': event.idEvent}) }}'">
                                     ✏️
                                 </button>
-                                <button class="action-btn delete" title="Delete" onclick="return confirm('Are you sure you want to delete this event?');">
-                                    🗑️
-                                </button>
+                                <!-- Delete -->
+                                {{ include('event/delete_formEvent.html.twig', { 'event': event }) }}
                                 <button
                                     class="action-btn details"
                                     title="Details"
-                                    onclick="window.location.href='{{ path('event_show', {'id': event.idEvent}) }}'"
-                                    >
+                                    onclick="window.location.href='{{ path('event_show', {'id': event.idEvent}) }}'">
                                     ℹ️
                                 </button>
                             </div>

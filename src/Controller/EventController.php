@@ -46,7 +46,7 @@ final class EventController extends AbstractController
                 $binary = file_get_contents($imageFile->getPathname());
                 $event->setImageData($binary);
 
-                $newFilename = uniqid().'.'.$imageFile->guessExtension();
+                $newFilename = uniqid() . '.' . $imageFile->guessExtension();
                 $event->setImageFilename($newFilename);
 
                 $imageFile->move(
@@ -72,16 +72,74 @@ final class EventController extends AbstractController
             'form' => $form,
         ]);
     }
+
     #[Route('/{id}', name: 'event_show', methods: ['GET'])]
-public function show(Event $event): Response
-{
-    if ($event->getImageData()) {
-        $event->base64Image = base64_encode(stream_get_contents($event->getImageData()));
+    public function show(Event $event): Response
+    {
+        if ($event->getImageData()) {
+            $event->base64Image = base64_encode(stream_get_contents($event->getImageData()));
+        }
+
+        return $this->render('event/showEvent.html.twig', [
+            'event' => $event,
+        ]);
+    }
+    #[Route('/{id}/edit', name: 'event_edit', methods: ['GET', 'POST'])]
+    public function edit(Request $request, Event $event, EntityManagerInterface $em): Response
+    {
+        // 🔁 Base64 si image BLOB SANS filename
+        $base64Image = null;
+        if ($event->getImageData() && !$event->getImageFilename()) {
+            $base64Image = base64_encode(stream_get_contents($event->getImageData()));
+        }
+        $form = $this->createForm(EventType::class, $event);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $imageFile = $form->get('image')->getData();
+
+            if ($imageFile) {
+                $binary = file_get_contents($imageFile->getPathname());
+                $event->setImageData($binary);
+
+                $newFilename = uniqid() . '.' . $imageFile->guessExtension();
+                $event->setImageFilename($newFilename);
+
+                try {
+                    $imageFile->move(
+                        $this->getParameter('uploads_directory'),
+                        $newFilename
+                    );
+                } catch (\Exception $e) {
+                    // Optionnel : log ou flash message
+                }
+            }
+
+            $em->flush();
+            $this->addFlash('success', 'Event updated successfully!');
+
+            return $this->redirectToRoute('app_events', [], Response::HTTP_SEE_OTHER);
+        }
+
+        return $this->renderForm('event/editEvent.html.twig', [
+            'event' => $event,
+            'form' => $form,
+            'base64Image' => $base64Image, // ✅ injecté ici
+        ]);
     }
 
-    return $this->render('event/showEvent.html.twig', [
-        'event' => $event,
-    ]);
-}
+    #[Route('/{id}', name: 'event_delete', methods: ['POST'])]
+    public function delete(Request $request, Event $event, EntityManagerInterface $em): Response
+    {
+        if ($this->isCsrfTokenValid('delete' . $event->getIdEvent(), $request->request->get('_token'))) {
+            $em->remove($event);
+            $em->flush();
+            $this->addFlash('success', 'Event deleted successfully!');
+        }
+
+        return $this->redirectToRoute('app_events', [], Response::HTTP_SEE_OTHER);
+    }
+
+
 
 }

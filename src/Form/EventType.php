@@ -28,13 +28,13 @@ class EventType extends AbstractType
             ])
             ->add('capacity')
             ->add('city', ChoiceType::class, [
-                'choices' => array_map(
-                    fn (City $c) => $c->value,
-                    City::cases()
+                'choices' => array_combine(
+                    array_map(fn (City $c) => ucwords(strtolower(str_replace('_', ' ', $c->value))), City::cases()),// labels jolis
+                    array_map(fn(City $c) => ucwords(strtolower(str_replace('_', ' ', $c->value))), City::cases())  // valeurs REELLES en BDD
                 ),
-                'choice_label' => fn (string $city) => ucwords(strtolower(str_replace('_', ' ', $city))),
                 'placeholder' => 'Select city',
             ])
+            
             ->add('image', FileType::class, [
                 'mapped' => false,
                 'required' => false,
