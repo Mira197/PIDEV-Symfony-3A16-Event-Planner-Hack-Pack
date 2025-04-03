@@ -1,52 +1,61 @@
 {% extends 'base.html.twig' %}
 
 {% block stylesheets %}
-    {{ parent() }}
-    <style>
-        .confirmation-container {
-            margin: 150px auto;
-            max-width: 700px;
-            text-align: center;
-            padding: 60px 40px;
-            background-color: #fff;
-            border-radius: 20px;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
-        }
+	{{ parent() }}
+	<style>
+		nav.fh5co-nav {
+			background-color: #cebec9 !important;
+			padding: 1px 0 !important;
+			max-height: 130px !important;
+		}
 
-        .confirmation-container h2 {
-            font-size: 2rem;
-            color: #5e2a5b;
-            margin-bottom: 20px;
-        }
+		body {
+			background-color: #f7f7f7;
+		}
+		.confirmation-container {
+			margin: 150px auto;
+			max-width: 700px;
+			text-align: center;
+			padding: 60px 40px;
+			background-color: #fff;
+			border-radius: 20px;
+			box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+		}
 
-        .confirmation-container p {
-            font-size: 1.1rem;
-            color: #555;
-        }
+		.confirmation-container h2 {
+			font-size: 2rem;
+			color: #5e2a5b;
+			margin-bottom: 20px;
+		}
 
-        .confirmation-container .btn {
-            margin-top: 30px;
-            padding: 10px 30px;
-            border-radius: 8px;
-        }
+		.confirmation-container p {
+			font-size: 1.1rem;
+			color: #555;
+		}
 
-        .confirmation-icon {
-            font-size: 50px;
-            color: #28a745;
-            margin-bottom: 20px;
-        }
-    </style>
+		.confirmation-container .btn {
+			margin-top: 30px;
+			padding: 10px 30px;
+			border-radius: 8px;
+		}
+
+		.confirmation-icon {
+			font-size: 50px;
+			color: #28a745;
+			margin-bottom: 20px;
+		}
+	</style>
 {% endblock %}
 
 {% block content %}
-    <div class="container">
-        <div class="confirmation-container">
-            <div class="confirmation-icon">✅</div>
-            <h2>Thank you for your order!</h2>
-            <p>Your order has been successfully placed and is being processed.</p>
-            <p>You will receive a confirmation email shortly.</p>
-            <a href="{{ path('aya_cart') }}" class="btn btn-outline-secondary">Back to Cart</a>
-            <a href="{{ path('app_services') }}" class="btn btn-primary">Continue Shopping</a>
-        </div>
-    </div>
+	<div class="container">
+		<div class="confirmation-container">
+			<div class="confirmation-icon">✅</div>
+			<h2>Thank you for your order!</h2>
+			<p>Your order has been successfully placed and is being processed.</p>
+			<p>You will receive a confirmation email shortly.</p>
+			<a href="{{ path('aya_cart') }}" class="btn btn-outline-secondary">Back to Cart</a>
+			<a href="{{ path('app_services') }}" class="btn btn-primary">Continue Shopping</a>
+		</div>
+	</div>
 {% endblock %}

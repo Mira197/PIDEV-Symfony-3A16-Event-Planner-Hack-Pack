@@ -60,6 +60,7 @@ class Order
     }
 
     #[ORM\Column(type: 'string', nullable: true)]
+
     private ?string $status = null;
 
     public function getStatus(): ?string
