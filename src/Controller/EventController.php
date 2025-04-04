@@ -16,9 +16,12 @@ use Symfony\Component\Routing\Attribute\Route;
 final class EventController extends AbstractController
 {
     #[Route(name: 'app_events', methods: ['GET'])]
-    public function index(EventRepository $eventRepository, Request $request): Response
+    public function index(EventRepository $eventRepository, Request $request,EntityManagerInterface $em): Response
     {
-        $events = $eventRepository->findAll();
+        //sans session :$events = $eventRepository->findAll(); and remove $em and $user. $events devient:$events = $eventRepository->findAll();
+        //avec session: $user = $this->getUser();
+        $user = $this->getUser() ?? $em->getRepository(User::class)->find(3);
+        $events = $eventRepository->findBy(['user' => $user]);
         foreach ($events as $event) {
             if ($event->getImageData()) {
                 $event->base64Image = base64_encode(stream_get_contents($event->getImageData()));
@@ -87,6 +90,7 @@ final class EventController extends AbstractController
     #[Route('/{id}/edit', name: 'event_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Event $event, EntityManagerInterface $em): Response
     {
+        //si je veux ajouter session:....
         // 🔁 Base64 si image BLOB SANS filename
         $base64Image = null;
         if ($event->getImageData() && !$event->getImageFilename()) {
