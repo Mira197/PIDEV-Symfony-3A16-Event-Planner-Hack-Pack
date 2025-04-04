@@ -16,29 +16,50 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     });
   
-    // 🗑️ Delete one
     document.querySelectorAll('.delete-btn').forEach(btn => {
-      btn.addEventListener('click', function () {
-        const id = this.dataset.id;
-        Swal.fire({
-          title: 'Delete order?',
-          text: "This action is irreversible!",
-          icon: 'warning',
-          showCancelButton: true,
-          confirmButtonColor: '#d33',
-          confirmButtonText: 'Yes, delete it!'
-        }).then(result => {
-          if (result.isConfirmed) {
-            fetch(`/admin/orders/delete/${id}`, { method: 'DELETE' })
-              .then(res => res.json())
-              .then(data => {
-                if (data.success) location.reload();
-                else alert("❌ Failed to delete");
-              });
+        btn.addEventListener('click', function () {
+          const id = this.dataset.id;
+          const row = this.closest('tr');
+          const status = row.querySelector('.status-select').value;
+      
+          // ⛔ Vérification du statut
+          if (status === 'DELIVERED') {
+            Swal.fire({
+              icon: 'error',
+              title: 'Action denied',
+              text: 'You cannot delete an order that has already been delivered.'
+            });
+            return; // ❌ Stoppe ici la suppression
           }
+      
+          // ✅ Sinon, on affiche l’alerte de confirmation
+          Swal.fire({
+            title: 'Delete order?',
+            text: "This action is irreversible!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            confirmButtonText: 'Yes, delete it!'
+          }).then(result => {
+            if (result.isConfirmed) {
+              fetch(`/admin/orders/delete/${id}`, { method: 'DELETE' })
+                .then(res => res.json())
+                .then(data => {
+                  if (data.success) {
+                    location.reload();
+                  } else {
+                    Swal.fire({
+                      icon: 'error',
+                      title: 'Cannot delete',
+                      text: data.message || "Something went wrong"
+                    });
+                  }
+                });
+            }
+          });
         });
       });
-    });
+      
   
     // 🧹 Delete all
     document.getElementById("deleteAllOrdersBtn").addEventListener("click", () => {

@@ -46,6 +46,8 @@ class Order
 
     #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'orders')]
     #[ORM\JoinColumn(name: 'user_id', referencedColumnName: 'id_user')]
+    #[Assert\NotNull]
+    #[Assert\Type(User::class)]
     private ?User $user = null;
 
     public function getUser(): ?User
@@ -60,8 +62,9 @@ class Order
     }
 
     #[ORM\Column(type: 'string', nullable: true)]
+    #[Assert\Choice(choices: ['PENDING', 'CONFIRMED', 'CANCELLED', 'DELIVERED'])]
+    private string $status;
 
-    private ?string $status = null;
 
     public function getStatus(): ?string
     {
@@ -126,6 +129,9 @@ class Order
     }
 
     #[ORM\Column(type: 'datetime', nullable: false)]
+    #[Assert\NotBlank]
+    #[Assert\Date]
+    #[Assert\LessThanOrEqual('today')]
     private ?\DateTimeInterface $ordered_at = null;
 
     public function getOrdered_at(): ?\DateTimeInterface
@@ -140,6 +146,10 @@ class Order
     }
 
     #[ORM\Column(type: 'decimal', nullable: false)]
+    #[Assert\NotBlank]
+    #[Assert\PositiveOrZero]
+    #[Assert\LessThanOrEqual(10000)]
+
     private ?float $total_price = null;
 
     public function getTotal_price(): ?float

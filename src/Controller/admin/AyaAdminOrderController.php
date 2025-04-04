@@ -51,11 +51,28 @@ class AyaAdminOrderController extends AbstractController
         return new JsonResponse(['success' => true]);
     }
     #[Route('/admin/orders/delete/{id}', name: 'admin_order_delete', methods: ['DELETE'])]
-    public function delete(Order $order, OrderRepository $repo): JsonResponse
+    public function deleteOrder($id, OrderRepository $orderRepository, EntityManagerInterface $em): JsonResponse
     {
-        $repo->remove($order, true);
+        $order = $orderRepository->find($id);
+
+        if (!$order) {
+            return new JsonResponse(['success' => false, 'message' => 'Order not found.'], 404);
+        }
+
+        // 🛑 Vérifie si la commande est déjà livrée
+        if ($order->getStatus() === 'DELIVERED') {
+            return new JsonResponse([
+                'success' => false,
+                'message' => 'You cannot delete an order that has already been delivered.'
+            ], 400);
+        }
+
+        $em->remove($order);
+        $em->flush();
+
         return new JsonResponse(['success' => true]);
     }
+
 
 
     #[Route('/delete-all', name: 'admin_order_delete_all', methods: ['POST'])]
@@ -76,11 +93,9 @@ class AyaAdminOrderController extends AbstractController
         if (!$order) {
             throw $this->createNotFoundException("Order not found");
         }
-    
+
         return $this->render('admin/order/view.html.twig', [
             'order' => $order,
         ]);
     }
-    
-
 }
