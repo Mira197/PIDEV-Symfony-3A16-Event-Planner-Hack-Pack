@@ -94,5 +94,18 @@
     margin: 0 auto;
     padding: 0 15px;
 }
+/*style for form validation error messages*/
+.form-error {
+    color: #dc3545; /* rouge doux */
+    font-size: 14px;
+    margin-top: 4px;
+    padding-left: 2px;
+    font-style: italic;
+}
+.is-invalid {
+    border-color: #dc3545;
+    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+}
+
 
 
