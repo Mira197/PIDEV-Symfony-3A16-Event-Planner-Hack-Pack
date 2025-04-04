@@ -1,0 +1,60 @@
+{% extends 'admin/baseAdmin.html.twig' %}
+
+{% block stylesheets %}
+  <link rel="stylesheet" href="{{ asset('assetsAya/css/adminOrder.css') }}">
+  {{ parent() }}
+{% endblock %}
+
+
+{% block section %}
+<div class="admin-mui-wrapper">
+  <h2>📋 Orders Management</h2>
+
+  <table class="admin-mui-table">
+    <thead>
+      <tr>
+        <th>#ID</th>
+        <th>User</th>
+        <th>Status</th>
+        <th>Total</th>
+        <th>Ordered At</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      {% for order in orders %}
+        <tr>
+          <td>{{ order.orderId }}</td>
+          <td><strong>{{ order.user.username }}</strong></td>
+          <td>
+            <select class="status-select" data-id="{{ order.orderId }}">
+              {% for status in ['PENDING', 'CONFIRMED', 'DELIVERED', 'CANCELLED'] %}
+                <option value="{{ status }}" {% if order.status == status %}selected{% endif %}>
+                  {{ status }}
+                </option>
+              {% endfor %}
+            </select>
+          </td>
+          <td>{{ order.totalPrice }} DT</td>
+          <td class="editable" data-id="{{ order.orderId }}" data-field="orderedAt">
+            {{ order.orderedAt|date('Y-m-d') }}
+          </td>
+          <td>
+            <button class="btn-delete delete-btn" data-id="{{ order.orderId }}">🗑️</button>
+          </td>
+        </tr>
+      {% else %}
+        <tr>
+          <td colspan="6" class="empty-row">No orders found.</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+  {{ parent() }}
+  <script src="{{ asset('assetsAya/js/ayaAdminOrders.js') }}"></script>
+{% endblock %}
