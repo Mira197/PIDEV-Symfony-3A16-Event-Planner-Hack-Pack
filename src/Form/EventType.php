@@ -12,6 +12,7 @@ use Symfony\Component\Form\Extension\Core\Type\EnumType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\Constraints as Assert;
 
 class EventType extends AbstractType
 {
@@ -39,6 +40,13 @@ class EventType extends AbstractType
                 'mapped' => false,
                 'required' => false,
                 'label' => 'Photo',
+                'constraints' => [
+                    new Assert\Image([
+                        'maxSize' => '5M',
+                        'mimeTypes' => ['image/jpeg', 'image/png', 'image/webp'],
+                        'mimeTypesMessage' => 'Please upload a valid image (JPEG, PNG, or WEBP).',
+                    ]),
+                ],
             ])
             //->add('image_data')
             //->add('image_filename')

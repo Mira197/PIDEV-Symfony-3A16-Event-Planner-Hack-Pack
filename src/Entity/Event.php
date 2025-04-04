@@ -9,6 +9,8 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 
 use App\Repository\EventRepository;
+use Symfony\Component\Validator\Constraints as Assert;
+
 
 #[ORM\Entity(repositoryClass: EventRepository::class)]
 #[ORM\Table(name: 'event')]
@@ -31,6 +33,13 @@ class Event
     }
 
     #[ORM\Column(type: 'string', nullable: false)]
+    #[Assert\NotBlank(message: "Name is required.")]
+    #[Assert\Length(
+    min: 3,
+    max: 30,
+    minMessage: "The name must have at least {{ limit }} characters.",
+    maxMessage: "The name cannot exceed {{ limit }} characters."
+    )]
     private ?string $name = null;
 
     public function getName(): ?string
@@ -44,7 +53,8 @@ class Event
         return $this;
     }
 
-    #[ORM\Column(type: 'text', nullable: true)]
+    #[ORM\Column(type: 'text', nullable: false)]
+    #[Assert\NotBlank(message: "Description is required.")]
     private ?string $description = null;
 
     public function getDescription(): ?string
@@ -59,6 +69,8 @@ class Event
     }
 
     #[ORM\Column(type: 'datetime', nullable: false)]
+    #[Assert\NotBlank(message: "Start date is required.")]
+    #[Assert\Type(type: \DateTimeInterface::class, message: "Start date must be a valid datetime.")]
     private ?\DateTimeInterface $start_date = null;
 
     public function getStart_date(): ?\DateTimeInterface
@@ -66,13 +78,20 @@ class Event
         return $this->start_date;
     }
 
-    public function setStart_date(\DateTimeInterface $start_date): self
+    public function setStart_date(?\DateTimeInterface $start_date): static
     {
         $this->start_date = $start_date;
         return $this;
     }
 
     #[ORM\Column(type: 'datetime', nullable: false)]
+    #[Assert\NotBlank(message: "End date is required.")]
+    #[Assert\Type(type: \DateTimeInterface::class, message: "End date must be a valid datetime.")]
+    #[Assert\Expression(
+        "this.getStart_date() !== null and this.getEnd_date() !== null ? this.getEnd_date() > this.getStart_date() : true",
+        message: "End date must be after start date."
+    )]
+    
     private ?\DateTimeInterface $end_date = null;
 
     public function getEnd_date(): ?\DateTimeInterface
@@ -80,13 +99,16 @@ class Event
         return $this->end_date;
     }
 
-    public function setEnd_date(\DateTimeInterface $end_date): self
+    public function setEnd_date(?\DateTimeInterface $end_date): static
     {
         $this->end_date = $end_date;
         return $this;
     }
 
     #[ORM\Column(type: 'integer', nullable: false)]
+    #[Assert\NotBlank(message: "Capacity is required.")]
+    #[Assert\Type(type: 'integer', message: "Capacity must be an integer.")]
+    #[Assert\PositiveOrZero(message: "Capacity must be a non-negative number.")]
     private ?int $capacity = null;
 
     public function getCapacity(): ?int
@@ -101,6 +123,7 @@ class Event
     }
 
     #[ORM\Column(type: 'string', nullable: false)]
+    #[Assert\NotBlank(message: "City is required.")]
     private ?string $city = null;
 
     public function getCity(): ?string
@@ -200,7 +223,7 @@ class Event
         return $this->start_date;
     }
 
-    public function setStartDate(\DateTimeInterface $start_date): static
+    public function setStartDate(?\DateTimeInterface $start_date): static
     {
         $this->start_date = $start_date;
 
@@ -212,7 +235,7 @@ class Event
         return $this->end_date;
     }
 
-    public function setEndDate(\DateTimeInterface $end_date): static
+    public function setEndDate(?\DateTimeInterface $end_date): static
     {
         $this->end_date = $end_date;
 
