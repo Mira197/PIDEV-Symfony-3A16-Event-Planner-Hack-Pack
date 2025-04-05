@@ -16,49 +16,64 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     });
   
-    document.querySelectorAll('.delete-btn').forEach(btn => {
-        btn.addEventListener('click', function () {
-          const id = this.dataset.id;
-          const row = this.closest('tr');
-          const status = row.querySelector('.status-select').value;
-      
-          // ⛔ Vérification du statut
-          if (status === 'DELIVERED') {
-            Swal.fire({
-              icon: 'error',
-              title: 'Action denied',
-              text: 'You cannot delete an order that has already been delivered.'
-            });
-            return; // ❌ Stoppe ici la suppression
-          }
-      
-          // ✅ Sinon, on affiche l’alerte de confirmation
-          Swal.fire({
-            title: 'Delete order?',
-            text: "This action is irreversible!",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#d33',
-            confirmButtonText: 'Yes, delete it!'
-          }).then(result => {
-            if (result.isConfirmed) {
-              fetch(`/admin/orders/delete/${id}`, { method: 'DELETE' })
-                .then(res => res.json())
-                .then(data => {
-                  if (data.success) {
-                    location.reload();
-                  } else {
-                    Swal.fire({
-                      icon: 'error',
-                      title: 'Cannot delete',
-                      text: data.message || "Something went wrong"
-                    });
-                  }
-                });
+// 🗑️ Supprimer une seule commande sans recharger la page
+document.querySelectorAll('.delete-btn').forEach(btn => {
+  btn.addEventListener('click', function () {
+    const id = this.dataset.id;
+    const row = this.closest('tr');
+    const status = row.querySelector('.status-select').value;
+
+    if (status === 'DELIVERED') {
+      Swal.fire({
+        icon: 'error',
+        title: 'Action denied',
+        text: 'You cannot delete an order that has already been delivered.'
+      });
+      return;
+    }
+
+    Swal.fire({
+      title: 'Delete order?',
+      text: "This action is irreversible!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      confirmButtonText: 'Yes, delete it!'
+    }).then(result => {
+      if (result.isConfirmed) {
+        fetch(`/admin/orders/delete/${id}`, { method: 'DELETE' })
+          .then(res => res.json())
+          .then(data => {
+            if (data.success) {
+              // 💨 Supprimer avec effet fluide
+              row.style.transition = 'opacity 0.4s ease';
+              row.style.opacity = 0;
+              setTimeout(() => row.remove(), 400);
+
+              // ✅ Affiche la notification APRÈS suppression
+              Swal.fire({
+                toast: true,
+                position: 'top-end',
+                icon: 'success',
+                title: 'Order deleted!',
+                showConfirmButton: false,
+                timer: 1500
+              });
+            } else {
+              Swal.fire({
+                icon: 'error',
+                title: 'Cannot delete',
+                text: data.message || "Something went wrong"
+              });
             }
           });
-        });
-      });
+      }
+    });
+  });
+});
+
+  
+  
       
   
     // 🧹 Delete all
@@ -72,9 +87,32 @@ document.addEventListener('DOMContentLoaded', () => {
         confirmButtonColor: '#d33'
       }).then(result => {
         if (result.isConfirmed) {
-          fetch('/admin/orders/delete-all', { method: 'POST' })
+            fetch('/admin/orders/delete-all', { method: 'POST' })
             .then(res => res.json())
-            .then(data => data.success ? location.reload() : alert("Failed to delete all"));
+            .then(data => {
+              if (data.success) {
+                // Supprime toutes les lignes du tableau avec effet
+                document.querySelectorAll('#adminOrdersTable tr').forEach(row => {
+                  row.style.transition = 'opacity 0.4s ease';
+                  row.style.opacity = 0;
+                  setTimeout(() => row.remove(), 400);
+                });
+                Swal.fire({
+                  toast: true,
+                  position: 'top-end',
+                  icon: 'success',
+                  title: 'All orders deleted!',
+                  showConfirmButton: false,
+                  timer: 1500
+                });
+              } else {
+                Swal.fire({
+                  icon: 'error',
+                  title: 'Deletion failed',
+                  text: 'Unable to delete all orders.'
+                });
+              }
+            });          
         }
       });
     });

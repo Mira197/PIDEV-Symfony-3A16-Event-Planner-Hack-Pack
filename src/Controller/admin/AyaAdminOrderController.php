@@ -10,6 +10,8 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
+use Symfony\Component\Security\Csrf\CsrfToken;
 
 #[Route('/admin/orders')]
 class AyaAdminOrderController extends AbstractController
@@ -37,7 +39,7 @@ class AyaAdminOrderController extends AbstractController
 
         return new JsonResponse(['success' => false, 'message' => 'Invalid status']);
     }
-    #[Route('/admin/orders/update-field/{id}', name: 'admin_order_update_field', methods: ['POST'])]
+    #[Route('/update-field/{id}', name: 'admin_order_update_field', methods: ['POST'])]
     public function updateField(Request $request, Order $order, OrderRepository $repo): JsonResponse
     {
         $field = $request->request->get('field');
@@ -50,28 +52,25 @@ class AyaAdminOrderController extends AbstractController
         $repo->save($order, true);
         return new JsonResponse(['success' => true]);
     }
-    #[Route('/admin/orders/delete/{id}', name: 'admin_order_delete', methods: ['DELETE'])]
-    public function deleteOrder($id, OrderRepository $orderRepository, EntityManagerInterface $em): JsonResponse
-    {
-        $order = $orderRepository->find($id);
+    #[Route('/delete/{id}', name: 'admin_order_delete', methods: ['DELETE'])]
+public function deleteOrder($id, OrderRepository $orderRepository, EntityManagerInterface $em): JsonResponse
+{
+    $order = $orderRepository->find($id);
 
-        if (!$order) {
-            return new JsonResponse(['success' => false, 'message' => 'Order not found.'], 404);
-        }
-
-        // 🛑 Vérifie si la commande est déjà livrée
-        if ($order->getStatus() === 'DELIVERED') {
-            return new JsonResponse([
-                'success' => false,
-                'message' => 'You cannot delete an order that has already been delivered.'
-            ], 400);
-        }
-
-        $em->remove($order);
-        $em->flush();
-
-        return new JsonResponse(['success' => true]);
+    if (!$order) {
+        return new JsonResponse(['success' => false, 'message' => 'Order not found.'], 404);
     }
+
+    if ($order->getStatus() === 'DELIVERED') {
+        return new JsonResponse(['success' => false, 'message' => 'You cannot delete an order that has already been delivered.'], 400);
+    }
+
+    $em->remove($order);
+    $em->flush();
+
+    return new JsonResponse(['success' => true]);
+}
+
 
 
 
@@ -86,7 +85,7 @@ class AyaAdminOrderController extends AbstractController
 
         return new JsonResponse(['success' => true]);
     }
-    #[Route('/admin/orders/view/{id}', name: 'admin_order_view')]
+    #[Route('/view/{id}', name: 'admin_order_view')]
     public function viewOrder($id, OrderRepository $orderRepo): Response
     {
         $order = $orderRepo->find($id);
