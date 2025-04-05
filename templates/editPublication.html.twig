@@ -1,10 +1,13 @@
-{% block title %}Edit Post{% endblock %}
-
 {% block content %}
+	{{ form_start(form, {
+    'attr': {
+        'novalidate': 'novalidate',
+        'enctype': 'multipart/form-data',
+        'class': 'publication-form-container'
+    }
+}) }}
 <div class="container publication-form">
     <h1 class="form-title">Edit Your Post</h1>
-    <form method="POST" enctype="multipart/form-data" class="publication-form-container">
-
         {{ form_row(form._token) }}
 
         <div class="form-group">

@@ -29,12 +29,8 @@ class CommentType extends AbstractType
         
             ->add('content', TextareaType::class, [
                 'label' => 'Your comment',
-                'required' => true,
-                'constraints' => [
-                    new NotBlank(['message' => 'The comment cannot be empty.']),
-                ],
                 'attr' => [
-                    'rows' => 5,
+                    'rows' => 1,
                     'placeholder' => 'Write something...',
                     'class' => 'form-textarea'
                 ],

@@ -15,6 +15,8 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use App\Entity\Report;
 use App\Form\ReportTypeAdmin;
+use Symfony\Component\Form\FormError;
+use Symfony\Component\Security\Core\Security;
 
 
 #[Route('/admin/publication')]
@@ -50,23 +52,76 @@ class PublicationAdminController extends AbstractController
     {
         return $this->redirectToRoute('admin_publication_dashboard');
     }
-
-    #[Route('/edit/{id}', name: 'publication_edit')]
-    public function edit(Publication $publication, Request $request, EntityManagerInterface $em): Response
+    #[Route('/add', name: 'app_publication_new')]
+    public function new(Request $request, EntityManagerInterface $em, UserRepository $userRepository): Response
     {
+        $publication = new Publication();
         $form = $this->createForm(PublicationType::class, $publication);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $em->flush();
-            return $this->redirectToRoute('admin_publication_dashboard');
+            $inputUsername = $form->get('username')->getData();
+
+            // 👇 Utilisateur de test avec ID 44
+           $user = $userRepository->find(44);
+            //$user = $this->getUser();
+            if (!$user || $inputUsername !== $user->getUsername()) {
+                $form->get('username')->addError(
+                    new FormError('The username does not match your test account.')
+                );
+            } else {
+                $publication->setUser($user);
+                $publication->setPublicationDate(new \DateTimeImmutable());
+
+                $uploadedImage = $request->files->get('image_file');
+                if ($uploadedImage) {
+                    $imageData = file_get_contents($uploadedImage->getPathname());
+                    $publication->setImage($imageData);
+                }
+
+                $em->persist($publication);
+                $em->flush();
+
+                return $this->redirectToRoute('admin_publication_dashboard');
+            }
         }
 
-        return $this->render('editPublication.html.twig', [
+        return $this->render('newPublication.html.twig', [
             'form' => $form->createView(),
         ]);
     }
 
+#[Route('/edit/{id}', name: 'publication_edit')]
+public function edit(Publication $publication, Request $request, EntityManagerInterface $em, Security $security,UserRepository $userRepository): Response
+{
+    $form = $this->createForm(PublicationType::class, $publication);
+    $form->handleRequest($request);
+
+    if ($form->isSubmitted() && $form->isValid()) {
+        $inputUsername = $form->get('username')->getData();
+        $user = $security->getUser();
+        //$user = $userRepository->find(44);
+
+        if (!$user || $inputUsername !== $user->getUsername()) {
+            $form->get('username')->addError(
+                new FormError('The username does not match your account.')
+            );
+        } else {
+            $publication->setUser($user); // Facultatif ici si déjà lié
+            $em->flush();
+
+            $this->addFlash('success', 'Publication updated successfully.');
+            return $this->redirectToRoute('admin_publication_dashboard');
+        }
+    }
+
+    return $this->render('editPublication.html.twig', [
+        'form' => $form->createView(),
+        'publication' => $publication,
+    ]);
+}
+
+    
     #[Route('/delete/{id}', name: 'publication_delete')]
     public function delete(Publication $publication, EntityManagerInterface $em): Response
     {

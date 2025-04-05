@@ -19,25 +19,10 @@ class ReportType extends AbstractType
         $builder
             ->add('reason', TextType::class, [
                 'label' => 'Reason',
-                'required' => true,
-                'constraints' => [
-                    new NotBlank([
-                        'message' => 'The reason is required.',
-                    ]),
-                    new Regex([
-                        'pattern' => '/^[^\d]+$/',
-                        'message' => 'The reason cannot contain numbers.',
-                    ]),
-                ],
+            
             ])
             ->add('description', TextareaType::class, [
                 'label' => 'Description',
-                'required' => true,
-                'constraints' => [
-                    new NotBlank([
-                        'message' => 'The description is required.',
-                    ]),
-                ],
             ])
             ->add('status', ChoiceType::class, [
                 'choices' => [

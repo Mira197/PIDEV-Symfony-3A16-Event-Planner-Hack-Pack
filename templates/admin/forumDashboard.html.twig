@@ -260,11 +260,16 @@
 													</button>
 													<ul class="dropdown-menu dropdown-menu-end" aria-labelledby="moreAction{{ loop.index }}">
 														<li class="dropdown-item">
-
-															<a href="{{ path('app_publication_new') }}" class="text-gray">Add</a>
+															<a href="{{ path('publication_edit', {'id': publication.publication_id}) }}" class="text-gray">
+																<i class="lni lni-pencil"></i>
+																Edit
+															</a>
 														</li>
 														<li class="dropdown-item">
-															<a href="{{ path('publication_delete', {'id': publication.publication_id}) }}" class="text-gray">Remove</a>
+															<a href="{{ path('publication_delete', {'id': publication.publication_id}) }}" class="text-gray" onclick="return confirm('Are you sure you want to delete this publication?')">
+																<i class="lni lni-trash"></i>
+																Remove
+															</a>
 														</li>
 													</ul>
 												</div>
@@ -282,7 +287,10 @@
 							<i class="lni lni-trash"></i>
 							Delete Selected
 						</button>
-
+						<a href="{{ path('app_publication_new') }}" class="btn-mauve mt-3">
+							<i class="lni lni-plus"></i>
+							Add Post
+						</a>
 					</form>
 				</div>
 			</div>
