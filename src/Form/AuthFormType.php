@@ -17,14 +17,13 @@ class AuthFormType extends AbstractType
             ->add('email')
             ->add('password', PasswordType::class)
             ->add('submit', SubmitType::class, ['label' => 'Login']);
-
-        ;
     }
 
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
             'data_class' => User::class,
+            'validation_groups' => false, // ➤ DÉSACTIVE la validation globale
         ]);
     }
 }

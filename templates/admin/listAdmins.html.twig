@@ -1,0 +1,55 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block head %}
+    <link rel="stylesheet" href="{{ asset('assetsdheker/css/adminUsers.css') }}">
+    {{ parent() }}
+{% endblock %}
+{% block section %}
+    <div class="admin-mui-wrapper">
+        <h2>👥 Users Management</h2>
+
+      <div class="admin-filters">
+            <input type="text" id="userSearchInput" class="form-control" placeholder="🔍 Search users...">
+            <a href="{{ path('app_user_export_pdf') }}" target="_blank" class="main-btn primary-btn btn-hover export-btn">
+                <i class="lni lni-printer"></i> Export PDF
+            </a>
+                 <a class="main-btn info-btn btn-hover export-btn">
+                    <i class="lni lni-user-plus"></i> Add Admin
+                </a>
+              <a href="{{ path('app_user_export_excel') }}" target="_blank" class="main-btn success-btn btn-hover export-btn">
+                    <i class="lni lni-exit-up"></i> Export Excel
+                </a>
+        </div>
+
+        <table class="admin-mui-table">
+            <thead>
+                <tr>
+                    <th>Username</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="userTable">
+                {% for user in users %}
+                    <tr>
+                        <td>{{ user.username }}</td>
+                        <td>{{ user.email }}</td>
+                        <td>{{ user.role }}</td>
+                        <td>
+                            <button class="btn btn-danger btn-sm delete-user" data-id="{{ user.idUser }}">🗑️</button>
+                                <button class="btn btn-warning btn-sm edit-user" data-id="{{ user.idUser }}">🖊️</button>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr><td colspan="4" class="empty-row">No users found.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="{{ asset('assetsdheker/js/ayaUsers.js') }}"></script>
+{% endblock %}

@@ -17,7 +17,7 @@ use Symfony\Component\Console\Output\ConsoleOutput;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Security\Core\Security;
 use App\Repository\UserRepository;
-
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 class AuthController extends AbstractController
 {
@@ -46,68 +46,76 @@ class AuthController extends AbstractController
 
     
     
-     #[Route('/login', name: 'login')]
-    public function login(Request $request, SessionInterface $session, EntityManagerInterface $entityManager): Response
-    {
+    #[Route('/login', name: 'login')]
+    public function login(
+        Request $request,
+        SessionInterface $session,
+        EntityManagerInterface $entityManager,
+        UserPasswordHasherInterface $passwordHasher
+    ): Response {
         $form = $this->createForm(AuthFormType::class);
         $form->handleRequest($request);
     
-        if ($form->isSubmitted()) {
-            
-            $user = $form->getData(); // Récupérer l'objet User du formulaire
-            $email = $user->getEmail(); // Accéder à l'email de l'utilisateur
-            $password = $user->getPassword();
+        if ($form->isSubmitted() && $form->isValid()) {
+            $submittedUser = $form->getData();
     
-            $userRepository = $entityManager->getRepository(User::class);
-            $authenticatedUser = $userRepository->findUserByEmailAndPassword($email, $password);
-            
-            if ($authenticatedUser) {
-                if ($authenticatedUser->isBlocked()) {
-                    // Vérifier si la date de fin de blocage est dépassée
-                    if ($authenticatedUser->getBlockEndDate() < new \DateTime()) {
-                        // Débloquer l'utilisateur et continuer l'authentification
-                        $authenticatedUser->setBlocked(false);
-                        $authenticatedUser->setBlockEndDate(null);
-                        $entityManager->flush();
-                    } else {
-                        // Si la date de fin de blocage n'est pas dépassée, afficher un message d'erreur et rester sur la page de connexion
-                        $form->get('email')->addError(new FormError('Le compte est bloqué.'));
+            $email = $submittedUser->getEmail();
+            $plainPassword = $submittedUser->getPassword();
+    
+            $user = $entityManager->getRepository(User::class)->findOneBy(['email' => $email]);
+            dump($email);
+            dump($plainPassword);
+            dump($user->getPassword()); // mot de passe hashé en BDD
+            dump($passwordHasher->isPasswordValid($user, $plainPassword));
+           
+            die();
+            if ($user && $passwordHasher->isPasswordValid($user, $plainPassword)) {
+    
+                // Vérifie si le compte est bloqué
+                if ($user->isBlocked()) {
+                    $now = new \DateTime();
+    
+                    if ($user->getBlockEndDate() !== null && $user->getBlockEndDate() > $now) {
+                        $form->get('email')->addError(new FormError('Votre compte est bloqué jusqu\'au ' . $user->getBlockEndDate()->format('d/m/Y H:i')));
                         return $this->render('auth/login.html.twig', [
                             'form' => $form->createView(),
                         ]);
                     }
+    
+                    // Déblocage si la date est expirée
+                    $user->setBlocked(false);
+                    $user->setBlockEndDate(null);
+                    $entityManager->flush();
                 }
     
-                // Authentification réussie, continuer avec le processus d'authentification
-                $userId = $authenticatedUser->getIdUser();
-                $session->set('user_id', $userId);
+                // Authentification réussie
+                $session->set('user_id', $user->getIdUser());
     
-                $role = $authenticatedUser->getRole();
-    
-                switch ($role) {
-                    case 'FOURNISSEUR':
-                        return $this->redirectToRoute('Artistpage');
-                        break;
-                    case 'CLIENT':
-                        return $this->redirectToRoute('userpage');
-                        break;
+                // Redirection selon le rôle
+                switch ($user->getRole()) {
                     case 'ADMIN':
                         return $this->redirectToRoute('Adminpage');
-                        break;
+                    case 'CLIENT':
+                        return $this->redirectToRoute('userpage');
+                    case 'FOURNISSEUR':
+                        return $this->redirectToRoute('FourniPage');
+                   
                     default:
-                        // Si le rôle n'est pas reconnu, rediriger vers la page d'accueil
                         return $this->redirectToRoute('homepage');
                 }
-            } else {
-                // Authentification échouée, afficher un message d'erreur à l'utilisateur
-                $form->get('email')->addError(new FormError('Les informations sont incorrectes.'));
             }
+         
+           
+            
+            // Email ou mot de passe incorrect
+            $form->get('email')->addError(new FormError('Email ou mot de passe incorrect.'));
         }
-    
-        return $this->render('auth/login.html.twig', [
+     
+        return $this->render('backOfficeAdmin.html.twig', [
             'form' => $form->createView(),
         ]);
     }
+    
     
     #[Route('/register', name: 'user_register')]
 public function register1(Request $request, EntityManagerInterface $entityManager): Response
@@ -197,7 +205,7 @@ public function register1(Request $request, EntityManagerInterface $entityManage
    
 
      #[Route('/FourniPage', name: 'FourniPage')]
-    public function directtoArtist(): Response
+    public function directtoFourni(): Response
     {
         return $this->render('backOffice.html.twig');    }
 
@@ -213,9 +221,8 @@ public function register1(Request $request, EntityManagerInterface $entityManage
     }
 
     
-    /**
-    * @Route("/roles", name="statistiques_roles")
-    */
+    
+    #[Route('/roles', name: 'statistiques_roles')]
    public function roles(UserRepository $userRepository): Response
    {
        // Récupérer les données de statistiques sur les utilisateurs par rôle

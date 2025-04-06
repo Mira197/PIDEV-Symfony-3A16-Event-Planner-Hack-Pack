@@ -31,7 +31,7 @@ use Symfony\Component\Mailer\Transport;
 use Symfony\Component\Mailer\Mailer;
 use Symfony\Component\Mailer\MailerInterface;
 
-#[Route('/user')]
+#[Route('/admin')]
 class UserController extends AbstractController
 {
     #[Route('/', name: 'app_user_index', methods: ['GET'])]
@@ -57,7 +57,7 @@ class UserController extends AbstractController
     }
 
     // Rendre la vue avec la liste des utilisateurs mise à jour
-    return $this->render('user/index.html.twig', [
+    return $this->render('admin/listAdmins.html.twig', [
         'users' => $users,
     ]);
 }
@@ -69,7 +69,7 @@ class UserController extends AbstractController
         $users = $userRepository->findAll();
 
         // Rendre la vue avec la liste des utilisateurs en HTML
-        $html = $this->renderView('user/print.html.twig', [
+        $html = $this->renderView('admin/print.html.twig', [
             'users' => $users,
         ]);
 
