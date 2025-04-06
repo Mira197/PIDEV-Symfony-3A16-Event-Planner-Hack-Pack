@@ -67,4 +67,50 @@ class BookingController extends AbstractController
             'bookings' => $bookings,
         ]);
     }
+
+    #[Route('/{id}/edit', name: 'booking_edit', methods: ['GET', 'POST'])]
+    public function edit(Request $request, Booking $booking, EntityManagerInterface $em): Response
+    {
+        $form = $this->createForm(BookingType::class, $booking);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $location = $booking->getLocation();
+            $start = $booking->getStartDate();
+            $end = $booking->getEndDate();
+
+            // Conflit ?
+            $conflicts = $em->getRepository(Booking::class)->findConflicts($location, $start, $end);
+
+            // ⚠️ Ignore current booking in conflict check (if editing same one)
+            $conflicts = array_filter($conflicts, fn($conflict) => $conflict->getIdBooking() !== $booking->getIdBooking());
+
+            if ($conflicts) {
+                $this->addFlash('error', 'This location is already booked for that period.');
+            } else {
+                $em->flush();
+                $this->addFlash('success', 'Booking updated successfully!');
+                return $this->redirectToRoute('booking_list');
+            }
+        }
+
+        return $this->renderForm('booking/editBooking.html.twig', [
+            'form' => $form,
+            'booking' => $booking,
+        ]);
+    }
+
+    #[Route('/{id}', name: 'booking_delete', methods: ['POST'])]
+    public function delete(Request $request, Booking $booking, EntityManagerInterface $em): Response
+    {
+        if ($this->isCsrfTokenValid('delete' . $booking->getIdBooking(), $request->request->get('_token'))) {
+            $em->remove($booking);
+            $em->flush();
+            $this->addFlash('success', 'Booking deleted successfully!');
+        }
+
+        return $this->redirectToRoute('booking_list', [], Response::HTTP_SEE_OTHER);
+    }
+
+
 }
