@@ -99,3 +99,109 @@
 .aya-cart-btn:hover {
     opacity: 0.85;
 }
+.aya-cart-badge {
+	position: absolute;
+	top: -6px;
+	right: -6px;
+	background-color: #ef4444;
+	color: white;
+	font-size: 12px;
+	font-weight: bold;
+	border-radius: 50%;
+	padding: 2px 6px;
+	line-height: 1;
+}
+
+.aya-cart-preview {
+	position: absolute;
+	top: 40px;
+	right: 0;
+	width: 320px;
+	background-color: #fff;
+	border-radius: 12px;
+	box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+	padding: 20px;
+	display: none;
+	z-index: 999;
+}
+
+.nav-item-cart:hover .aya-cart-preview {
+	display: block;
+}
+
+.preview-item {
+	display: flex;
+	justify-content: space-between;
+	align-items: flex-start;
+	padding-bottom: 10px;
+	margin-bottom: 10px;
+	border-bottom: 1px solid #eee;
+}
+
+.preview-item .item-info {
+	width: 100%;
+}
+
+.preview-item strong {
+	display: block;
+	font-weight: 600;
+	color: #333;
+	margin-bottom: 4px;
+}
+
+.preview-item .item-meta {
+	font-size: 13px;
+	color: #777;
+}
+
+.cart-total {
+	display: flex;
+	justify-content: space-between;
+	font-size: 15px;
+	margin: 10px 0;
+}
+
+.cart-total strong {
+	color: #222;
+}
+
+.cart-actions {
+	text-align: center;
+	margin-top: 10px;
+}
+
+.btn-view-cart {
+	display: inline-block;
+	background-color: #4CAF50;
+	color: white;
+	padding: 10px 18px;
+	border-radius: 25px;
+	font-size: 14px;
+	text-decoration: none;
+	transition: background-color 0.3s ease;
+}
+
+.btn-view-cart:hover {
+	background-color: #3e8e41;
+}
+
+.preview-empty {
+	text-align: center;
+	color: #777;
+}
+
+.preview-empty img {
+	width: 60px;
+	opacity: 0.7;
+	margin-bottom: 8px;
+}
+
+.preview-empty p {
+	margin: 5px 0;
+	font-size: 13px;
+}
+
+.preview-empty .empty-note {
+	font-size: 12px;
+	line-height: 1.4;
+}
