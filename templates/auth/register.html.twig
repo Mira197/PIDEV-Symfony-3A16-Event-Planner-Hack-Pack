@@ -1,0 +1,26 @@
+{{ form_start(form, {'attr': {'class': 'login-form', 'novalidate': 'novalidate'}}) }}
+
+    {{ form_row(form.lastName) }}
+    {{ form_errors(form.lastName) }} {# Afficher les erreurs éventuelles pour le champ lastName #}
+
+    {{ form_row(form.firstName) }}
+    {{ form_errors(form.firstName) }} {# Afficher les erreurs éventuelles pour le champ firstName #}
+
+    {{ form_row(form.username) }}
+    {{ form_errors(form.username) }} {# Afficher les erreurs éventuelles pour le champ username #}
+
+    {{ form_row(form.password) }}
+    {{ form_errors(form.password) }} {# Afficher les erreurs éventuelles pour le champ password #}
+
+    {{ form_row(form.role) }}
+    {{ form_errors(form.role) }} {# Afficher les erreurs éventuelles pour le champ role #}
+
+    {{ form_row(form.email) }}
+    {{ form_errors(form.email) }} {# Afficher les erreurs éventuelles pour le champ email #}
+
+    {{ form_row(form.numtel) }}
+    {{ form_errors(form.numtel) }} {# Afficher les erreurs éventuelles pour le champ numtel #}
+
+
+    {{ form_row(form.submit) }}   
+{{ form_end(form) }}

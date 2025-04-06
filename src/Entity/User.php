@@ -10,8 +10,14 @@ use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use App\Repository\UserRepository;
 
+
+
+
+
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: 'user')]
+
+#[UniqueEntity(fields: ['username'], message: 'Ce nom d\'utilisateur est déjà utilisé.')]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
   
 {
@@ -176,8 +182,7 @@ public function setBlockEndDate(?\DateTimeInterface $blockEndDate): self
     #[ORM\Column(name: 'email', type: 'string', length: 255, nullable: true)]
     #[Assert\NotBlank(message: "L'email ne peut pas être vide.")]
     #[Assert\Email(message: "L'email '{{ value }}' n'est pas une adresse valide.")]
-    #[UniqueEntity(fields: ['email'], message: "L'email '{{ value }}' est déjà utilisé.")]
-
+ 
     private ?string $email = null;
 
     public function getEmail(): ?string

@@ -2,6 +2,8 @@
 
 namespace App\Controller;
 
+
+
 use App\Entity\User;
 use App\Form\AuthFormType;
 use App\Form\InscriptionFormType;
@@ -42,9 +44,9 @@ class AuthController extends AbstractController
     }
 
 
-     /**
-     * @Route("/login", name="login")
-     */
+    
+    
+     #[Route('/login', name: 'login')]
     public function login(Request $request, SessionInterface $session, EntityManagerInterface $entityManager): Response
     {
         $form = $this->createForm(AuthFormType::class);
@@ -107,83 +109,61 @@ class AuthController extends AbstractController
         ]);
     }
     
-    
+    #[Route('/register', name: 'user_register')]
+public function register1(Request $request, EntityManagerInterface $entityManager): Response
+{
+    $user = new User();
+    $form = $this->createForm(InscriptionFormType::class, $user);
+    $form->handleRequest($request);
 
-// /**
-//      * @Route("/register", name="user_register")
-//      */
-//     public function register(Request $request, EntityManagerInterface $entityManager): Response
-//     {
-//         $user = new User();
-//         $form = $this->createForm(InscriptionFormType::class, $user);
-//         $form->handleRequest($request);
+    if ($form->isSubmitted()) {
+        $existingUsername = $entityManager->getRepository(User::class)->findOneBy(['username' => $user->getUsername()]);
+        if ($existingUsername) {
+            $form->get('username')->addError(new FormError('Ce nom d\'utilisateur est déjà utilisé.'));
+        }
 
-//         if ($form->isSubmitted() && $form->isValid()) {
-//             // Encodez le mot de passe avant de l'enregistrer
+        $existingEmail = $entityManager->getRepository(User::class)->findOneBy(['email' => $user->getEmail()]);
+        if ($existingEmail) {
+            $form->get('email')->addError(new FormError('Cet email est déjà utilisé.'));
+        }
 
-//             $entityManager->persist($user);
-//             $entityManager->flush();
+        if ($user->getPassword() !== $form->get('passwordConfirmation')->getData()) {
+            $form->get('passwordConfirmation')->addError(new FormError('Les mots de passe ne correspondent pas.'));
+        }
 
-//             // Rediriger vers une page de confirmation ou une autre page après l'enregistrement
-//             return $this->redirectToRoute('registration_success');
-//         }
+        if ($form->getErrors(true)->count() === 0) {
+            $user->setPassword(password_hash($user->getPassword(), PASSWORD_BCRYPT));
 
-//         return $this->render('auth/auth.html.twig', [
-//             'form' => $form->createView(), 
-//         ]);
-//     }
-     /**
-     * @Route("/register", name="user_register")
-     */
-
-     public function register1(Request $request, EntityManagerInterface $entityManager): Response
-     {
-         $user = new User();
-         $form = $this->createForm(InscriptionFormType::class, $user);
-         $form->handleRequest($request);
- 
-         if ($form->isSubmitted() ) {
-             // Vérifier l'unicité du nom d'utilisateur
-             $existingUsername = $entityManager->getRepository(User::class)->findOneBy(['username' => $user->getUsername()]);
-             if ($existingUsername) {
-                 $form->get('username')->addError(new FormError('Ce nom d\'utilisateur est déjà utilisé.'));
-             }
- 
-             // Vérifier l'unicité de l'email
-             $existingEmail = $entityManager->getRepository(User::class)->findOneBy(['email' => $user->getEmail()]);
-             if ($existingEmail) {
-                 $form->get('email')->addError(new FormError('Cet email est déjà utilisé.'));
-             }
-             if ($user->getPassword() !== $form->get('passwordConfirmation')->getData()) {
-                $form->get('passwordConfirmation')->addError(new FormError('Les mots de passe ne correspondent pas.'));
+            $entityManager->persist($user);
+            $entityManager->flush();
+            dump($form->getErrors(true, false));
+            return $this->redirectToRoute('login'); // ✅ route correcte
+        }
+      
+        dump($form->isSubmitted()); // doit être true
+        dump($form->isValid()); 
+        foreach ($form as $child) {
+            foreach ($child->getErrors() as $error) {
+                dump('Champ : ' . $child->getName(), 'Erreur : ' . $error->getMessage());
             }
-    
+        }    // doit être true
+        dump($form->getErrors(true, false)); // pour voir les erreurs
+        dump($user);                // voir les valeurs remplies
+        die();
+    }
+    dump($form->getErrors(true, false));
+    return $this->render('auth/auth.html.twig', [
+        'form' => $form->createView(),
+    ]);
+}
 
- 
-             if ($form->getErrors(true)->count() === 0) {
-                 // Encodage du mot de passe avant de l'enregistrer
-                 $user->setPassword(password_hash($user->getPassword(), PASSWORD_BCRYPT));
- 
-                 // Enregistrement de l'utilisateur
-                 $entityManager->persist($user);
-                 $entityManager->flush();
- 
-                 // Redirection vers une page de confirmation ou une autre page après l'enregistrement
-                 return $this->redirectToRoute('app_login');
-             }
-         }
- 
-         // Affichage du formulaire avec les erreurs
-         return $this->render('auth/auth.html.twig', [
-             'form' => $form->createView(),
-         ]);
-     }
 
 
 
     /**
      * @Route("/registration/success", name="registration_success")
      */
+    
     public function registrationSuccess(): Response
     {
         return $this->forward('App\Controller\SecurityController::login');
