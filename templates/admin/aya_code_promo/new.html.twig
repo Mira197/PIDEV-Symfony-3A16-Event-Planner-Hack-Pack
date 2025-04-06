@@ -1,0 +1,36 @@
+{% extends 'admin/baseAdmin.html.twig' %}
+
+{% block section %}
+<section class="section">
+    <div class="container-fluid">
+        <div class="card-style mb-30">
+            <h4 class="mb-4">Add New Promo Code</h4>
+
+            {{ form_start(form) }}
+                <div class="mb-3">
+                    {{ form_label(form.code, 'Code') }}
+                    {{ form_widget(form.code, {'attr': {'class': 'form-control'}}) }}
+                    {{ form_errors(form.code) }}
+                </div>
+                
+                <div class="mb-3">
+                    {{ form_label(form.discount, 'Discount (%)') }}
+                    {{ form_widget(form.discount, {'attr': {'class': 'form-control'}}) }}
+                    {{ form_errors(form.discount) }}
+                </div>
+                
+                <div class="mb-3">
+                    {{ form_label(form.expirationDate, 'Expiration Date') }}
+                    {{ form_widget(form.expirationDate, {'attr': {'class': 'form-control'}}) }}
+                    {{ form_errors(form.expirationDate) }}
+                </div>
+
+                <div class="d-flex justify-content-end">
+                    <a href="{{ path('aya_admin_code_promo_index') }}" class="btn btn-secondary me-2">Back</a>
+                    <button class="btn btn-primary">Save</button>
+                </div>
+            {{ form_end(form) }}
+        </div>
+    </div>
+</section>
+{% endblock %}
