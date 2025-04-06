@@ -21,14 +21,18 @@ class BookingType extends AbstractType
             ->add('end_date', null, [
                 'widget' => 'single_text',
             ])
-            ->add('event', EntityType::class, [
+            /*->add('event', EntityType::class, [
                 'class' => Event::class,
                 'choice_label' => 'id',
-            ])
+            ])*/
             ->add('location', EntityType::class, [
                 'class' => Location::class,
-                'choice_label' => 'id',
+                'choice_label' => 'name',
             ])
+            /*->add('location', EntityType::class, [
+                'class' => Location::class,
+                'choice_label' => 'id',
+            ])*/
         ;
     }
 
