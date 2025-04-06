@@ -26,8 +26,14 @@ class BookingController extends AbstractController
         LocationRepository $locationRepo,
         BookingRepository $bookingRepo
     ): Response {
+        //session : $user = $this->getUser();
+        $user = $this->getUser() ?? $em->getRepository(User::class)->find(3);
+
+        if ($event->getUser() !== $user) {
+            throw $this->createAccessDeniedException('You are not allowed to book for this event.');
+        }
+
         $booking = new Booking();
-       
         $form = $this->createForm(BookingType::class, $booking);
         $form->handleRequest($request);
 
@@ -71,6 +77,13 @@ class BookingController extends AbstractController
     #[Route('/{id}/edit', name: 'booking_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Booking $booking, EntityManagerInterface $em): Response
     {
+        //session : $user = $this->getUser();
+        $user = $this->getUser() ?? $em->getRepository(User::class)->find(3);
+
+        if ($booking->getEvent()->getUser() !== $user) {
+            throw $this->createAccessDeniedException('You are not allowed to edit this booking.');
+        }
+
         $form = $this->createForm(BookingType::class, $booking);
         $form->handleRequest($request);
 
@@ -103,6 +116,13 @@ class BookingController extends AbstractController
     #[Route('/{id}', name: 'booking_delete', methods: ['POST'])]
     public function delete(Request $request, Booking $booking, EntityManagerInterface $em): Response
     {
+        //session : $user = $this->getUser();
+        $user = $this->getUser() ?? $em->getRepository(User::class)->find(3);
+
+        if ($booking->getEvent()->getUser() !== $user) {
+            throw $this->createAccessDeniedException('You are not allowed to delete this booking.');
+        }
+
         if ($this->isCsrfTokenValid('delete' . $booking->getIdBooking(), $request->request->get('_token'))) {
             $em->remove($booking);
             $em->flush();
