@@ -160,50 +160,43 @@ public function register1(Request $request, EntityManagerInterface $entityManage
 
 
 
-    /**
-     * @Route("/registration/success", name="registration_success")
-     */
-    
+    #[Route('/registration/success', name:'registration_success')]
     public function registrationSuccess(): Response
     {
         return $this->forward('App\Controller\SecurityController::login');
     }
 
 
-    /**
-     * @Route("/userpage", name="userpage")
-     */
+ 
+
+     #[Route('/userpage', name: 'userpage')]
     public function directto(): Response
     {
         return $this->forward('App\Controller\UserController::index');
     }
-/**
-     * @Route("/homepage", name="homepage")
-     */
+
+    #[Route('/homepage', name: 'homepage')]
     public function directto1(): Response
     {
         return $this->forward('App\Controller\AuthController::index');
     }
 
 
-     /**
-     * @Route("/userpage1", name="userpage1")
-     */
+     
+    #[Route('/userpage1', name: 'userpage1')]
     public function directtouser(): Response
     {
         return $this->render('base.html.twig'); 
     }
 
-     /**
-     * @Route("/Adminpage", name="Adminpage")
-     */
+    #[Route('/Adminpage', name: 'Adminpage')]
     public function directtoAdmin(): Response
     {
         return $this->render('backOfficeAdmin.html.twig'); 
     }
-    /**
-     * @Route("/Artistpage", name="Artistpage")
-     */
+   
+
+     #[Route('/FourniPage', name: 'FourniPage')]
     public function directtoArtist(): Response
     {
         return $this->render('backOffice.html.twig');    }
@@ -211,9 +204,9 @@ public function register1(Request $request, EntityManagerInterface $entityManage
 
 
 
-    /**
-     * @Route("/logout", name="app_logout")
-     */
+
+
+     #[Route('/logout', name: 'app_logout')]
     public function logout(SessionInterface $session): response
     {        $session->clear();
         return $this->forward('App\Controller\AuthController::login');
