@@ -27,6 +27,7 @@ class BookingController extends AbstractController
         BookingRepository $bookingRepo
     ): Response {
         $booking = new Booking();
+       
         $form = $this->createForm(BookingType::class, $booking);
         $form->handleRequest($request);
 

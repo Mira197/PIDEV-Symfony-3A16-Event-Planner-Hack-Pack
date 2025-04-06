@@ -39,6 +39,24 @@
                             <li><strong>📍 Location:</strong> {{ booking.location.name }} ({{ booking.location.city.value }})</li>
                             <li><strong>📅</strong> {{ booking.startDate|date('d/m/Y H:i') }} → {{ booking.endDate|date('d/m/Y H:i') }}</li>
                         </ul>
+                        <!-- Action Buttons -->
+                            <div class="event-card-actions">
+                                <button
+                                    class="action-btn edit"
+                                    title="Edit"
+                                    {#onclick="window.location.href='{{ path('event_edit', {'id': event.idEvent}) }}'">#}
+                                    ✏️
+                                </button>
+                                <!-- Delete -->
+                                {#{{ include('event/delete_formEvent.html.twig', { 'event': event }) }}#}
+                                <!-- Details -->
+                                {#<button
+                                    class="action-btn details"
+                                    title="Details"
+                                    onclick="window.location.href='{{ path('event_show', {'id': event.idEvent}) }}'">
+                                    ℹ️
+                                </button>#}
+                            </div>
                     </div>
                 </div>
             </div>
