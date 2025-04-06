@@ -1,0 +1,53 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}My Bookings{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('css/eventcards.css') }}">
+{% endblock %}
+
+{% block content %}
+<header id="fh5co-header" class="fh5co-cover fh5co-cover-sm" role="banner" style="background-image:url('{{ asset('images/eventspage.jpg') }}');">
+        <div class="overlay"></div>
+        <div class="fh5co-container">
+            <div class="row">
+                <div class="col-md-8 col-md-offset-2 text-center">
+                    <div class="display-t">
+                        <div class="display-tc animate-box" data-animate-effect="fadeIn">
+                            <h1>My Bookings</h1>
+                            <h2>You can now create your events here freely.</h2>
+                            <p>
+										<a href="{{ path('event_new') }}" class="btn btn-default btn-sm">Create Now</a>
+									</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+<h1>My Bookings</h1>
+
+<div class="container mt-5 mb-5">
+    <div class="row">
+        {% for booking in bookings %}
+            <div class="col-xl-4 col-lg-4 col-md-6 col-sm-6">
+                <div class="event-card">
+                    <div class="event-card-content">
+                        <h4>{{ booking.event.name }}</h4>
+                        <ul>
+                            <li><strong>📍 Location:</strong> {{ booking.location.name }} ({{ booking.location.city.value }})</li>
+                            <li><strong>📅</strong> {{ booking.startDate|date('d/m/Y H:i') }} → {{ booking.endDate|date('d/m/Y H:i') }}</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <div class="col-12 text-center">
+                <p>No bookings yet.</p>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+
+{% endblock %}

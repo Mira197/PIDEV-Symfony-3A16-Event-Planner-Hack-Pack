@@ -2,15 +2,20 @@
 
 namespace App\Controller;
 
+use App\Entity\Location;
 use App\Entity\User;
 use App\Entity\Event;
 use App\Form\EventType;
+use App\Repository\BookingRepository;
 use App\Repository\EventRepository;
+use App\Repository\LocationRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\VarDumper\VarDumper; // pour debug
+
 
 #[Route('/events')]
 final class EventController extends AbstractController
@@ -77,16 +82,41 @@ final class EventController extends AbstractController
     }
 
     #[Route('/{id}', name: 'event_show', methods: ['GET'])]
-    public function show(Event $event): Response
+    public function show(Event $event, LocationRepository $locationRepo,BookingRepository $bookingRepo): Response
     {
+        // Convertir image binaire en base64 si elle existe
         if ($event->getImageData()) {
             $event->base64Image = base64_encode(stream_get_contents($event->getImageData()));
         }
+        // Récupérer toutes les locations disponibles (même ville, capacité suffisante, pas de conflit)
+        // Charger tous les lieux
+        $allLocations = $locationRepo->findAll();
 
+        // Filtrer les lieux compatibles avec l'événement
+        $availableLocations = array_filter($allLocations, function (Location $loc) use ($event, $bookingRepo) {
+            $sameCity = strtolower($loc->getCity()->value) === strtolower($event->getCity());
+            $enoughCapacity = $loc->getCapacity() >= $event->getCapacity();
+        
+            if (!$sameCity || !$enoughCapacity) {
+                return false;
+            }
+            // Vérifie les conflits de réservation
+            $conflicts = $bookingRepo->findConflicts($loc, $event->getStartDate(), $event->getEndDate());
+            return count($conflicts) === 0;
+        });
+        // Injecter base64 pour les locations (si imageData existe)
+        foreach ($availableLocations as $loc) {
+            if ($loc->getImageData()) {
+            $loc->base64Image = base64_encode(stream_get_contents($loc->getImageData()));
+            }
+        }
+        
         return $this->render('event/showEvent.html.twig', [
             'event' => $event,
+            'locations' => $availableLocations,
         ]);
     }
+
     #[Route('/{id}/edit', name: 'event_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Event $event, EntityManagerInterface $em): Response
     {

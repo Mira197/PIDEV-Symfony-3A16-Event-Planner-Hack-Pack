@@ -1,0 +1,14 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Book Location{% endblock %}
+
+{% block content %}
+<h1>Book Event: {{ event.name }}</h1>
+
+{{ form_start(form) }}
+    {{ form_row(form.location) }}
+    {{ form_row(form.start_date) }}
+    {{ form_row(form.end_date) }}
+    <button class="btn btn-success">Book</button>
+{{ form_end(form) }}
+{% endblock %}
