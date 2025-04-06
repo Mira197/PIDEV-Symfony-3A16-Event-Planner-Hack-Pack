@@ -114,42 +114,49 @@
 
 .aya-cart-preview {
 	position: absolute;
-	top: 40px;
+	top: 100%;
 	right: 0;
 	width: 320px;
-	background-color: #fff;
+	background: white;
 	border-radius: 12px;
-	box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+	box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
 	padding: 20px;
-	display: none;
 	z-index: 999;
+	animation: fadeInCart 0.3s ease;
 }
 
-.nav-item-cart:hover .aya-cart-preview {
-	display: block;
+@keyframes fadeInCart {
+	from { opacity: 0; transform: translateY(-10px); }
+	to { opacity: 1; transform: translateY(0); }
 }
 
 .preview-item {
 	display: flex;
-	justify-content: space-between;
-	align-items: flex-start;
-	padding-bottom: 10px;
-	margin-bottom: 10px;
-	border-bottom: 1px solid #eee;
+	align-items: center;
+	padding: 10px 0;
+	border-bottom: 1px solid #f1f1f1;
 }
 
-.preview-item .item-info {
-	width: 100%;
+.product-thumb {
+	width: 45px;
+	height: 45px;
+	object-fit: cover;
+	margin-right: 12px;
+	border-radius: 6px;
+	border: 1px solid #ddd;
 }
 
-.preview-item strong {
-	display: block;
+.item-info {
+	flex-grow: 1;
+}
+
+.product-name {
+	font-size: 14px;
 	font-weight: 600;
 	color: #333;
-	margin-bottom: 4px;
 }
 
-.preview-item .item-meta {
+.item-meta {
 	font-size: 13px;
 	color: #777;
 }
@@ -157,51 +164,32 @@
 .cart-total {
 	display: flex;
 	justify-content: space-between;
-	font-size: 15px;
+	font-weight: bold;
 	margin: 10px 0;
-}
-
-.cart-total strong {
-	color: #222;
+	font-size: 15px;
 }
 
 .cart-actions {
 	text-align: center;
-	margin-top: 10px;
 }
 
 .btn-view-cart {
 	display: inline-block;
-	background-color: #4CAF50;
+	background-color: #3DBA3D;
 	color: white;
-	padding: 10px 18px;
-	border-radius: 25px;
-	font-size: 14px;
+	padding: 10px 20px;
+	border-radius: 30px;
+	font-weight: 600;
 	text-decoration: none;
-	transition: background-color 0.3s ease;
+	transition: background 0.2s ease;
 }
 
 .btn-view-cart:hover {
-	background-color: #3e8e41;
+	background-color: #329a32;
 }
-
-.preview-empty {
-	text-align: center;
-	color: #777;
+.nav-item-cart:hover .aya-cart-preview {
+	display: block;
 }
-
-.preview-empty img {
-	width: 60px;
-	opacity: 0.7;
-	margin-bottom: 8px;
-}
-
-.preview-empty p {
-	margin: 5px 0;
-	font-size: 13px;
-}
-
-.preview-empty .empty-note {
-	font-size: 12px;
-	line-height: 1.4;
+.aya-cart-preview {
+	display: none;
 }

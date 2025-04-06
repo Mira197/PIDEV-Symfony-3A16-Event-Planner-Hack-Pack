@@ -91,6 +91,7 @@
 					<table class="table table-bordered cart-table">
 						<thead>
 							<tr>
+								<th>Image</th>
 								<th>Product</th>
 								<th>Unit Price</th>
 								<th>Quantity</th>
@@ -101,6 +102,9 @@
 						<tbody>
 							{% for item in cartProducts %}
 								<tr>
+									<td>
+										<img src="{{ asset(item.getProduct().getImageUrl()) }}" alt="{{ item.getProduct().getName() }}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 6px;">
+									</td>
 									<td>{{ item.product.name }}</td>
 									<td>{{ item.product.price }}
 										TND</td>
@@ -116,7 +120,6 @@
 									<td id="subtotal-{{ item.product.product_id }}">{{ item.totalPrice }}
 										TND</td>
 									<td>
-										<a href="#" class="btn btn-sm btn-outline-primary" title="Edit">✏️</a>
 										<a href="#" class="btn btn-sm text-danger delete-item" data-id="{{ item.product.product_id }}" title="Delete">🗑️</a>
 									</td>
 								</tr>
@@ -209,7 +212,7 @@ subtotalSpan.text((unitPrice * currentQty).toFixed(2) + ' TND');
 // Recalcul total approximatif
 let newTotal = 0;
 $('.cart-table tbody tr').each(function () {
-let subtotalText = $(this).find('td:nth-child(4)').text().replace(' TND', '');
+let subtotalText = $(this).find('td:nth-child(5)').text().replace(' TND', '');
 newTotal += parseFloat(subtotalText);
 });
 totalSpan.text(newTotal.toFixed(2) + ' TND');
@@ -258,7 +261,7 @@ $(this).remove();
 // Recalcul total
 let newTotal = 0;
 $('.cart-table tbody tr').each(function () {
-let subtotalText = $(this).find('td:nth-child(4)').text().replace(' TND', '');
+let subtotalText = $(this).find('td:nth-child(5)').text().replace(' TND', '');
 newTotal += parseFloat(subtotalText);
 });
 $('#cart-total').text(newTotal.toFixed(2) + ' TND');
