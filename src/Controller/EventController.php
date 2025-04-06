@@ -82,8 +82,15 @@ final class EventController extends AbstractController
     }
 
     #[Route('/{id}', name: 'event_show', methods: ['GET'])]
-    public function show(Event $event, LocationRepository $locationRepo,BookingRepository $bookingRepo): Response
+    public function show(Event $event, LocationRepository $locationRepo,BookingRepository $bookingRepo,EntityManagerInterface $em): Response
     {
+        //session : $user = $this->getUser();
+        $user = $this->getUser() ?? $em->getRepository(User::class)->find(3);
+
+        if ($event->getUser() !== $user) {
+            throw $this->createAccessDeniedException('You are not allowed to access this event.');
+        }
+
         // Convertir image binaire en base64 si elle existe
         if ($event->getImageData()) {
             $event->base64Image = base64_encode(stream_get_contents($event->getImageData()));
@@ -120,7 +127,13 @@ final class EventController extends AbstractController
     #[Route('/{id}/edit', name: 'event_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Event $event, EntityManagerInterface $em): Response
     {
-        //si je veux ajouter session:....
+        //session : $user = $this->getUser();
+        $user = $this->getUser() ?? $em->getRepository(User::class)->find(3);
+
+        if ($event->getUser() !== $user) {
+            throw $this->createAccessDeniedException('You are not allowed to edit this event.');
+        }
+        
         // 🔁 Base64 si image BLOB SANS filename
         $base64Image = null;
         if ($event->getImageData() && !$event->getImageFilename()) {
@@ -165,6 +178,13 @@ final class EventController extends AbstractController
     #[Route('/{id}', name: 'event_delete', methods: ['POST'])]
     public function delete(Request $request, Event $event, EntityManagerInterface $em): Response
     {
+        //session : $user = $this->getUser();
+        $user = $this->getUser() ?? $em->getRepository(User::class)->find(3);
+
+        if ($event->getUser() !== $user) {
+            throw $this->createAccessDeniedException('You are not allowed to delete this event.');
+        }
+
         if ($this->isCsrfTokenValid('delete' . $event->getIdEvent(), $request->request->get('_token'))) {
             $em->remove($event);
             $em->flush();
@@ -173,7 +193,5 @@ final class EventController extends AbstractController
 
         return $this->redirectToRoute('app_events', [], Response::HTTP_SEE_OTHER);
     }
-
-
 
 }
