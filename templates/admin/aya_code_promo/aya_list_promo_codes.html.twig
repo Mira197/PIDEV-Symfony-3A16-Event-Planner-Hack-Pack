@@ -95,15 +95,16 @@ row.style.display = row.innerText.toLowerCase().includes(keyword) ? '' : 'none';
 });
 });
 document.querySelectorAll('.edit-btn').forEach(btn => {
-btn.addEventListener('click', () => {
-const id = btn.dataset.id;
-const code = btn.dataset.code;
-const pourcentage = btn.dataset.pourcentage;
-const dateExpiration = btn.dataset.date;
+	btn.addEventListener('click', () => {
+		const id = btn.dataset.id;
+		const code = btn.dataset.code;
+		const pourcentage = btn.dataset.pourcentage;
+		const dateExpiration = btn.dataset.date;
 
-openEditModal(id, code, pourcentage, dateExpiration);
+		openEditModal(id, code, pourcentage, dateExpiration);
+	});
 });
-});
+
 
 document.querySelectorAll('.status-filter').forEach(btn => {
 btn.addEventListener('click', () => {

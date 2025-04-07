@@ -97,3 +97,8 @@ table.admin-mui-table th {
     border: 1px solid #ced4da;
     border-radius: 6px;
 }
+.field-error {
+    color: #e74c3c;
+    font-size: 13px;
+    margin-top: 5px;
+  }
