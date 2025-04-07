@@ -51,28 +51,48 @@ class AyaCodePromoAdminController extends AbstractController
     }
 
 
-    #[Route('/edit/{id}', name: 'edit')]
-    public function edit(CodePromo $codePromo, Request $request, EntityManagerInterface $em): Response
+    #[Route('/edit/{id}', name: 'edit', methods: ['POST'])]
+    public function edit(Request $request, CodePromo $codePromo, EntityManagerInterface $em): JsonResponse
     {
-        $form = $this->createForm(AyaCodePromoType::class, $codePromo);
-        $form->handleRequest($request);
+        $data = json_decode($request->getContent(), true);
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            $em->flush();
+        if (!isset($data['code_promo'], $data['pourcentage'], $data['date_expiration'])) {
+            return new JsonResponse(['success' => false, 'message' => 'Missing fields']);
+        }
+
+        $codePromo->setCodePromo($data['code_promo']);
+        $codePromo->setPourcentage($data['pourcentage']);
+        $codePromo->setDateExpiration(new \DateTime($data['date_expiration']));
+
+        $em->flush();
+
+        return new JsonResponse(['success' => true]);
+    }
+
+
+    #[Route('/delete/{id}', name: 'delete', methods: ['POST'])]
+    public function delete(Request $request, CodePromo $codePromo, EntityManagerInterface $em): Response
+
+    {
+        $submittedToken = $request->request->get('_token');
+
+        if (!$this->isCsrfTokenValid('delete' . $codePromo->getId(), $submittedToken)) {
+            if ($request->isXmlHttpRequest()) {
+                return new JsonResponse(['success' => false, 'message' => 'Invalid CSRF token'], 400);
+            }
+
+            $this->addFlash('danger', 'Invalid CSRF token');
             return $this->redirectToRoute('aya_admin_code_promo_index');
         }
 
-        return $this->render('admin/aya_code_promo/edit.html.twig', [
-            'form' => $form->createView(),
-            'code' => $codePromo,
-        ]);
-    }
-
-    #[Route('/delete/{id}', name: 'delete')]
-    public function delete(CodePromo $codePromo, EntityManagerInterface $em): Response
-    {
         $em->remove($codePromo);
         $em->flush();
+
+        if ($request->isXmlHttpRequest()) {
+            return new JsonResponse(['success' => true]);
+        }
+
+        $this->addFlash('success', 'Promo code deleted.');
         return $this->redirectToRoute('aya_admin_code_promo_index');
     }
 }
