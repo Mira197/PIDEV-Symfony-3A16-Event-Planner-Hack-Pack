@@ -83,3 +83,17 @@ table.admin-mui-table th {
 .right-actions button {
     margin-left: 10px;
 }
+.swal2-popup {
+    border-radius: 10px;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+.swal2-title {
+    color: #6b336e;
+    font-size: 1.5rem;
+}
+
+.swal2-input {
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+}
