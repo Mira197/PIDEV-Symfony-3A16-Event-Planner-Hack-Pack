@@ -99,8 +99,8 @@ public function edit(Publication $publication, Request $request, EntityManagerIn
 
     if ($form->isSubmitted() && $form->isValid()) {
         $inputUsername = $form->get('username')->getData();
-        $user = $security->getUser();
-        //$user = $userRepository->find(44);
+        //$user = $security->getUser();
+        $user = $userRepository->find(44);
 
         if (!$user || $inputUsername !== $user->getUsername()) {
             $form->get('username')->addError(

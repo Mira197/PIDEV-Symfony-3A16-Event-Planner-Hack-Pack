@@ -37,8 +37,8 @@ class PublicationClientController extends AbstractController
             $inputUsername = $form->get('username')->getData();
 
             // 👇 Utilisateur de test avec ID 44
-           // $user = $userRepository->find(44);
-            $user = $this->getUser();
+            $user = $userRepository->find(44);
+            //$user = $this->getUser();
             if (!$user || $inputUsername !== $user->getUsername()) {
                 $form->get('username')->addError(
                     new FormError('The username does not match your test account.')
@@ -73,8 +73,8 @@ class PublicationClientController extends AbstractController
     
         if ($form->isSubmitted() && $form->isValid()) {
             $inputUsername = $form->get('username')->getData();
-            $user = $this->getUser();
-            //$user = $userRepository->find(44);
+            //$user = $this->getUser();
+            $user = $userRepository->find(44);
     
             if (!$user || $inputUsername !== $user->getUsername()) {
                 $form->get('username')->addError(

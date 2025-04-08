@@ -26,8 +26,8 @@ class ReportController extends AbstractController
     
         if ($form->isSubmitted() && $form->isValid()) {
             // ✅ Tester l'utilisateur connecté
-            $user = $security->getUser();
-           //$user = $userRepository->find(44);
+           // $user = $security->getUser();
+           $user = $userRepository->find(44);
     
             if (!$user) {
                 $this->addFlash('error', 'You must be logged in to report a publication.');

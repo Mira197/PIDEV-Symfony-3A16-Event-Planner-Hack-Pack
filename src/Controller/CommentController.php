@@ -31,8 +31,8 @@ class CommentController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             // Récupère le nom d'utilisateur saisi manuellement
             $inputUsername = $form->get('username')->getData();
-            $user = $security->getUser();
-            //$user = $userRepository->find(44);
+           // $user = $security->getUser();
+            $user = $userRepository->find(44);
     
             // Vérifie si l'utilisateur est connecté et correspond
             if (!$user || $inputUsername !== $user->getUsername()) {
