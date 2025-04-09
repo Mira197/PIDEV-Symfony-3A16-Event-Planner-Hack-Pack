@@ -10,13 +10,13 @@
 			<title>3alaKifiAdmin | Event Planner</title>
 
 			<!-- ========== All CSS files linkup ========= -->
-			<link rel="stylesheet" href="admin/css/bootstrap.min.css"/>
-			<link rel="stylesheet" href="admin/css/lineicons.css" rel="stylesheet" type="text/css"/>
-			<link rel="stylesheet" href="admin/css/materialdesignicons.min.css" rel="stylesheet" type="text/css"/>
-			<link rel="stylesheet" href="admin/css/fullcalendar.css"/>
-			<link rel="stylesheet" href="admin/css/fullcalendar.css"/>
-			<link rel="stylesheet" href="admin/css/main.css"/>
-      <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+			<link rel="stylesheet" href="{{ asset('admin/css/bootstrap.min.css') }}">
+			<link rel="stylesheet" href="{{ asset('admin/css/lineicons.css') }}">
+			<link rel="stylesheet" href="{{ asset('admin/css/materialdesignicons.min.css') }}">
+			<link rel="stylesheet" href="{{ asset('admin/css/fullcalendar.css') }}">
+			<link rel="stylesheet" href="{{ asset('admin/css/main.css') }}">
+
+			<link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
 
 		{% endblock %}
 	</head>
@@ -35,7 +35,7 @@
 			<aside class="sidebar-nav-wrapper">
 				<div class="navbar-logo">
 					<a href="{{ path('admin_dashboard') }}">
-						<img src="{{ asset('admin/images/logo/logo1.png') }}" alt="Logo 2" class="logo-img" />
+						<img src="{{ asset('admin/images/logo/logo1.png') }}" alt="Logo 2" class="logo-img"/>
 					</a>
 				</div>
 				<nav class="sidebar-nav">
@@ -76,7 +76,7 @@
 									</a>
 								</li>
 								<li>
-									<a href="{{ path('admin_dashboard') }}" class="">
+									<a href="{{ path('affiche') }}" class="">
 										<i class="bx bx-box"></i>
 										Products
 									</a>
@@ -315,7 +315,7 @@
 														</h6>
 														<p>
 															Lorem ipsum dolor sit amet, consect etur adipiscing
-															                            elit Vivamus tortor.
+																														                            elit Vivamus tortor.
 														</p>
 														<span>10 mins ago</span>
 													</div>
@@ -335,7 +335,7 @@
 														</h6>
 														<p>
 															Lorem ipsum dolor sit amet, consect etur adipiscing
-															                            elit Vivamus tortor.
+																														                            elit Vivamus tortor.
 														</p>
 														<span>10 mins ago</span>
 													</div>
@@ -1250,15 +1250,15 @@
 		<!-- ========= All Javascript files linkup ======== -->
 
 		{% block javascripts %}
-			<script src="admin/js/bootstrap.bundle.min.js"></script>
-			<script src="admin/js/Chart.min.js"></script>
-			<script src="admin/js/dynamic-pie-chart.js"></script>
-			<script src="admin/js/moment.min.js"></script>
-			<script src="admin/js/fullcalendar.js"></script>
-			<script src="admin/js/jvectormap.min.js"></script>
-			<script src="admin/js/world-merc.js"></script>
-			<script src="admin/js/polyfill.js"></script>
-			<script src="admin/js/main.js"></script>
+			 <script src="{{ asset('admin/js/bootstrap.bundle.min.js') }}"></script>
+        <script src="{{ asset('admin/js/Chart.min.js') }}"></script>
+        <script src="{{ asset('admin/js/dynamic-pie-chart.js') }}"></script>
+        <script src="{{ asset('admin/js/moment.min.js') }}"></script>
+        <script src="{{ asset('admin/js/fullcalendar.js') }}"></script>
+        <script src="{{ asset('admin/js/jvectormap.min.js') }}"></script>
+        <script src="{{ asset('admin/js/world-merc.js') }}"></script>
+        <script src="{{ asset('admin/js/polyfill.js') }}"></script>
+        <script src="{{ asset('admin/js/main.js') }}"></script>
 
 			<script>
 				// ======== jvectormap activation

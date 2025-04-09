@@ -1,0 +1,67 @@
+
+{# templates/admin/add.html.twig #}
+{% extends 'admin/baseAdmin.html.twig' %}
+
+{% block title %}  {{ editMode is defined and editMode ? 'Edit Product' : 'Add Product' }}
+{% endblock %}
+
+{% block section %}
+<section class="section">
+    <div class="container-fluid">
+        <div class="title-wrapper pt-30">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <div class="title">
+                        <h2>{{ editMode is defined and editMode ? 'Edit Product' : 'Add New Product' }}</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card-style mb-30">
+            {{ form_start(form) }}
+                <div class="mb-3">
+                    {{ form_label(form.name) }}
+                    {{ form_widget(form.name, {'attr': {'class': 'form-control'}}) }}
+                    {{ form_errors(form.name) }}
+                </div>
+
+                <div class="mb-3">
+                    {{ form_label(form.description) }}
+                    {{ form_widget(form.description, {'attr': {'class': 'form-control'}}) }}
+                    {{ form_errors(form.description) }}
+                </div>
+
+                <div class="mb-3">
+                    {{ form_label(form.price) }}
+                    {{ form_widget(form.price, {'attr': {'class': 'form-control'}}) }}
+                    {{ form_errors(form.price) }}
+                </div>
+
+                <div class="mb-3">
+                    {{ form_label(form.stock) }}
+                    {{ form_widget(form.stock, {'attr': {'class': 'form-control'}}) }}
+                    {{ form_errors(form.stock) }}
+                </div>
+
+                <div class="mb-3">
+                    {{ form_label(form.imageUrl) }}
+                    {{ form_widget(form.imageUrl, {'attr': {'class': 'form-control'}}) }}
+                    {{ form_errors(form.imageUrl) }}
+                </div>
+
+                <div class="mb-3">
+                    {{ form_label(form.category) }}
+                    {{ form_widget(form.category, {'attr': {'class': 'form-control'}}) }}
+                    {{ form_errors(form.category) }}
+                </div>
+
+                <div>
+                    <button type="submit" class="btn btn-primary">            {{ editMode is defined and editMode ? 'Update Product' : 'Add Product' }}
+                    </button>
+                </div>
+            {{ form_end(form) }}
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -71,20 +71,33 @@ class Product
         return $this;
     }
 
-    #[ORM\ManyToOne(targetEntity: Stock::class, inversedBy: 'products')]
+    /*#[ORM\ManyToOne(targetEntity: Stock::class, inversedBy: 'products')]
     #[ORM\JoinColumn(name: 'stock_id', referencedColumnName: 'stock_id')]
-    private ?Stock $stock = null;
+    private ?int $stock_id = null;
 
-    public function getStock(): ?Stock
-    {
-        return $this->stock;
-    }
+public function getStockId(): ?int
+{
+    return $this->stock_id;
+}
 
-    public function setStock(?Stock $stock): self
-    {
-        $this->stock = $stock;
-        return $this;
-    }
+public function setStockId(?int $stockId): self
+{
+    $this->stock_id = $stockId;
+    return $this;
+}*/
+#[ORM\ManyToOne(targetEntity: Stock::class, inversedBy: 'products')]
+#[ORM\JoinColumn(name: 'stock_id', referencedColumnName: 'stock_id', nullable: false)]
+private ?Stock $stock = null;
+public function getStock(): ?Stock
+{
+    return $this->stock;
+}
+
+public function setStock(?Stock $stock): self
+{
+    $this->stock = $stock;
+    return $this;
+}
 
     #[ORM\Column(type: 'string', nullable: true)]
     private ?string $image_url = null;
