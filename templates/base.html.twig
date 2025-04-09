@@ -16,6 +16,7 @@
 			<meta name="author" content="FREEHTML5.CO"/>
 
 			<!-- 
+
 																																														//////////////////////////////////////////////////////
 																																													
 																																														FREE HTML5 TEMPLATE 
@@ -29,6 +30,7 @@
 																																														//////////////////////////////////////////////////////
 																																														 -->
 
+
 			<!-- Facebook and Twitter integration -->
 			<meta property="og:title" content=""/> <meta property="og:image" content=""/>
 			<meta property="og:url" content=""/>
@@ -41,10 +43,12 @@
 			{% block stylesheets %}
 				<link href='https://fonts.googleapis.com/css?family=Work+Sans:400,300,600,400italic,700' rel='stylesheet' type='text/css'>
 				<link href="https://fonts.googleapis.com/css?family=Sacramento" rel="stylesheet">
+
 				<link rel="stylesheet" href="{{ asset('fonts/dripicons-v2.ttf') }}">
 				<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 				<link
 				rel="stylesheet" href="{{ asset('css/AyaCSS.css') }}">
+
 
 				<!-- Animate.css -->
 				<link
@@ -72,8 +76,10 @@
 			<script src="js/modernizr-2.6.2.min.js"></script>
 			<!-- FOR IE9 below -->
 			<!--[if lt IE 9]>
+
 																																														<script src="js/respond.min.js"></script>
 																																														<![endif]-->
+
 
 		</head>
 	{% endblock %}
@@ -113,9 +119,10 @@
 										<li>
 											<a href="#">Products</a>
 										</li>
-										<li>
-											<a href="#">Forum</a>
+										<li class="{% if app.request.attributes.get('_route') == 'app_publication_client' %}active{% endif %}">
+											<a href="{{ path('app_publication_client') }}">Forum</a>
 										</li>
+
 									</ul>
 								</li>
 								<li class="has-dropdown {% if app.request.attributes.get('_route') == 'app_gallery' %}active{% endif %}">
@@ -223,6 +230,7 @@
 
 			<!-- Partie mt3 hello-->
 			{# <div id="fh5co-couple">
+
 																															<div class="container">
 																																<div class="row">
 																																	<div class="col-md-8 col-md-offset-2 text-center fh5co-heading animate-box">
@@ -309,6 +317,7 @@
 																																</div>
 																															</div>
 																														</div> #}
+
 
 				<div id="fh5co-couple-story"> <div class="container">
 					<div class="row">
@@ -462,6 +471,7 @@
 
 			<!-- hedhi mt3 ekel ar9am eli yet7arkou barcha-->
 			{# <div id="fh5co-counter" class="fh5co-bg fh5co-counter" style="background-image:url(images/img_bg_5.jpg);">
+
 																															<div class="overlay"></div>
 																															<div class="container">
 																																<div class="row">
@@ -601,6 +611,7 @@
 			</div>
 			<!--Ekeli feha el video-->
 		{# <div id="fh5co-services" class="fh5co-section-gray">
+
 																						<div class="container">
 																		
 																							<div class="row animate-box">
@@ -691,6 +702,7 @@
 																																</div>
 																															</div>
 																														</div> #}
+
 
 
 		{% endblock %}

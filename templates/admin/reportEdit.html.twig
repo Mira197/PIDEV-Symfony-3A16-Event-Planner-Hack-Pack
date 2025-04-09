@@ -1,0 +1,82 @@
+{% extends 'admin/baseAdmin.html.twig' %}
+
+{% block section %}
+<div class="container" style="max-width: 800px; margin: 2rem auto; padding: 0 15px;">
+    <div class="admin-card" style="background: #fff; border-radius: 10px; box-shadow: 0 2px 15px rgba(83, 60, 86, 0.1); padding: 2rem; border-top: 4px solid #533C56;">
+        <h2 style="color: #533C56; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid #f0e5f2; display: flex; align-items: center;">
+            <i class="fas fa-flag" style="margin-right: 0.75rem; color: #e74c3c;"></i>
+            Edit Report Status
+        </h2>
+
+        {{ form_start(form, {'attr': {'class': 'admin-form'}}) }}
+            <div class="form-group" style="margin-bottom: 1.5rem;">
+                {{ form_label(form.status, null, {
+                    'label_attr': {
+                        'class': 'form-label',
+                        'style': 'display: block; margin-bottom: 0.5rem; color: #533C56; font-weight: 500;'
+                    }
+                }) }}
+                <div class="select-wrapper" style="position: relative;">
+                    {{ form_widget(form.status, {
+                        'attr': {
+                            'class': 'form-select',
+                            'style': 'width: 100%; padding: 0.75rem 1rem; border: 1px solid #d9c7df; border-radius: 6px; background-color: #f8f5f9; font-size: 1rem; appearance: none; -webkit-appearance: none;'
+                        }
+                    }) }}
+                    <div style="position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); pointer-events: none;">
+                        <i class="fas fa-chevron-down" style="color: #99707E;"></i>
+                    </div>
+                </div>
+                <div class="form-errors" style="color: #e74c3c; font-size: 0.85rem; margin-top: 0.5rem;">
+                    {{ form_errors(form.status) }}
+                </div>
+            </div>
+
+            <div class="form-actions" style="display: flex; justify-content: flex-end; gap: 1rem; margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid #f0e5f2;">
+                <a href="{{ path('admin_publication_dashboard') }}" class="btn btn-secondary" style="background: #f8f5f9; color: #533C56; border: 1px solid #d9c7df; padding: 0.75rem 1.5rem; border-radius: 6px; text-decoration: none; transition: all 0.3s;">
+                    Cancel
+                </a>
+                <button type="submit" class="btn btn-primary" style="background: #533C56; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 6px; transition: all 0.3s;">
+                    <i class="fas fa-save" style="margin-right: 0.5rem;"></i>
+                    Save Changes
+                </button>
+            </div>
+        {{ form_end(form) }}
+    </div>
+</div>
+
+<style>
+    .form-select {
+        transition: all 0.3s ease;
+    }
+    
+    .form-select:focus {
+        border-color: #99707E;
+        box-shadow: 0 0 0 0.2rem rgba(153, 112, 126, 0.25);
+        outline: none;
+        background-color: #fff;
+    }
+    
+    .btn-primary:hover {
+        background: #3e2d40 !important;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(83, 60, 86, 0.2);
+    }
+    
+    .btn-secondary:hover {
+        background: #f3eef5 !important;
+        transform: translateY(-2px);
+        color: #3e2d40 !important;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    .admin-card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .admin-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 5px 20px rgba(83, 60, 86, 0.15);
+    }
+</style>
+{% endblock %}
