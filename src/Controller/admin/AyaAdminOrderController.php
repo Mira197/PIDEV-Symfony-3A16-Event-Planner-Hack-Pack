@@ -1,0 +1,100 @@
+<?php
+
+namespace App\Controller\admin;
+
+use App\Entity\Order;
+use App\Repository\OrderRepository;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
+use Symfony\Component\Security\Csrf\CsrfToken;
+
+#[Route('/admin/orders')]
+class AyaAdminOrderController extends AbstractController
+{
+    #[Route('/all', name: 'admin_orders')]
+    public function index(OrderRepository $orderRepository): Response
+    {
+        $orders = $orderRepository->findAll();
+
+        return $this->render('admin/aya_orders_admin.html.twig', [
+            'orders' => $orders,
+        ]);
+    }
+    #[Route('/update-status/{id}', name: 'admin_order_update_status', methods: ['POST'])]
+    public function updateStatus(Order $order, Request $request, EntityManagerInterface $em): JsonResponse
+    {
+        $newStatus = $request->request->get('status');
+
+        if ($newStatus) {
+            $order->setStatus($newStatus);
+            $em->flush();
+
+            return new JsonResponse(['success' => true]);
+        }
+
+        return new JsonResponse(['success' => false, 'message' => 'Invalid status']);
+    }
+    #[Route('/update-field/{id}', name: 'admin_order_update_field', methods: ['POST'])]
+    public function updateField(Request $request, Order $order, OrderRepository $repo): JsonResponse
+    {
+        $field = $request->request->get('field');
+        $value = $request->request->get('value');
+
+        if ($field === 'orderedAt') {
+            $order->setOrderedAt(new \DateTime($value));
+        }
+
+        $repo->save($order, true);
+        return new JsonResponse(['success' => true]);
+    }
+    #[Route('/delete/{id}', name: 'admin_order_delete', methods: ['DELETE'])]
+public function deleteOrder($id, OrderRepository $orderRepository, EntityManagerInterface $em): JsonResponse
+{
+    $order = $orderRepository->find($id);
+
+    if (!$order) {
+        return new JsonResponse(['success' => false, 'message' => 'Order not found.'], 404);
+    }
+
+    if ($order->getStatus() === 'DELIVERED') {
+        return new JsonResponse(['success' => false, 'message' => 'You cannot delete an order that has already been delivered.'], 400);
+    }
+
+    $em->remove($order);
+    $em->flush();
+
+    return new JsonResponse(['success' => true]);
+}
+
+
+
+
+    #[Route('/delete-all', name: 'admin_order_delete_all', methods: ['POST'])]
+    public function deleteAll(EntityManagerInterface $em, OrderRepository $orderRepository): JsonResponse
+    {
+        $orders = $orderRepository->findAll();
+        foreach ($orders as $order) {
+            $em->remove($order);
+        }
+        $em->flush();
+
+        return new JsonResponse(['success' => true]);
+    }
+    #[Route('/view/{id}', name: 'admin_order_view')]
+    public function viewOrder($id, OrderRepository $orderRepo): Response
+    {
+        $order = $orderRepo->find($id);
+        if (!$order) {
+            throw $this->createNotFoundException("Order not found");
+        }
+
+        return $this->render('admin/order/view.html.twig', [
+            'order' => $order,
+        ]);
+    }
+}
