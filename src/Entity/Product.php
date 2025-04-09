@@ -6,6 +6,7 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Symfony\Component\Validator\Constraints as Assert;
 
 use App\Repository\ProductRepository;
 
@@ -30,6 +31,7 @@ class Product
     }
 
     #[ORM\Column(type: 'string', nullable: false)]
+    #[Assert\NotBlank(message: "Le nom du produit est obligatoire.")]
     private ?string $name = null;
 
     public function getName(): ?string
@@ -44,6 +46,7 @@ class Product
     }
 
     #[ORM\Column(type: 'text', nullable: true)]
+    #[Assert\NotBlank(message: "La description est requise.")]
     private ?string $description = null;
 
     public function getDescription(): ?string
@@ -58,6 +61,8 @@ class Product
     }
 
     #[ORM\Column(type: 'float', nullable: true)]
+    #[Assert\NotBlank(message: "Le prix est obligatoire.")]
+    #[Assert\PositiveOrZero(message: "Le prix ne peut pas être négatif.")]
     private ?float $price = null;
 
     public function getPrice(): ?float
@@ -100,6 +105,8 @@ public function setStock(?Stock $stock): self
 }
 
     #[ORM\Column(type: 'string', nullable: true)]
+    #[Assert\NotBlank(message: "L'image est obligatoire.")]
+
     private ?string $image_url = null;
 
     public function getImage_url(): ?string
@@ -114,6 +121,7 @@ public function setStock(?Stock $stock): self
     }
 
     #[ORM\Column(type: 'string', nullable: false)]
+    #[Assert\NotBlank(message: "La category est obligatoire.")]
     private ?string $category = null;
 
     public function getCategory(): ?string

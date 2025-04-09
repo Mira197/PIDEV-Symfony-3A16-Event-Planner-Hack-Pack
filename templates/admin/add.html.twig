@@ -19,8 +19,8 @@
         </div>
 
         <div class="card-style mb-30">
-            {{ form_start(form) }}
-                <div class="mb-3">
+            {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+            <div class="mb-3">
                     {{ form_label(form.name) }}
                     {{ form_widget(form.name, {'attr': {'class': 'form-control'}}) }}
                     {{ form_errors(form.name) }}
