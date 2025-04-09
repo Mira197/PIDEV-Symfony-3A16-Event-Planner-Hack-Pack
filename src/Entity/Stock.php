@@ -6,6 +6,8 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Symfony\Component\Validator\Constraints as Assert;
+
 
 use App\Repository\StockRepository;
 
@@ -30,6 +32,11 @@ class Stock
     }
 
     #[ORM\Column(type: 'integer', nullable: false)]
+    #[Assert\NotBlank(message: "La quantité disponible est obligatoire.")]
+    #[Assert\GreaterThanOrEqual(
+        propertyPath: "minimum_quantity",
+        message: "La quantité disponible doit être supérieure ou égale à la quantité minimale."
+    )]
     private ?int $available_quantity = null;
 
     public function getAvailable_quantity(): ?int
@@ -44,6 +51,8 @@ class Stock
     }
 
     #[ORM\Column(type: 'integer', nullable: false)]
+    #[Assert\NotBlank(message: "La quantité minimale est obligatoire.")]
+    #[Assert\PositiveOrZero(message: "La quantité minimale ne peut pas être négative.")]
     private ?int $minimum_quantity = null;
 
     public function getMinimum_quantity(): ?int
