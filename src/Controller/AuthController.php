@@ -5,6 +5,8 @@ namespace App\Controller;
 
 
 use App\Entity\User;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use App\Form\AdminRegisterFormType;
 use App\Form\AuthFormType;
 use App\Form\InscriptionFormType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -68,7 +70,7 @@ class AuthController extends AbstractController
             dump($user->getPassword()); // mot de passe hashé en BDD
             dump($passwordHasher->isPasswordValid($user, $plainPassword));
            
-            die();
+         
             if ($user && $passwordHasher->isPasswordValid($user, $plainPassword)) {
     
                 // Vérifie si le compte est bloqué
@@ -94,7 +96,7 @@ class AuthController extends AbstractController
                 // Redirection selon le rôle
                 switch ($user->getRole()) {
                     case 'ADMIN':
-                        return $this->redirectToRoute('Adminpage');
+                        return $this->redirectToRoute('app_user_index');
                     case 'CLIENT':
                         return $this->redirectToRoute('userpage');
                     case 'FOURNISSEUR':
@@ -111,7 +113,7 @@ class AuthController extends AbstractController
             $form->get('email')->addError(new FormError('Email ou mot de passe incorrect.'));
         }
      
-        return $this->render('backOfficeAdmin.html.twig', [
+        return $this->render('auth/login.html.twig', [
             'form' => $form->createView(),
         ]);
     }
@@ -157,13 +159,16 @@ public function register1(Request $request, EntityManagerInterface $entityManage
         }    // doit être true
         dump($form->getErrors(true, false)); // pour voir les erreurs
         dump($user);                // voir les valeurs remplies
-        die();
+   
     }
     dump($form->getErrors(true, false));
     return $this->render('auth/auth.html.twig', [
         'form' => $form->createView(),
     ]);
 }
+
+
+
 
 
 
@@ -242,7 +247,56 @@ public function register1(Request $request, EntityManagerInterface $entityManage
            'roleLabels' => $roleLabels,
            'userCounts' => $userCounts,
        ]);
+       
 
+}
+#[Route('/admin/register', name: 'admin_register', methods: ['POST'])]
+public function registerAdmin(Request $request, EntityManagerInterface $entityManager): Response
+{
+    $user = new User();
+    $form = $this->createForm(AdminRegisterFormType::class, $user);
+    $form->handleRequest($request);
 
+    if ($form->isSubmitted()) {
+        // Validation personnalisée
+        $existingUsername = $entityManager->getRepository(User::class)->findOneBy(['username' => $user->getUsername()]);
+        if ($existingUsername) {
+            $form->get('username')->addError(new FormError('Ce nom d\'utilisateur est déjà utilisé.'));
+        }
 
-}}
+        $existingEmail = $entityManager->getRepository(User::class)->findOneBy(['email' => $user->getEmail()]);
+        if ($existingEmail) {
+            $form->get('email')->addError(new FormError('Cet email est déjà utilisé.'));
+        }
+
+        if ($user->getPassword() !== $form->get('passwordConfirmation')->getData()) {
+            $form->get('passwordConfirmation')->addError(new FormError('Les mots de passe ne correspondent pas.'));
+        }
+
+        // Appeler isValid() après vérifications personnalisées
+        if ($form->isValid()) {
+            $user->setPassword(password_hash($user->getPassword(), PASSWORD_BCRYPT));
+            $user->setRole("ADMIN"); // 💡 On force ici le rôle, pas dans le form
+            $entityManager->persist($user);
+            $entityManager->flush();
+
+            return $this->redirectToRoute('app_user_index');
+        }
+
+        // En cas d'erreurs → facultatif, pour debug
+        /*
+        foreach ($form as $child) {
+            foreach ($child->getErrors() as $error) {
+                dump('Champ : ' . $child->getName(), 'Erreur : ' . $error->getMessage());
+            }
+        }
+        dump($form->getErrors(true, false));
+        dump($user);
+        die();
+        */
+    }
+
+    return $this->redirectToRoute('app_user_index');
+}
+
+}

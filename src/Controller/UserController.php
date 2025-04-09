@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\User;
+use App\Form\AdminRegisterFormType;
 use App\Form\UserType;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -55,11 +56,13 @@ class UserController extends AbstractController
             $entityManager->flush();
         }
     }
+    $form = $this->createForm(AdminRegisterFormType::class, new User());
 
-    // Rendre la vue avec la liste des utilisateurs mise à jour
     return $this->render('admin/listAdmins.html.twig', [
         'users' => $users,
+        'adminForm' => $form->createView(), // ⬅️ très important !
     ]);
+    
 }
 
     #[Route('/export-pdf', name: 'app_user_export_pdf', methods: ['GET'])]
@@ -171,8 +174,8 @@ class UserController extends AbstractController
             case 'CLIENT':
                 $editTemplate = 'user/show.html.twig';
                 break;
-            case 'ARTIST':
-                $editTemplate = 'user/profileArtist.html.twig';
+            case 'Fournissuer':
+                $editTemplate = 'user/profileFournissuer.html.twig';
                 break;
             case 'ADMIN':
                 $editTemplate = 'user/profileAdmin.html.twig';
