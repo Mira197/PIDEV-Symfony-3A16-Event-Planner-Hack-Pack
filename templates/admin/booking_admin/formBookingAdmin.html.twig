@@ -1,0 +1,94 @@
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+
+        {#<div class="select-style-1">
+            {{ form_label(form.event) }}
+            <div class="select-position">
+                {{ form_widget(form.event, {
+                    'attr': {
+                        'class': form_errors(form.event) ? 'is-invalid' : ''
+                    }
+                }) }}
+            </div>
+            {% if form_errors(form.event) %}
+                <div class="form-error">{{ form_errors(form.event) }}</div>
+            {% endif %}
+        </div>#}
+
+        <div class="select-style-1">
+            {{ form_label(form.location) }}
+            <div class="select-position">
+                {{ form_widget(form.location, {
+                    'attr': {
+                        'class': form_errors(form.location) ? 'is-invalid' : ''
+                    }
+                }) }}
+            </div>
+            {% if form_errors(form.location) %}
+                <div class="form-error">{{ form_errors(form.location) }}</div>
+            {% endif %}
+        </div>
+
+        <div class="input-style-1">
+            {{ form_label(form.start_date) }}
+            {{ form_widget(form.start_date, {
+                'attr': {
+                    'class': form_errors(form.start_date) ? 'is-invalid' : ''
+                }
+            }) }}
+            {% if form_errors(form.start_date) %}
+                <div class="form-error">{{ form_errors(form.start_date) }}</div>
+            {% endif %}
+        </div>
+
+        <div class="input-style-1">
+            {{ form_label(form.end_date) }}
+            {{ form_widget(form.end_date, {
+                'attr': {
+                    'class': form_errors(form.end_date) ? 'is-invalid' : ''
+                }
+            }) }}
+            {% if form_errors(form.end_date) %}
+                <div class="form-error">{{ form_errors(form.end_date) }}</div>
+            {% endif %}
+        </div>
+
+        <button class="main-btn primary-btn-outline btn-hover px-4 py-2">
+            {{ button_label|default('Save Booking') }}
+        </button>
+
+        {{ form_end(form) }}
+
+        <style>
+            .input-style-1,
+            .select-style-1,
+            .form-check {
+                margin-bottom: 10px !important;
+            }
+
+            .input-style-1 label,
+            .select-style-1 label {
+                font-size: 14px;
+                margin-bottom: 3px;
+            }
+
+            .form-check label {
+                margin-left: 6px;
+            }
+
+            .form-error {
+                color: #dc3545;
+                font-size: 14px;
+                margin-top: 4px;
+                padding-left: 2px;
+                font-style: italic;
+            }
+
+            .is-invalid {
+                border-color: #dc3545;
+                box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+            }
+        </style>
+    </div>
+</div>

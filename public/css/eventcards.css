@@ -1,0 +1,161 @@
+.event-card {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    margin-bottom: 30px;
+    overflow: hidden;
+    transition: transform 0.2s ease-in-out;
+    padding: 20px;
+}
+
+.event-card:hover {
+    transform: scale(1.02);
+}
+
+.event-card-image img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 5px;
+}
+
+.event-card-content h4 {
+    font-size: 20px;
+    margin: 15px 0 10px;
+    color: #333;
+    font-weight: 600;
+}
+
+.event-card-content p {
+    font-size: 14px;
+    color: #555;
+}
+
+.event-card-content ul {
+    list-style: none;
+    padding: 0;
+    margin: 10px 0 0;
+    font-size: 14px;
+    color: #777;
+}
+
+.event-card-content ul li {
+    margin-bottom: 5px;
+}
+
+.event-card-actions {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.event-card-actions button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 45px;
+    height: 45px;
+    font-size: 18px;
+    background-color: #533C56 !important;
+    color: white !important;
+    border-radius: 10px;
+    border: none;
+    text-decoration: none;
+    transition: background 0.3s ease;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    cursor: pointer;
+}
+
+.event-card-actions button:hover {
+    background-color: #3a204a !important;
+}
+
+/*style pour le show.html.twig*/
+.event-details-container {
+    background-color: #ffffff;
+    border-radius: 10px;
+    padding: 30px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.event-details-container h2 {
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 30px;
+    color: #2c2c2c;
+}
+
+.event-details-image {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.event-details-table {
+    width: 100%;
+    font-size: 16px;
+    
+}
+
+.event-details-table th {
+    width: 150px;
+    color: #333;
+    font-weight: 600;
+    padding: 10px 15px;
+    background-color: #f9f9f9;
+}
+
+.event-details-table td {
+    padding: 10px 15px;
+    background-color: #fefefe;
+    color: #444;
+}
+
+.event-details-buttons {
+    margin-top: 25px;
+}
+
+.event-details-buttons a {
+    margin-right: 10px;
+}
+/* --- Event Details Table Style (no borders) --- */
+.event-details-table {
+    border: none;
+}
+
+.event-details-table th,
+.event-details-table td {
+    border: none !important;
+    padding: 10px 15px;
+    font-size: 15px;
+    color: #333;
+}
+
+.event-details-table th {
+    font-weight: 600;
+}
+
+
+.main-btn {
+    font-size: 14px;
+    font-weight: 500;
+    border: 1px solid #1f2937;
+    color: #1f2937;
+    background: transparent;
+    border-radius: 5px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    padding: 8px 20px;
+}
+
+.main-btn:hover {
+    background-color: #1f2937;
+    color: #fff;
+}
+
+
+
+
+

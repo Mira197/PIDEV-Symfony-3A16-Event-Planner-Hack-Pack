@@ -51,35 +51,34 @@
 
 
 				<!-- Animate.css -->
-				<link
-				rel="stylesheet" href="{{ asset('css/animate.css') }}">
+
+				<link rel="stylesheet" href="{{ asset('css/animate.css') }}">
 				<!-- Icomoon Icon Fonts-->
-				<link
-				rel="stylesheet" href="{{ asset('css/icomoon.css') }}">
+				<link rel="stylesheet" href="{{ asset('css/icomoon.css') }}">
 				<!-- Bootstrap  -->
-				<link
-				rel="stylesheet" href="{{ asset('css/bootstrap.css') }}">
+				<link rel="stylesheet" href="{{ asset('css/bootstrap.css') }}">
 
 				<!-- Magnific Popup -->
-				<link
-				rel="stylesheet" href="{{ asset('css/magnific-popup.css') }}">
+				<link rel="stylesheet" href="{{ asset('css/magnific-popup.css') }}">
 
 				<!-- Owl Carousel  -->
 				<link rel="stylesheet" href="{{ asset('css/owl.carousel.min.css') }}">
-				<link
-				rel="stylesheet" href="{{ asset('css/owl.theme.default.min.css') }}">
+				<link rel="stylesheet" href="{{ asset('css/owl.theme.default.min.css') }}">
 				<!-- Theme style  -->
 				<link rel="stylesheet" href="{{ asset('css/style.css') }}">
+				
+
 
 			{% endblock %}
 			<!-- Modernizr JS -->
-			<script src="js/modernizr-2.6.2.min.js"></script>
+			<script src="{{ asset('js/modernizr-2.6.2.min.js') }}"></script>
 			<!-- FOR IE9 below -->
 			<!--[if lt IE 9]>
 
-																																														<script src="js/respond.min.js"></script>
-																																														<![endif]-->
-
+																			<script src="js/respond.min.js"></script>
+		
+																			<![endif]-->
+		
 
 		</head>
 	{% endblock %}
@@ -114,7 +113,7 @@
 
 									<ul class="dropdown">
 										<li>
-											<a href="#">Events</a>
+											<a href="{{ path('app_events') }}">Events</a>
 										</li>
 										<li>
 											<a href="#">Products</a>

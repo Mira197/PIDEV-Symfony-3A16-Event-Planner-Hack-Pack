@@ -6,10 +6,11 @@
 			<meta charset="UTF-8"/>
 			<meta http-equiv="X-UA-Compatible" content="IE=edge"/>
 			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-			<link rel="shortcut icon" href="admin/images/logo/logo1.png" type="image/x-icon"/>
+			<link rel="shortcut icon" href="{{ asset('admin/images/logo/logo1.png') }}" type="image/x-icon"/>
 			<title>3alaKifiAdmin | Event Planner</title>
 
 			<!-- ========== All CSS files linkup ========= -->
+
 			<link rel="stylesheet" href="{{ asset('admin/css/bootstrap.min.css') }}">
 			<link rel="stylesheet" href="{{ asset('admin/css/lineicons.css') }}">
 			<link rel="stylesheet" href="{{ asset('admin/css/materialdesignicons.min.css') }}">
@@ -17,6 +18,7 @@
 			<link rel="stylesheet" href="{{ asset('admin/css/main.css') }}">
 
 			<link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+
 
 
 		{% endblock %}
@@ -90,6 +92,35 @@
 								</li>
 							</ul>
 
+						</li>
+						<!--Event management-->
+						<li class="nav-item nav-item-has-children">
+							<a href="#0" class="collapsed" data-bs-toggle="collapse" data-bs-target="#ddmenu_6" aria-controls="ddmenu_6" aria-expanded="false" aria-label="Toggle navigation">
+								<span class="icon">
+									<svg width="20" height="20" viewbox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+										<path d="M11.8097 1.66667C11.8315 1.66667 11.8533 1.6671 11.875 1.66796V4.16667C11.875 5.43232 12.901 6.45834 14.1667 6.45834H16.6654C16.6663 6.48007 16.6667 6.50186 16.6667 6.5237V16.6667C16.6667 17.5872 15.9205 18.3333 15 18.3333H5.00001C4.07954 18.3333 3.33334 17.5872 3.33334 16.6667V3.33334C3.33334 2.41286 4.07954 1.66667 5.00001 1.66667H11.8097ZM6.66668 7.70834C6.3215 7.70834 6.04168 7.98816 6.04168 8.33334C6.04168 8.67851 6.3215 8.95834 6.66668 8.95834H10C10.3452 8.95834 10.625 8.67851 10.625 8.33334C10.625 7.98816 10.3452 7.70834 10 7.70834H6.66668ZM6.04168 11.6667C6.04168 12.0118 6.3215 12.2917 6.66668 12.2917H13.3333C13.6785 12.2917 13.9583 12.0118 13.9583 11.6667C13.9583 11.3215 13.6785 11.0417 13.3333 11.0417H6.66668C6.3215 11.0417 6.04168 11.3215 6.04168 11.6667ZM6.66668 14.375C6.3215 14.375 6.04168 14.6548 6.04168 15C6.04168 15.3452 6.3215 15.625 6.66668 15.625H13.3333C13.6785 15.625 13.9583 15.3452 13.9583 15C13.9583 14.6548 13.6785 14.375 13.3333 14.375H6.66668Z"/>
+										<path d="M13.125 2.29167L16.0417 5.20834H14.1667C13.5913 5.20834 13.125 4.74197 13.125 4.16667V2.29167Z"/>
+									</svg>
+								</span>
+								<span class="text">Event management</span>
+							</a>
+							<ul id="ddmenu_6" class="collapse dropdown-nav">
+								<li>
+									<a href="{{ path('event_admin_index') }}">
+										Events
+									</a>
+								</li>
+								<li>
+									<a href="{{ path('location_admin') }}">
+										Locations
+									</a>
+								</li>
+								<li>
+									<a href="{{ path('booking_admin_index') }}">
+										Bookings
+									</a>
+								</li>
+							</ul>
 						</li>
 						<li class="nav-item nav-item-has-children">
 							<a href="#0" class="collapsed" data-bs-toggle="collapse" data-bs-target="#aya_orders_menu" aria-controls="aya_orders_menu" aria-expanded="false" aria-label="Toggle navigation">
@@ -331,7 +362,7 @@
 											<li>
 												<a href="#0">
 													<div class="image">
-														<img src="admin/images/lead/lead-6.png" alt=""/>
+														<img src="{{ asset('admin/images/lead/lead-6.png') }}" alt=""/>
 													</div>
 													<div class="content">
 														<h6>
@@ -351,7 +382,7 @@
 											<li>
 												<a href="#0">
 													<div class="image">
-														<img src="admin/images/lead/lead-1.png" alt=""/>
+														<img src="{{ asset('admin/images/lead/lead-1.png') }}" alt=""/>
 													</div>
 													<div class="content">
 														<h6>
@@ -384,7 +415,7 @@
 											<li>
 												<a href="#0">
 													<div class="image">
-														<img src="admin/images/lead/lead-5.png" alt=""/>
+														<img src="{{ asset('admin/images/lead/lead-5.png') }}" alt=""/>
 													</div>
 													<div class="content">
 														<h6>Jacob Jones</h6>
@@ -396,7 +427,7 @@
 											<li>
 												<a href="#0">
 													<div class="image">
-														<img src="admin/images/lead/lead-3.png" alt=""/>
+														<img src="{{ asset('admin/images/lead/lead-3.png') }}" alt=""/>
 													</div>
 													<div class="content">
 														<h6>John Doe</h6>
@@ -408,7 +439,7 @@
 											<li>
 												<a href="#0">
 													<div class="image">
-														<img src="admin/images/lead/lead-2.png" alt=""/>
+														<img src="{{ asset('admin/images/lead/lead-2.png') }}" alt=""/>
 													</div>
 													<div class="content">
 														<h6>Anee Lee</h6>
@@ -426,7 +457,7 @@
 											<div class="profile-info">
 												<div class="info">
 													<div class="image">
-														<img src="admin/images/profile/profile-image.png" alt=""/>
+														<img src="{{ asset('admin/images/profile/profile-image.png') }}" alt=""/>
 													</div>
 													<div>
 														<h6 class="fw-500">Adam Joe</h6>
@@ -439,7 +470,7 @@
 											<li>
 												<div class="author-info flex items-center !p-1">
 													<div class="image">
-														<img src="admin/images/profile/profile-image.png" alt="image">
+														<img src="{{ asset('admin/images/profile/profile-image.png') }}" alt="image"/>
 													</div>
 													<div class="content">
 														<h4 class="text-sm">Adam Joe</h4>
@@ -724,7 +755,7 @@
 													<td>
 														<div class="product">
 															<div class="image">
-																<img src="admin/images/products/product-mini-1.jpg" alt=""/>
+																<img src="{{ asset('admin/images/products/product-mini-1.jpg') }}" alt=""/>
 															</div>
 															<p class="text-sm">Arm Chair</p>
 														</div>
@@ -766,7 +797,7 @@
 													<td>
 														<div class="product">
 															<div class="image">
-																<img src="admin/images/products/product-mini-2.jpg" alt=""/>
+																<img src="{{ asset('admin/images/products/product-mini-2.jpg') }}" alt=""/>
 															</div>
 															<p class="text-sm">SOfa</p>
 														</div>
@@ -808,7 +839,7 @@
 													<td>
 														<div class="product">
 															<div class="image">
-																<img src="admin/images/products/product-mini-3.jpg" alt=""/>
+																<img src="{{ asset('admin/images/products/product-mini-3.jpg') }}" alt=""/>
 															</div>
 															<p class="text-sm">Dining Table</p>
 														</div>
@@ -850,7 +881,7 @@
 													<td>
 														<div class="product">
 															<div class="image">
-																<img src="admin/images/products/product-mini-4.jpg" alt=""/>
+																<img src="{{ asset('admin/images/products/product-mini-4.jpg') }}" alt=""/>
 															</div>
 															<p class="text-sm">Office Chair</p>
 														</div>
@@ -1082,7 +1113,7 @@
 													<td>
 														<div class="product">
 															<div class="image">
-																<img src="admin/images/products/product-mini-1.jpg" alt=""/>
+																<img src="{{ asset('admin/images/products/product-mini-1.jpg') }}" alt=""/>
 															</div>
 															<p class="text-sm">Bedroom</p>
 														</div>
@@ -1119,7 +1150,7 @@
 													<td>
 														<div class="product">
 															<div class="image">
-																<img src="admin/images/products/product-mini-2.jpg" alt=""/>
+																<img src="{{ asset('admin/images/products/product-mini-2.jpg') }}" alt=""/>
 															</div>
 															<p class="text-sm">Arm Chair</p>
 														</div>
@@ -1156,7 +1187,7 @@
 													<td>
 														<div class="product">
 															<div class="image">
-																<img src="admin/images/products/product-mini-3.jpg" alt=""/>
+																<img src="{{ asset('admin/images/products/product-mini-3.jpg') }}" alt=""/>
 															</div>
 															<p class="text-sm">Sofa</p>
 														</div>
@@ -1193,7 +1224,7 @@
 													<td>
 														<div class="product">
 															<div class="image">
-																<img src="admin/images/products/product-mini-4.jpg" alt=""/>
+																<img src="{{ asset('admin/images/products/product-mini-4.jpg') }}" alt=""/>
 															</div>
 															<p class="text-sm">Kitchen</p>
 														</div>
@@ -1286,6 +1317,7 @@
 			<script src="{{ asset('admin/js/world-merc.js') }}"></script>
 			<script src="{{ asset('admin/js/polyfill.js') }}"></script>
 			<script src="{{ asset('admin/js/main.js') }}"></script>
+
 
 
 			<script>
