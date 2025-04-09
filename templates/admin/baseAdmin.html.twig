@@ -10,13 +10,16 @@
 			<title>3alaKifiAdmin | Event Planner</title>
 
 			<!-- ========== All CSS files linkup ========= -->
-			<link rel="stylesheet" href="{{ asset('admin/css/bootstrap.min.css') }}"/>
-			<link rel="stylesheet" href="{{ asset('admin/css/lineicons.css') }}" type="text/css"/>
-			<link rel="stylesheet" href="{{ asset('admin/css/materialdesignicons.min.css') }}" rel="stylesheet" type="text/css"/>
-			<link rel="stylesheet" href="{{ asset('admin/css/fullcalendar.css') }}"/>
-			<link rel="stylesheet" href="{{ asset('admin/css/fullcalendar.css') }}"/>
-			<link rel="stylesheet" href="{{ asset('admin/css/main.css') }}"/>
-      <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+
+			<link rel="stylesheet" href="{{ asset('admin/css/bootstrap.min.css') }}">
+			<link rel="stylesheet" href="{{ asset('admin/css/lineicons.css') }}">
+			<link rel="stylesheet" href="{{ asset('admin/css/materialdesignicons.min.css') }}">
+			<link rel="stylesheet" href="{{ asset('admin/css/fullcalendar.css') }}">
+			<link rel="stylesheet" href="{{ asset('admin/css/main.css') }}">
+
+			<link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+
+
 
 		{% endblock %}
 	</head>
@@ -35,7 +38,7 @@
 			<aside class="sidebar-nav-wrapper">
 				<div class="navbar-logo">
 					<a href="{{ path('admin_dashboard') }}">
-						<img src="{{ asset('admin/images/logo/logo1.png') }}" alt="Logo 2" class="logo-img" />
+						<img src="{{ asset('admin/images/logo/logo1.png') }}" alt="Logo 2" class="logo-img"/>
 					</a>
 				</div>
 				<nav class="sidebar-nav">
@@ -82,7 +85,7 @@
 									</a>
 								</li>
 								<li>
-									<a href="{{ path('admin_dashboard') }}" class="">
+									<a href="{{ path('forum_dashboard') }}" class="">
 										<i class="bx bx-message-dots"></i>
 										Forum
 									</a>
@@ -119,6 +122,32 @@
 								</li>
 							</ul>
 						</li>
+						<li class="nav-item nav-item-has-children">
+							<a href="#0" class="collapsed" data-bs-toggle="collapse" data-bs-target="#aya_orders_menu" aria-controls="aya_orders_menu" aria-expanded="false" aria-label="Toggle navigation">
+								<span class="icon">
+									<svg width="20" height="20" viewbox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+										<path d="M3 3H21V5H3V3ZM3 7H21V9H3V7ZM3 11H21V13H3V11ZM3 15H13V17H3V15ZM3 19H13V21H3V19Z" fill="currentColor"/>
+									</svg>
+								</span>
+								<span class="text">Management Orders</span>
+							</a>
+							<ul id="aya_orders_menu" class="collapse dropdown-nav">
+								<li>
+									<a href="{{ path('admin_orders') }}">
+										Orders
+									</a>
+								</li>
+								<li>
+									<a href="{{ path('aya_admin_code_promo_index') }}">
+										Promo Codes
+									</a>
+
+
+								</li>
+							</ul>
+						</li>
+
+
 						<li class="nav-item nav-item-has-children">
 							<a href="#0" class="collapsed" data-bs-toggle="collapse" data-bs-target="#ddmenu_2" aria-controls="ddmenu_2" aria-expanded="false" aria-label="Toggle navigation">
 								<span class="icon">
@@ -344,7 +373,7 @@
 														</h6>
 														<p>
 															Lorem ipsum dolor sit amet, consect etur adipiscing
-															                            elit Vivamus tortor.
+
 														</p>
 														<span>10 mins ago</span>
 													</div>
@@ -364,7 +393,7 @@
 														</h6>
 														<p>
 															Lorem ipsum dolor sit amet, consect etur adipiscing
-															                            elit Vivamus tortor.
+
 														</p>
 														<span>10 mins ago</span>
 													</div>
@@ -1288,6 +1317,8 @@
 			<script src="{{ asset('admin/js/world-merc.js') }}"></script>
 			<script src="{{ asset('admin/js/polyfill.js') }}"></script>
 			<script src="{{ asset('admin/js/main.js') }}"></script>
+
+
 
 			<script>
 				// ======== jvectormap activation
