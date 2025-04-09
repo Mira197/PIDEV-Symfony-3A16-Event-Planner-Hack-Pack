@@ -3,6 +3,11 @@
 {% block head %}
 	<link rel="stylesheet" href="{{ asset('assetsAya/css/adminOrder.css') }}">
 	{{ parent() }}
+	<style>
+        .hidden-column {
+            display: none;
+        }
+    </style>
 {% endblock %}
 
 {% block section %}
@@ -32,7 +37,7 @@
 		<table class="admin-mui-table">
 			<thead>
 				<tr>
-					<th>#ID</th>
+					<th class="hidden-column">#ID</th>
 					<th>User</th>
 					<th>Status</th>
 					<th>Total</th>
@@ -44,7 +49,7 @@
 			<tbody id="adminOrdersTable">
 				{% for order in orders %}
 					<tr data-status="{{ order.status }}">
-						<td>{{ order.orderId }}</td>
+						<td class="hidden-column">{{ order.orderId }}</td>
 						<td>
 							<strong>{{ order.user.username }}</strong>
 						</td>
