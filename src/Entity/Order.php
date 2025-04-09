@@ -6,16 +6,16 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
-
+use Symfony\Component\Validator\Constraints as Assert;
 use App\Repository\OrderRepository;
 
 #[ORM\Entity(repositoryClass: OrderRepository::class)]
-#[ORM\Table(name: 'order')]
+#[ORM\Table(name: '`order`')]
 class Order
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column(type: 'integer')]
+    #[ORM\Column(name: 'order_id', type: 'integer')]
     private ?int $order_id = null;
 
     public function getOrder_id(): ?int
@@ -46,6 +46,8 @@ class Order
 
     #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'orders')]
     #[ORM\JoinColumn(name: 'user_id', referencedColumnName: 'id_user')]
+    #[Assert\NotNull]
+    #[Assert\Type(User::class)]
     private ?User $user = null;
 
     public function getUser(): ?User
@@ -60,7 +62,9 @@ class Order
     }
 
     #[ORM\Column(type: 'string', nullable: true)]
-    private ?string $status = null;
+    #[Assert\Choice(choices: ['PENDING', 'CONFIRMED', 'CANCELLED', 'DELIVERED'])]
+    private string $status;
+
 
     public function getStatus(): ?string
     {
@@ -73,7 +77,10 @@ class Order
         return $this;
     }
 
-    #[ORM\Column(type: 'string', nullable: false)]
+    #[ORM\Column(type: 'string', length: 255)]
+    #[Assert\NotBlank]
+    #[Assert\NotBlank(message: "Please select a payment method.")]
+
     private ?string $payment_method = null;
 
     public function getPayment_method(): ?string
@@ -88,6 +95,11 @@ class Order
     }
 
     #[ORM\Column(type: 'text', nullable: false)]
+    #[Assert\NotBlank(message: "Delivery address is required.")]
+    #[Assert\Length(
+        min: 10,
+        minMessage: "This value is too short. It should have {{ limit }} characters or more."
+    )]
     private ?string $exact_address = null;
 
     public function getExact_address(): ?string
@@ -102,6 +114,9 @@ class Order
     }
 
     #[ORM\Column(type: 'datetime', nullable: false)]
+    #[Assert\NotNull]
+    #[Assert\NotNull(message: "Please select a valid event date.")]
+    #[Assert\GreaterThan("today", message: "The event date must be in the future.")]
     private ?\DateTimeInterface $event_date = null;
 
     public function getEvent_date(): ?\DateTimeInterface
@@ -116,6 +131,7 @@ class Order
     }
 
     #[ORM\Column(type: 'datetime', nullable: false)]
+    #[Assert\NotNull(message: "Ordered at cannot be null.")]
     private ?\DateTimeInterface $ordered_at = null;
 
     public function getOrdered_at(): ?\DateTimeInterface
@@ -130,6 +146,8 @@ class Order
     }
 
     #[ORM\Column(type: 'decimal', nullable: false)]
+    #[Assert\NotNull(message: "Total price cannot be null.")]
+    #[Assert\PositiveOrZero]
     private ?float $total_price = null;
 
     public function getTotal_price(): ?float
@@ -207,5 +225,4 @@ class Order
 
         return $this;
     }
-
 }

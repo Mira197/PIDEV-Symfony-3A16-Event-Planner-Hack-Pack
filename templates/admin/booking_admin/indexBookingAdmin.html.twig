@@ -1,0 +1,55 @@
+{% extends 'admin/baseAdmin.html.twig' %}
+
+{% block section %}
+<section class="section">
+    <div class="container-fluid">
+        <div class="title-wrapper pt-30">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <div class="title">
+                        <h2>Manage Bookings</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card-style mb-30">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Event</th>
+                                <th>Location</th>
+                                <th>Start Date</th>
+                                <th>End Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for booking in bookings %}
+                                <tr>
+                                    <td>{{ booking.event.name }}</td>
+                                    <td>{{ booking.location.name }}</td>
+                                    <td>{{ booking.startDate|date('Y-m-d H:i') }}</td>
+                                    <td>{{ booking.endDate|date('Y-m-d H:i') }}</td>
+                                    <td>
+                                        {#<a href="{{ path('booking_admin_show', {'id': booking.idBooking}) }}" class="main-btn secondary-btn-outline btn-hover px-3 py-1">Show</a>#}
+                                        
+                                        <a href="{{ path('booking_admin_edit', { 'id': booking.idBooking }) }}" class="main-btn warning-btn-outline btn-hover px-4 py-2">Edit</a>
+                                        {{ include('admin/booking_admin/delete_formBookingAdmin.html.twig') }}
+                                    </td>
+                                </tr>
+                            {% else %}
+                                <tr>
+                                    <td colspan="5">No bookings found.</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

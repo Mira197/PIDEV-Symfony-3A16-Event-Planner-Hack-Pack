@@ -8,7 +8,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 
 use App\Repository\CodePromoRepository;
-
+use Symfony\Component\Validator\Constraints as Assert;
 #[ORM\Entity(repositoryClass: CodePromoRepository::class)]
 #[ORM\Table(name: 'code_promo')]
 class CodePromo
@@ -28,8 +28,14 @@ class CodePromo
         $this->id = $id;
         return $this;
     }
-
     #[ORM\Column(type: 'string', nullable: false)]
+    #[Assert\NotBlank(message: "Promo code is required.")]
+    #[Assert\Length(
+        min: 3,
+        max: 20,
+        minMessage: "The code must be at least {{ limit }} characters long.",
+        maxMessage: "The code must not exceed {{ limit }} characters."
+    )]
     private ?string $code_promo = null;
 
     public function getCode_promo(): ?string
@@ -44,6 +50,13 @@ class CodePromo
     }
 
     #[ORM\Column(type: 'decimal', nullable: false)]
+    #[Assert\NotNull(message: "Discount percentage is required.")]
+    #[Assert\Type(type: 'numeric', message: "The discount must be a number.")]
+    #[Assert\Range(
+        min: 1,
+        max: 100,
+        notInRangeMessage: "The discount must be between {{ min }}% and {{ max }}%."
+    )]
     private ?float $pourcentage = null;
 
     public function getPourcentage(): ?float
@@ -58,6 +71,8 @@ class CodePromo
     }
 
     #[ORM\Column(type: 'datetime', nullable: false)]
+    #[Assert\NotNull(message: "Creation date is required.")]
+    #[Assert\Type("\DateTimeInterface")]
     private ?\DateTimeInterface $date_creation = null;
 
     public function getDate_creation(): ?\DateTimeInterface
@@ -72,6 +87,9 @@ class CodePromo
     }
 
     #[ORM\Column(type: 'datetime', nullable: false)]
+    #[Assert\NotNull(message: "Expiration date is required.")]
+    #[Assert\Type("\DateTimeInterface")]
+    #[Assert\GreaterThan("today", message: "The expiration date must be in the future.")]
     private ?\DateTimeInterface $date_expiration = null;
 
     public function getDate_expiration(): ?\DateTimeInterface
