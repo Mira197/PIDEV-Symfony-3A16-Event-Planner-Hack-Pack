@@ -102,3 +102,6 @@ table.admin-mui-table th {
     font-size: 13px;
     margin-top: 5px;
   }
+  .hidden-column {
+    display: none;
+}

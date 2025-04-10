@@ -51,6 +51,12 @@
 				<div class="order-form-container">
 					<h2 class="mb-4 text-center">🧾 Validate Your Order</h2>
 					{{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+					{% if not form.vars.valid %}
+						<div class="alert alert-danger">
+							Please correct the errors below before submitting the order.
+						</div>
+					{% endif %}
+
 					<div class="form-group">
 						{{ form_label(form.exact_address) }}
 						{{ form_widget(form.exact_address, {
@@ -59,7 +65,8 @@
             'placeholder': 'Enter exact delivery address'
         }
     }) }}
-                    {{ form_errors(form.exact_address) }} {# ← important ! #}
+						{{ form_errors(form.exact_address) }}
+						{# ← important ! #}
 					</div>
 					<div class="form-group mt-3">
 						{{ form_label(form.event_date) }}
@@ -126,7 +133,6 @@
 	</div>
 {% endblock %}
 {% block javascripts %}
-    {{ parent() }}
-    <script src="{{ asset('assetsAya/js/order_validation.js') }}"></script>
+	{{ parent() }}
+	<script src="{{ asset('assetsAya/js/order_validation.js') }}"></script>
 {% endblock %}
-

@@ -77,8 +77,10 @@ class Order
         return $this;
     }
 
-    #[ORM\Column(type: 'string', nullable: false)]
+    #[ORM\Column(type: 'string', length: 255)]
     #[Assert\NotBlank]
+    #[Assert\NotBlank(message: "Please select a payment method.")]
+
     private ?string $payment_method = null;
 
     public function getPayment_method(): ?string
@@ -114,7 +116,7 @@ class Order
     #[ORM\Column(type: 'datetime', nullable: false)]
     #[Assert\NotNull]
     #[Assert\NotNull(message: "Please select a valid event date.")]
-    #[Assert\GreaterThan("today")]
+    #[Assert\GreaterThan("today", message: "The event date must be in the future.")]
     private ?\DateTimeInterface $event_date = null;
 
     public function getEvent_date(): ?\DateTimeInterface
@@ -129,9 +131,7 @@ class Order
     }
 
     #[ORM\Column(type: 'datetime', nullable: false)]
-    #[Assert\NotBlank]
-    #[Assert\Date]
-    #[Assert\LessThanOrEqual('today')]
+    #[Assert\NotNull(message: "Ordered at cannot be null.")]
     private ?\DateTimeInterface $ordered_at = null;
 
     public function getOrdered_at(): ?\DateTimeInterface
@@ -146,10 +146,8 @@ class Order
     }
 
     #[ORM\Column(type: 'decimal', nullable: false)]
-    #[Assert\NotBlank]
+    #[Assert\NotNull(message: "Total price cannot be null.")]
     #[Assert\PositiveOrZero]
-    #[Assert\LessThanOrEqual(10000)]
-
     private ?float $total_price = null;
 
     public function getTotal_price(): ?float

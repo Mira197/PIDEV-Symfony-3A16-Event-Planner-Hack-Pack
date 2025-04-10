@@ -32,7 +32,7 @@
 		<table class="admin-mui-table" id="promoCodeTable">
 			<thead>
 				<tr>
-					<th>#</th>
+					<th class="hidden-column">#</th>
 					<th>Code</th>
 					<th>Discount (%)</th>
 					<th>Expiration Date</th>
@@ -44,7 +44,7 @@
 				{% for code in codes %}
 					{% set status = (code.dateExpiration and code.dateExpiration < "now"|date) ? 'expired' : 'active' %}
 					<tr data-status="{{ status }}">
-						<td>{{ loop.index }}</td>
+						<td class="hidden-column">{{ loop.index }}</td>
 						<td>
 							<strong>{{ code.codePromo }}</strong>
 						</td>
@@ -95,14 +95,14 @@ row.style.display = row.innerText.toLowerCase().includes(keyword) ? '' : 'none';
 });
 });
 document.querySelectorAll('.edit-btn').forEach(btn => {
-	btn.addEventListener('click', () => {
-		const id = btn.dataset.id;
-		const code = btn.dataset.code;
-		const pourcentage = btn.dataset.pourcentage;
-		const dateExpiration = btn.dataset.date;
+btn.addEventListener('click', () => {
+const id = btn.dataset.id;
+const code = btn.dataset.code;
+const pourcentage = btn.dataset.pourcentage;
+const dateExpiration = btn.dataset.date;
 
-		openEditModal(id, code, pourcentage, dateExpiration);
-	});
+openEditModal(id, code, pourcentage, dateExpiration);
+});
 });
 
 
