@@ -1,0 +1,65 @@
+{% extends 'admin/baseAdmin.html.twig' %}
+
+{% block section %}
+<section class="section">
+    <div class="container-fluid">
+        <div class="title-wrapper pt-30">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <div class="title">
+                        <h2>Manage Events</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card-style mb-30">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Image</th>
+                                <th>Name</th>
+                                <th>City</th>
+                                <th>Start Date</th>
+                                <th>End Date</th>
+                                <th>Capacity</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for event in events %}
+                                <tr>
+                                    <td>
+                                        {% if event.imageFilename %}
+                                            <img src="{{ asset('uploads/' ~ event.imageFilename) }}" alt="{{ event.name }}" width="100" height="70" style="object-fit: cover;">
+                                        {% elseif event.base64Image is defined %}
+                                            <img src="data:image/jpeg;base64,{{ event.base64Image }}" alt="{{ event.name }}" width="100" height="70" style="object-fit: cover;">
+                                        {% else %}
+                                            <span class="text-muted">No image</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ event.name }}</td>
+                                    <td>{{ event.city }}</td>
+                                    <td>{{ event.startDate|date('Y-m-d H:i') }}</td>
+                                    <td>{{ event.endDate|date('Y-m-d H:i') }}</td>
+                                    <td>{{ event.capacity }}</td>
+                                    <td>
+                                        <a href="{{ path('event_admin_show', {'id': event.idEvent}) }}" class="main-btn secondary-btn-outline btn-hover px-4 py-2">Show</a>
+                                        <a href="{{ path('event_admin_edit', {'id': event.idEvent}) }}"class="main-btn warning-btn-outline btn-hover px-4 py-2">Edit</a>
+                                    </td>
+                                </tr>
+                            {% else %}
+                                <tr>
+                                    <td colspan="7">No events found.</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
