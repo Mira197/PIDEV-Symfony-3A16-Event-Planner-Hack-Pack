@@ -1,0 +1,329 @@
+{% extends 'admin/baseAdmin.html.twig' %}
+
+{% block head %}
+	<link rel="stylesheet" href="{{ asset('assetsAya/css/ayaPromo.css') }}">
+	{{ parent() }}
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+{% endblock %}
+
+
+{% block section %}
+	<div class="admin-mui-wrapper">
+		<h2>🎟️ Promo Codes Management</h2>
+
+		<div class="admin-filters">
+			<div class="left-search">
+				<input type="text" id="promoSearch" placeholder="🔍 Search promo codes..." class="form-control">
+			</div>
+
+			<div class="center-filters">
+				<button class="status-filter active" data-filter="">All</button>
+				<button class="status-filter" data-filter="active">Active</button>
+				<button class="status-filter" data-filter="expired">Expired</button>
+			</div>
+
+			<div class="right-actions">
+				<button class="btn btn-outline-secondary" id="exportPromoCsv">⬇️ Export CSV</button>
+				<a href="#" class="btn btn-outline-primary" onclick="openPromoForm()">➕ Add Promo Code</a>
+			</div>
+		</div>
+
+		<table class="admin-mui-table" id="promoCodeTable">
+			<thead>
+				<tr>
+					<th>#</th>
+					<th>Code</th>
+					<th>Discount (%)</th>
+					<th>Expiration Date</th>
+					<th>Status</th>
+					<th>Actions</th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for code in codes %}
+					{% set status = (code.dateExpiration and code.dateExpiration < "now"|date) ? 'expired' : 'active' %}
+					<tr data-status="{{ status }}">
+						<td>{{ loop.index }}</td>
+						<td>
+							<strong>{{ code.codePromo }}</strong>
+						</td>
+						<td>{{ code.pourcentage }}</td>
+						<td>{{ code.dateExpiration ? code.dateExpiration|date('Y-m-d') : '-' }}</td>
+						<td>
+							{% if status == 'expired' %}
+								<span class="badge bg-danger">Expired</span>
+							{% else %}
+								<span class="badge bg-success">Active</span>
+							{% endif %}
+						</td>
+						<td>
+							<button class="btn btn-sm btn-warning me-1 edit-btn" data-id="{{ code.id }}" data-code="{{ code.codePromo }}" data-pourcentage="{{ code.pourcentage }}" data-date="{{ code.dateExpiration ? code.dateExpiration|date('Y-m-d') : '' }}" onclick="openEditModal(this)">
+								✏️
+							</button>
+
+
+							<button class="btn btn-sm btn-danger" onclick="confirmDelete({{ code.id }}, '{{ csrf_token('delete' ~ code.id) }}')">
+								🗑️
+							</button>
+
+						</td>
+					</tr>
+				{% else %}
+					<tr>
+						<td colspan="6" class="empty-row">No promo codes found.</td>
+					</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+	</div>
+{% endblock %}
+
+{% block javascripts %}
+	{{ parent() }}
+	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+	<script>
+		document.addEventListener('DOMContentLoaded', () => {
+const searchInput = document.getElementById('promoSearch');
+const rows = document.querySelectorAll('#promoCodeTable tbody tr');
+
+searchInput.addEventListener('keyup', () => {
+const keyword = searchInput.value.toLowerCase();
+rows.forEach(row => {
+row.style.display = row.innerText.toLowerCase().includes(keyword) ? '' : 'none';
+});
+});
+document.querySelectorAll('.edit-btn').forEach(btn => {
+	btn.addEventListener('click', () => {
+		const id = btn.dataset.id;
+		const code = btn.dataset.code;
+		const pourcentage = btn.dataset.pourcentage;
+		const dateExpiration = btn.dataset.date;
+
+		openEditModal(id, code, pourcentage, dateExpiration);
+	});
+});
+
+
+document.querySelectorAll('.status-filter').forEach(btn => {
+btn.addEventListener('click', () => {
+const filter = btn.dataset.filter;
+document.querySelectorAll('.status-filter').forEach(b => b.classList.remove('active'));
+btn.classList.add('active');
+
+rows.forEach(row => {
+const status = row.dataset.status;
+row.style.display = (filter === '' || status === filter) ? '' : 'none';
+});
+});
+});
+
+document.getElementById('exportPromoCsv').addEventListener('click', () => {
+let csv = 'Code,Discount,Expiration Date,Status\n';
+document.querySelectorAll('#promoCodeTable tbody tr').forEach(row => {
+if (row.style.display !== 'none') {
+const cells = row.querySelectorAll('td');
+csv += `${
+cells[1].innerText
+},${
+cells[2].innerText
+},${
+cells[3].innerText
+},${
+cells[4].innerText
+}\n`;
+}
+});
+const blob = new Blob([csv], {type: 'text/csv'});
+const a = document.createElement('a');
+a.href = URL.createObjectURL(blob);
+a.download = 'promo_codes.csv';
+a.click();
+});
+});
+
+function openPromoForm() {
+Swal.fire({
+title: '<strong class="text-purple">🎟️ Add New Promo Code</strong>',
+html: `
+    <div style="display: flex; flex-direction: column; gap: 15px; text-align: left;">
+        <div>
+            <label for="code_promo" style="font-weight: bold;">Code</label>
+            <input id="code_promo" class="swal2-input" placeholder="Ex: PROMO25">
+        </div>
+        
+        <div style="display: flex; gap: 10px;">
+            <div style="flex: 1;">
+                <label for="pourcentage" style="font-weight: bold;">Discount (%)</label>
+                <input id="pourcentage" type="number" min="1" max="100" class="swal2-input" placeholder="Ex: 25">
+            </div>
+            <div style="flex: 1;">
+                <label for="date_expiration" style="font-weight: bold;">Expiration Date</label>
+                <input id="date_expiration" type="date" class="swal2-input">
+            </div>
+        </div>
+    </div>
+`,
+showCancelButton: true,
+confirmButtonText: '<i class="fas fa-save"></i> Save',
+cancelButtonText: 'Cancel',
+focusConfirm: false,
+preConfirm: () => {
+const code = document.getElementById('code_promo').value.trim();
+const discount = document.getElementById('pourcentage').value;
+const expiration = document.getElementById('date_expiration').value;
+
+if (! code || ! discount || ! expiration) {
+Swal.showValidationMessage('🚨 All fields are required');
+return false;
+}
+
+return fetch('{{ path("aya_admin_code_promo_new") }}', {
+method: 'POST',
+headers: {
+'Content-Type': 'application/json',
+'X-Requested-With': 'XMLHttpRequest'
+},
+body: JSON.stringify(
+{code_promo: code, pourcentage: discount, date_expiration: expiration}
+)
+}).then(res => res.json()).then(data => {
+if (data.success) {
+Swal.fire('✅ Success!', 'Promo code added.', 'success');
+
+const tbody = document.querySelector('#promoCodeTable tbody');
+const newRow = document.createElement('tr');
+newRow.dataset.status = 'active';
+const index = tbody.rows.length + 1;
+newRow.innerHTML = `
+                        <td>${index}</td>
+                        <td><strong>${code}</strong></td>
+                        <td>${discount}</td>
+                        <td>${expiration}</td>
+                        <td><span class="badge bg-success">Active</span></td>
+                        <td>
+                            <button class="btn btn-sm btn-warning me-1 edit-btn"
+                                    data-id="${
+data.id
+}"
+                                    data-code="${code}"
+                                    data-pourcentage="${discount}"
+                                    data-date="${expiration}"
+                                    onclick="openEditModal(this)">✏️</button>
+                            <button class="btn btn-sm btn-danger"
+                                    onclick="confirmDelete(${
+data.id
+}, '${
+data.csrf_token
+}')">🗑️</button>
+                        </td>
+                    `;
+tbody.appendChild(newRow);
+} else {
+Swal.showValidationMessage(data.message || '❌ Error occurred');
+}
+});
+}
+});
+}
+
+
+function openEditModal(button) {
+const id = button.dataset.id;
+const code = button.dataset.code;
+const pourcentage = button.dataset.pourcentage;
+const dateExpiration = button.dataset.date;
+
+Swal.fire({
+title: 'Edit Promo Code',
+html: `
+			<input id="edit_code" class="swal2-input" value="${code}">
+			<input id="edit_discount" type="number" min="1" max="100" class="swal2-input" value="${pourcentage}">
+			<input id="edit_expiration" type="date" class="swal2-input" value="${dateExpiration}">
+		`,
+showCancelButton: true,
+confirmButtonText: 'Update',
+preConfirm: () => {
+const updatedCode = document.getElementById('edit_code').value.trim();
+const updatedDiscount = document.getElementById('edit_discount').value;
+const updatedExpiration = document.getElementById('edit_expiration').value;
+
+return fetch (`/admin/promo-codes/edit/${id}`, {
+method: 'POST',
+headers: {
+'Content-Type': 'application/json'
+},
+body: JSON.stringify(
+{code_promo: updatedCode, pourcentage: updatedDiscount, date_expiration: updatedExpiration}
+)
+}).then(res => res.json()).then(data => {
+if (data.success) {
+Swal.fire('Updated!', 'Promo code updated successfully.', 'success');
+
+const row = button.closest('tr');
+row.cells[1].innerHTML = `<strong>${updatedCode}</strong>`;
+row.cells[2].textContent = updatedDiscount;
+row.cells[3].textContent = updatedExpiration;
+
+const now = new Date().toISOString().split("T")[0];
+const expired = updatedExpiration < now;
+
+row.cells[4].innerHTML = expired ? '<span class="badge bg-danger">Expired</span>' : '<span class="badge bg-success">Active</span>';
+
+row.dataset.status = expired ? 'expired' : 'active';
+
+// ✅ Met à jour les data-* du bouton pour futures éditions
+button.dataset.code = updatedCode;
+button.dataset.pourcentage = updatedDiscount;
+button.dataset.date = updatedExpiration;
+
+} else {
+Swal.showValidationMessage(data.message || 'Update failed');
+}
+});
+}
+});
+}
+
+
+function confirmDelete(id, csrfToken) {
+Swal.fire({
+title: 'Are you sure?',
+text: 'This action cannot be undone.',
+icon: 'warning',
+showCancelButton: true,
+confirmButtonColor: '#d33',
+cancelButtonColor: '#3085d6',
+confirmButtonText: 'Yes, delete it!'
+}).then((result) => {
+if (result.isConfirmed) {
+fetch (`/admin/promo-codes/delete/${id}`, {
+method: 'POST',
+headers: {
+'Content-Type': 'application/x-www-form-urlencoded',
+'X-Requested-With': 'XMLHttpRequest'
+},
+body: new URLSearchParams(
+{_token: csrfToken}
+)
+}).then(res => res.json()).then(data => {
+if (data.success) {
+Swal.fire('Deleted!', 'Promo code deleted.', 'success');
+const row = document.querySelector (`button[onclick*="confirmDelete(${id}"]`).closest('tr');
+if (row) 
+row.remove();
+
+
+
+} else {
+Swal.fire('Error', data.message || 'Delete failed.', 'error');
+}
+}).catch(() => {
+Swal.fire('Error', 'Unexpected server error.', 'error');
+});
+}
+});
+}
+	</script>
+{% endblock %}

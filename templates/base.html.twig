@@ -16,18 +16,20 @@
 			<meta name="author" content="FREEHTML5.CO"/>
 
 			<!-- 
-																			//////////////////////////////////////////////////////
-																		
-																			FREE HTML5 TEMPLATE 
-																			DESIGNED & DEVELOPED by FREEHTML5.CO
-																				
-																			Website: 		http://freehtml5.co/
-																			Email: 			info@freehtml5.co
-																			Twitter: 		http://twitter.com/fh5co
-																			Facebook: 		https://www.facebook.com/fh5co
-																		
-																			//////////////////////////////////////////////////////
-																			 -->
+
+																																														//////////////////////////////////////////////////////
+																																													
+																																														FREE HTML5 TEMPLATE 
+																																														DESIGNED & DEVELOPED by FREEHTML5.CO
+																																															
+																																														Website: 		http://freehtml5.co/
+																																														Email: 			info@freehtml5.co
+																																														Twitter: 		http://twitter.com/fh5co
+																																														Facebook: 		https://www.facebook.com/fh5co
+																																													
+																																														//////////////////////////////////////////////////////
+																																														 -->
+
 
 			<!-- Facebook and Twitter integration -->
 			<meta property="og:title" content=""/> <meta property="og:image" content=""/>
@@ -40,11 +42,16 @@
 			<meta name="twitter:card" content=""/>
 			{% block stylesheets %}
 				<link href='https://fonts.googleapis.com/css?family=Work+Sans:400,300,600,400italic,700' rel='stylesheet' type='text/css'>
+				<link href="https://fonts.googleapis.com/css?family=Sacramento" rel="stylesheet">
+
+				<link rel="stylesheet" href="{{ asset('fonts/dripicons-v2.ttf') }}">
+				<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 				<link
-				href="https://fonts.googleapis.com/css?family=Sacramento" rel="stylesheet">
-                <link rel="stylesheet" href="{{ asset('fonts/dripicons-v2.ttf') }}">
+				rel="stylesheet" href="{{ asset('css/AyaCSS.css') }}">
+
 
 				<!-- Animate.css -->
+
 				<link rel="stylesheet" href="{{ asset('css/animate.css') }}">
 				<!-- Icomoon Icon Fonts-->
 				<link rel="stylesheet" href="{{ asset('css/icomoon.css') }}">
@@ -61,15 +68,18 @@
 				<link rel="stylesheet" href="{{ asset('css/style.css') }}">
 				
 
+
 			{% endblock %}
 			<!-- Modernizr JS -->
 			<script src="{{ asset('js/modernizr-2.6.2.min.js') }}"></script>
 			<!-- FOR IE9 below -->
 			<!--[if lt IE 9]>
+
 																			<script src="js/respond.min.js"></script>
 		
 																			<![endif]-->
 		
+
 		</head>
 	{% endblock %}
 	<body>
@@ -108,9 +118,10 @@
 										<li>
 											<a href="#">Products</a>
 										</li>
-										<li>
-											<a href="#">Forum</a>
+										<li class="{% if app.request.attributes.get('_route') == 'app_publication_client' %}active{% endif %}">
+											<a href="{{ path('app_publication_client') }}">Forum</a>
 										</li>
+
 									</ul>
 								</li>
 								<li class="has-dropdown {% if app.request.attributes.get('_route') == 'app_gallery' %}active{% endif %}">
@@ -120,13 +131,70 @@
 								<li class="{% if app.request.attributes.get('_route') == 'contact_us' %}active{% endif %}">
 									<a href="{{ path('contact_us') }}">Contact</a>
 								</li>
-								
+
 								<li class="{% if app.request.attributes.get('_route') == 'contact_us' %}active{% endif %}">
 									<a href="{{ path('contact_us') }}" class="btn-signin">Sign in</a>
 								</li>
-								<li class="{% if app.request.attributes.get('_route') == 'contact_us' %}active{% endif %}">
-									<a href="{{ path('contact_us') }}" class="dripicon-cart">Q</a>
+
+
+								{% set summary = aya_cart_summary() %}
+								<li class="nav-item-cart" id="aya-cart-hover" style="position: relative;">
+									<a href="{{ path('aya_cart') }}" style="position: relative;">
+										<i class="dripicon-cart" style="font-size: 22px;">Q</i>
+										{% if summary.cartProducts is not empty %}
+											<span class="aya-cart-badge">{{ summary.cartProducts|length }}</span>
+										{% endif %}
+									</a>
+
+									<div class="aya-cart-preview">
+										{% if summary.cartProducts is not empty %}
+											<div class="cart-items-list">
+												{% for item in summary.cartProducts %}
+													<div class="preview-item">
+														<img src="{{ asset(item.getProduct().getImageUrl()) }}" class="product-thumb" alt="{{ item.getProduct().getName() }}">
+														<div class="item-info">
+															<strong class="product-name">{{ item.getProduct().getName() }}</strong>
+															<div class="item-meta">
+																x{{ item.getQuantity() }}
+																•
+																{{ item.getTotalPrice() }}
+																TND
+															</div>
+														</div>
+													</div>
+												{% endfor %}
+											</div>
+
+											<hr class="preview-divider">
+											<div class="cart-total">
+												<span>Total:</span>
+												<strong>{{ summary.total }}
+													TND</strong>
+											</div>
+
+											<div class="cart-actions">
+												<a href="{{ path('aya_cart') }}" class="btn-view-cart">🛒 View Cart</a>
+											</div>
+										{% else %}
+											<div class="preview-empty">
+												<img src="{{ asset('images/empty-cart.png') }}" alt="Cart Empty">
+												<p>
+													<strong>Shopping cart is Empty</strong>
+												</p>
+												<p class="empty-note">
+													Welcome back! If you had items in your cart, we saved them for you.<br>
+													<a href="{{ path('contact_us') }}">
+														<u>SIGN IN</u>
+													</a>
+													now to see them.
+												</p>
+											</div>
+										{% endif %}
+									</div>
+
 								</li>
+
+
 							</ul>
 						</div>
 					</div>
@@ -159,148 +227,149 @@
 				</div>
 			</header>
 
-            <!-- Partie mt3 hello-->
+			<!-- Partie mt3 hello-->
 			{# <div id="fh5co-couple">
-				<div class="container">
-					<div class="row">
-						<div class="col-md-8 col-md-offset-2 text-center fh5co-heading animate-box">
-							<h2>Hello!</h2>
-							<h3>November 28th, 2016 New York, USA</h3>
-							<p>We invited you to celebrate our wedding</p>
-						</div>
-					</div>
-					<div class="couple-wrap animate-box">
-						<div class="couple-half">
-							<div class="groom">
-								<img src="images/groom.jpg" alt="groom" class="img-responsive">
-							</div>
-							<div class="desc-groom">
-								<h3>Joefrey Mahusay</h3>
-								<p>Far far away, behind the word mountains, far from the countries Vokalia and Consonantia, there live the blind texts. Separated they live in Bookmarksgrove</p>
-							</div>
-						</div>
-						<p class="heart text-center">
-							<i class="icon-heart2"></i>
-						</p>
-						<div class="couple-half">
-							<div class="bride">
-								<img src="images/bride.jpg" alt="groom" class="img-responsive">
-							</div>
-							<div class="desc-bride">
-								<h3>Sheila Mahusay</h3>
-								<p>Far far away, behind the word mountains, far from the countries Vokalia and Consonantia, there live the blind texts. Separated they live in Bookmarksgrove</p>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div> #}
 
-            <!-- Partie mte3 ekel cartet hekom -->
+																															<div class="container">
+																																<div class="row">
+																																	<div class="col-md-8 col-md-offset-2 text-center fh5co-heading animate-box">
+																																		<h2>Hello!</h2>
+																																		<h3>November 28th, 2016 New York, USA</h3>
+																																		<p>We invited you to celebrate our wedding</p>
+																																	</div>
+																																</div>
+																																<div class="couple-wrap animate-box">
+																																	<div class="couple-half">
+																																		<div class="groom">
+																																			<img src="images/groom.jpg" alt="groom" class="img-responsive">
+																																		</div>
+																																		<div class="desc-groom">
+																																			<h3>Joefrey Mahusay</h3>
+																																			<p>Far far away, behind the word mountains, far from the countries Vokalia and Consonantia, there live the blind texts. Separated they live in Bookmarksgrove</p>
+																																		</div>
+																																	</div>
+																																	<p class="heart text-center">
+																																		<i class="icon-heart2"></i>
+																																	</p>
+																																	<div class="couple-half">
+																																		<div class="bride">
+																																			<img src="images/bride.jpg" alt="groom" class="img-responsive">
+																																		</div>
+																																		<div class="desc-bride">
+																																			<h3>Sheila Mahusay</h3>
+																																			<p>Far far away, behind the word mountains, far from the countries Vokalia and Consonantia, there live the blind texts. Separated they live in Bookmarksgrove</p>
+																																		</div>
+																																	</div>
+																																</div>
+																															</div>
+																														</div> #}
+
+			<!-- Partie mte3 ekel cartet hekom -->
 			{# <div id="fh5co-event" class="fh5co-bg" style="background-image:url(images/img_bg_3.jpg);">
-				<div class="overlay"></div>
-				<div class="container">
+																															<div class="overlay"></div>
+																															<div class="container">
+																																<div class="row">
+																																	<div class="col-md-8 col-md-offset-2 text-center fh5co-heading animate-box">
+																																		<span>Our Special Events</span>
+																																		<h2>Wedding Events</h2>
+																																	</div>
+																																</div>
+																																<div class="row">
+																																	<div class="display-t">
+																																		<div class="display-tc">
+																																			<div class="col-md-10 col-md-offset-1">
+																																				<div class="col-md-6 col-sm-6 text-center">
+																																					<div class="event-wrap animate-box">
+																																						<h3>Main Ceremony</h3>
+																																						<div class="event-col">
+																																							<i class="icon-clock"></i>
+																																							<span>4:00 PM</span>
+																																							<span>6:00 PM</span>
+																																						</div>
+																																						<div class="event-col">
+																																							<i class="icon-calendar"></i>
+																																							<span>Monday 28</span>
+																																							<span>November, 2016</span>
+																																						</div>
+																																						<p>Far far away, behind the word mountains, far from the countries Vokalia and Consonantia, there live the blind texts. Separated they live in Bookmarksgrove right at the coast of the Semantics, a large language ocean.</p>
+																																					</div>
+																																				</div>
+																																				<div class="col-md-6 col-sm-6 text-center">
+																																					<div class="event-wrap animate-box">
+																																						<h3>Wedding Party</h3>
+																																						<div class="event-col">
+																																							<i class="icon-clock"></i>
+																																							<span>7:00 PM</span>
+																																							<span>12:00 AM</span>
+																																						</div>
+																																						<div class="event-col">
+																																							<i class="icon-calendar"></i>
+																																							<span>Monday 28</span>
+																																							<span>November, 2016</span>
+																																						</div>
+																																						<p>Far far away, behind the word mountains, far from the countries Vokalia and Consonantia, there live the blind texts. Separated they live in Bookmarksgrove right at the coast of the Semantics, a large language ocean.</p>
+																																					</div>
+																																				</div>
+																																			</div>
+																																		</div>
+																																	</div>
+																																</div>
+																															</div>
+																														</div> #}
+
+
+				<div id="fh5co-couple-story"> <div class="container">
 					<div class="row">
 						<div class="col-md-8 col-md-offset-2 text-center fh5co-heading animate-box">
-							<span>Our Special Events</span>
-							<h2>Wedding Events</h2>
+							<span>We Believe in Beautiful Moments</span>
+							<h2>Our Story</h2>
+							<p>From a small dream to a powerful tool, 3alakifi grew with us, step by step — and with love.</p>
 						</div>
 					</div>
 					<div class="row">
-						<div class="display-t">
-							<div class="display-tc">
-								<div class="col-md-10 col-md-offset-1">
-									<div class="col-md-6 col-sm-6 text-center">
-										<div class="event-wrap animate-box">
-											<h3>Main Ceremony</h3>
-											<div class="event-col">
-												<i class="icon-clock"></i>
-												<span>4:00 PM</span>
-												<span>6:00 PM</span>
-											</div>
-											<div class="event-col">
-												<i class="icon-calendar"></i>
-												<span>Monday 28</span>
-												<span>November, 2016</span>
-											</div>
-											<p>Far far away, behind the word mountains, far from the countries Vokalia and Consonantia, there live the blind texts. Separated they live in Bookmarksgrove right at the coast of the Semantics, a large language ocean.</p>
+						<div class="col-md-12 col-md-offset-0">
+							<ul class="timeline animate-box">
+								<li class="animate-box">
+									<div class="timeline-badge" style="background-image:url(images/story-begin.jpg);"></div>
+									<div class="timeline-panel">
+										<div class="timeline-heading">
+											<h3 class="timeline-title">The Beginning</h3>
+											<span class="date">January 2025</span>
+										</div>
+										<div class="timeline-body">
+											<p>It all started with a shared idea: to create something meaningful for people planning special events. Just five minds, one vision.</p>
 										</div>
 									</div>
-									<div class="col-md-6 col-sm-6 text-center">
-										<div class="event-wrap animate-box">
-											<h3>Wedding Party</h3>
-											<div class="event-col">
-												<i class="icon-clock"></i>
-												<span>7:00 PM</span>
-												<span>12:00 AM</span>
-											</div>
-											<div class="event-col">
-												<i class="icon-calendar"></i>
-												<span>Monday 28</span>
-												<span>November, 2016</span>
-											</div>
-											<p>Far far away, behind the word mountains, far from the countries Vokalia and Consonantia, there live the blind texts. Separated they live in Bookmarksgrove right at the coast of the Semantics, a large language ocean.</p>
+								</li>
+								<li class="timeline-inverted animate-box">
+									<div class="timeline-badge" style="background-image:url(images/story-grow.jpg);"></div>
+									<div class="timeline-panel">
+										<div class="timeline-heading">
+											<h3 class="timeline-title">We Grew</h3>
+											<span class="date">February 2025</span>
+										</div>
+										<div class="timeline-body">
+											<p>With each day, 3alakifi evolved — adding more features, more joy, and more soul. It became more than a platform. It became a part of us.</p>
 										</div>
 									</div>
-								</div>
-							</div>
+								</li>
+								<li class="animate-box">
+									<div class="timeline-badge" style="background-image:url(images/story-launch.jpg);"></div>
+									<div class="timeline-panel">
+										<div class="timeline-heading">
+											<h3 class="timeline-title">Ready for the World</h3>
+											<span class="date">March 2025</span>
+										</div>
+										<div class="timeline-body">
+											<p>3alakifi is now ready to support your events — weddings, birthdays, surprises — your beautiful moments. Made with love, just for you.</p>
+										</div>
+									</div>
+								</li>
+							</ul>
 						</div>
 					</div>
 				</div>
-			</div> #}
-
-			<div id="fh5co-couple-story">
-    <div class="container">
-        <div class="row">
-            <div class="col-md-8 col-md-offset-2 text-center fh5co-heading animate-box">
-                <span>We Believe in Beautiful Moments</span>
-                <h2>Our Story</h2>
-                <p>From a small dream to a powerful tool, 3alakifi grew with us, step by step — and with love.</p>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-md-12 col-md-offset-0">
-                <ul class="timeline animate-box">
-                    <li class="animate-box">
-                        <div class="timeline-badge" style="background-image:url(images/story-begin.jpg);"></div>
-                        <div class="timeline-panel">
-                            <div class="timeline-heading">
-                                <h3 class="timeline-title">The Beginning</h3>
-                                <span class="date">January 2025</span>
-                            </div>
-                            <div class="timeline-body">
-                                <p>It all started with a shared idea: to create something meaningful for people planning special events. Just five minds, one vision.</p>
-                            </div>
-                        </div>
-                    </li>
-                    <li class="timeline-inverted animate-box">
-                        <div class="timeline-badge" style="background-image:url(images/story-grow.jpg);"></div>
-                        <div class="timeline-panel">
-                            <div class="timeline-heading">
-                                <h3 class="timeline-title">We Grew</h3>
-                                <span class="date">February 2025</span>
-                            </div>
-                            <div class="timeline-body">
-                                <p>With each day, 3alakifi evolved — adding more features, more joy, and more soul. It became more than a platform. It became a part of us.</p>
-                            </div>
-                        </div>
-                    </li>
-                    <li class="animate-box">
-                        <div class="timeline-badge" style="background-image:url(images/story-launch.jpg);"></div>
-                        <div class="timeline-panel">
-                            <div class="timeline-heading">
-                                <h3 class="timeline-title">Ready for the World</h3>
-                                <span class="date">March 2025</span>
-                            </div>
-                            <div class="timeline-body">
-                                <p>3alakifi is now ready to support your events — weddings, birthdays, surprises — your beautiful moments. Made with love, just for you.</p>
-                            </div>
-                        </div>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </div>
-</div>
+			</div>
 
 
 			<div id="fh5co-gallery" class="fh5co-section-gray">
@@ -399,59 +468,60 @@
 				</div>
 			</div>
 
-            <!-- hedhi mt3 ekel ar9am eli yet7arkou barcha-->
+			<!-- hedhi mt3 ekel ar9am eli yet7arkou barcha-->
 			{# <div id="fh5co-counter" class="fh5co-bg fh5co-counter" style="background-image:url(images/img_bg_5.jpg);">
-				<div class="overlay"></div>
-				<div class="container">
-					<div class="row">
-						<div class="display-t">
-							<div class="display-tc">
-								<div class="col-md-3 col-sm-6 animate-box">
-									<div class="feature-center">
-										<span class="icon">
-											<i class="icon-users"></i>
-										</span>
 
-										<span class="counter js-counter" data-from="0" data-to="500" data-speed="5000" data-refresh-interval="50">1</span>
-										<span class="counter-label">Estimated Guest</span>
-
-									</div>
-								</div>
-								<div class="col-md-3 col-sm-6 animate-box">
-									<div class="feature-center">
-										<span class="icon">
-											<i class="icon-user"></i>
-										</span>
-
-										<span class="counter js-counter" data-from="0" data-to="1000" data-speed="5000" data-refresh-interval="50">1</span>
-										<span class="counter-label">We Catter</span>
-									</div>
-								</div>
-								<div class="col-md-3 col-sm-6 animate-box">
-									<div class="feature-center">
-										<span class="icon">
-											<i class="icon-calendar"></i>
-										</span>
-										<span class="counter js-counter" data-from="0" data-to="402" data-speed="5000" data-refresh-interval="50">1</span>
-										<span class="counter-label">Events Done</span>
-									</div>
-								</div>
-								<div class="col-md-3 col-sm-6 animate-box">
-									<div class="feature-center">
-										<span class="icon">
-											<i class="icon-clock"></i>
-										</span>
-
-										<span class="counter js-counter" data-from="0" data-to="2345" data-speed="5000" data-refresh-interval="50">1</span>
-										<span class="counter-label">Hours Spent</span>
-
-									</div>
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div> #}
+																															<div class="overlay"></div>
+																															<div class="container">
+																																<div class="row">
+																																	<div class="display-t">
+																																		<div class="display-tc">
+																																			<div class="col-md-3 col-sm-6 animate-box">
+																																				<div class="feature-center">
+																																					<span class="icon">
+																																						<i class="icon-users"></i>
+																																					</span>
+																											
+																																					<span class="counter js-counter" data-from="0" data-to="500" data-speed="5000" data-refresh-interval="50">1</span>
+																																					<span class="counter-label">Estimated Guest</span>
+																											
+																																				</div>
+																																			</div>
+																																			<div class="col-md-3 col-sm-6 animate-box">
+																																				<div class="feature-center">
+																																					<span class="icon">
+																																						<i class="icon-user"></i>
+																																					</span>
+																											
+																																					<span class="counter js-counter" data-from="0" data-to="1000" data-speed="5000" data-refresh-interval="50">1</span>
+																																					<span class="counter-label">We Catter</span>
+																																				</div>
+																																			</div>
+																																			<div class="col-md-3 col-sm-6 animate-box">
+																																				<div class="feature-center">
+																																					<span class="icon">
+																																						<i class="icon-calendar"></i>
+																																					</span>
+																																					<span class="counter js-counter" data-from="0" data-to="402" data-speed="5000" data-refresh-interval="50">1</span>
+																																					<span class="counter-label">Events Done</span>
+																																				</div>
+																																			</div>
+																																			<div class="col-md-3 col-sm-6 animate-box">
+																																				<div class="feature-center">
+																																					<span class="icon">
+																																						<i class="icon-clock"></i>
+																																					</span>
+																											
+																																					<span class="counter js-counter" data-from="0" data-to="2345" data-speed="5000" data-refresh-interval="50">1</span>
+																																					<span class="counter-label">Hours Spent</span>
+																											
+																																				</div>
+																																			</div>
+																																		</div>
+																																	</div>
+																																</div>
+																															</div>
+																														</div> #}
 
 			<div id="fh5co-testimonial">
 				<div class="container">
@@ -538,100 +608,102 @@
 					</div>
 				</div>
 			</div>
-            <!--Ekeli feha el video-->
-			{# <div id="fh5co-services" class="fh5co-section-gray">
-				<div class="container">
+			<!--Ekeli feha el video-->
+		{# <div id="fh5co-services" class="fh5co-section-gray">
 
-					<div class="row animate-box">
-						<div class="col-md-8 col-md-offset-2 text-center fh5co-heading">
-							<h2>We Offer Services</h2>
-							<p>Dignissimos asperiores vitae velit veniam totam fuga molestias accusamus alias autem provident. Odit ab aliquam dolor eius.</p>
-						</div>
-					</div>
+																						<div class="container">
+																		
+																							<div class="row animate-box">
+																								<div class="col-md-8 col-md-offset-2 text-center fh5co-heading">
+																									<h2>We Offer Services</h2>
+																									<p>Dignissimos asperiores vitae velit veniam totam fuga molestias accusamus alias autem provident. Odit ab aliquam dolor eius.</p>
+																								</div>
+																							</div>
+																		
+																							<div class="row">
+																								<div class="col-md-6">
+																									<div class="feature-left animate-box" data-animate-effect="fadeInLeft">
+																										<span class="icon">
+																											<i class="icon-calendar"></i>
+																										</span>
+																										<div class="feature-copy">
+																											<h3>We Organized Events</h3>
+																											<p>Facilis ipsum reprehenderit nemo molestias. Aut cum mollitia reprehenderit. Eos cumque dicta adipisci architecto culpa amet.</p>
+																										</div>
+																									</div>
+																		
+																									<div class="feature-left animate-box" data-animate-effect="fadeInLeft">
+																										<span class="icon">
+																											<i class="icon-image"></i>
+																										</span>
+																										<div class="feature-copy">
+																											<h3>Photoshoot</h3>
+																											<p>Facilis ipsum reprehenderit nemo molestias. Aut cum mollitia reprehenderit. Eos cumque dicta adipisci architecto culpa amet.</p>
+																										</div>
+																									</div>
+																		
+																									<div class="feature-left animate-box" data-animate-effect="fadeInLeft">
+																										<span class="icon">
+																											<i class="icon-video"></i>
+																										</span>
+																										<div class="feature-copy">
+																											<h3>Video Editing</h3>
+																											<p>Facilis ipsum reprehenderit nemo molestias. Aut cum mollitia reprehenderit. Eos cumque dicta adipisci architecto culpa amet.</p>
+																										</div>
+																									</div>
+																		
+																								</div>
+																		
+																								<div class="col-md-6 animate-box">
+																									<div class="fh5co-video fh5co-bg" style="background-image: url(images/img_bg_3.jpg); ">
+																										<a href="https://vimeo.com/channels/staffpicks/93951774" class="popup-vimeo">
+																											<i class="icon-video2"></i>
+																										</a>
+																										<div class="overlay"></div>
+																									</div>
+																								</div>
+																							</div>
+																		
+																		
+																						</div>
+																					</div> #}
 
-					<div class="row">
-						<div class="col-md-6">
-							<div class="feature-left animate-box" data-animate-effect="fadeInLeft">
-								<span class="icon">
-									<i class="icon-calendar"></i>
-								</span>
-								<div class="feature-copy">
-									<h3>We Organized Events</h3>
-									<p>Facilis ipsum reprehenderit nemo molestias. Aut cum mollitia reprehenderit. Eos cumque dicta adipisci architecto culpa amet.</p>
-								</div>
-							</div>
-
-							<div class="feature-left animate-box" data-animate-effect="fadeInLeft">
-								<span class="icon">
-									<i class="icon-image"></i>
-								</span>
-								<div class="feature-copy">
-									<h3>Photoshoot</h3>
-									<p>Facilis ipsum reprehenderit nemo molestias. Aut cum mollitia reprehenderit. Eos cumque dicta adipisci architecto culpa amet.</p>
-								</div>
-							</div>
-
-							<div class="feature-left animate-box" data-animate-effect="fadeInLeft">
-								<span class="icon">
-									<i class="icon-video"></i>
-								</span>
-								<div class="feature-copy">
-									<h3>Video Editing</h3>
-									<p>Facilis ipsum reprehenderit nemo molestias. Aut cum mollitia reprehenderit. Eos cumque dicta adipisci architecto culpa amet.</p>
-								</div>
-							</div>
-
-						</div>
-
-						<div class="col-md-6 animate-box">
-							<div class="fh5co-video fh5co-bg" style="background-image: url(images/img_bg_3.jpg); ">
-								<a href="https://vimeo.com/channels/staffpicks/93951774" class="popup-vimeo">
-									<i class="icon-video2"></i>
-								</a>
-								<div class="overlay"></div>
-							</div>
-						</div>
-					</div>
-
-
-				</div>
-			</div> #}
-
-            <!--Ekeli melekher eli ynjm yesta3malha dheker-->
+			<!--Ekeli melekher eli ynjm yesta3malha dheker-->
 			{# <div id="fh5co-started" class="fh5co-bg" style="background-image:url(images/img_bg_4.jpg);">
-				<div class="overlay"></div>
-				<div class="container">
-					<div class="row animate-box">
-						<div class="col-md-8 col-md-offset-2 text-center fh5co-heading">
-							<h2>Are You Attending?</h2>
-							<p>Please Fill-up the form to notify you that you're attending. Thanks.</p>
-						</div>
-					</div>
-					<div class="row animate-box">
-						<div class="col-md-10 col-md-offset-1">
-							<form class="form-inline">
-								<div class="col-md-4 col-sm-4">
-									<div class="form-group">
-										<label for="name" class="sr-only">Name</label>
-										<input type="name" class="form-control" id="name" placeholder="Name">
-									</div>
-								</div>
-								<div class="col-md-4 col-sm-4">
-									<div class="form-group">
-										<label for="email" class="sr-only">Email</label>
-										<input type="email" class="form-control" id="email" placeholder="Email">
-									</div>
-								</div>
-								<div class="col-md-4 col-sm-4">
-									<button type="submit" class="btn btn-default btn-block">I am Attending</button>
-								</div>
-							</form>
-						</div>
-					</div>
-				</div>
-			</div> #}
+																															<div class="overlay"></div>
+																															<div class="container">
+																																<div class="row animate-box">
+																																	<div class="col-md-8 col-md-offset-2 text-center fh5co-heading">
+																																		<h2>Are You Attending?</h2>
+																																		<p>Please Fill-up the form to notify you that you're attending. Thanks.</p>
+																																	</div>
+																																</div>
+																																<div class="row animate-box">
+																																	<div class="col-md-10 col-md-offset-1">
+																																		<form class="form-inline">
+																																			<div class="col-md-4 col-sm-4">
+																																				<div class="form-group">
+																																					<label for="name" class="sr-only">Name</label>
+																																					<input type="name" class="form-control" id="name" placeholder="Name">
+																																				</div>
+																																			</div>
+																																			<div class="col-md-4 col-sm-4">
+																																				<div class="form-group">
+																																					<label for="email" class="sr-only">Email</label>
+																																					<input type="email" class="form-control" id="email" placeholder="Email">
+																																				</div>
+																																			</div>
+																																			<div class="col-md-4 col-sm-4">
+																																				<button type="submit" class="btn btn-default btn-block">I am Attending</button>
+																																			</div>
+																																		</form>
+																																	</div>
+																																</div>
+																															</div>
+																														</div> #}
 
-			
+
+
 		{% endblock %}
 		{% block footer %}
 			<footer id="fh5co-footer" role="contentinfo">
@@ -640,7 +712,8 @@
 					<div class="row copyright">
 						<div class="col-md-12 text-center">
 							<p>
-								<small class="block"> &copy; 2025 3laKifi. All rights reserved.</small>
+								<small class="block">
+									&copy; 2025 3laKifi. All rights reserved.</small>
 								<small class="block">Designed by
 									<a href="http://freehtml5.co/" target="_blank">hackPack</a>
 									Demo Images:
