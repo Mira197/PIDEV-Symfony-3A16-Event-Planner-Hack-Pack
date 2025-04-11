@@ -52,7 +52,7 @@ class MahdiStockController extends AbstractController
         if ($form1->isSubmitted() && $form1->isValid()) {
             
             // Affecter user_id = 1
-    $user = $em->getRepository(User::class)->find(1);
+    $user = $em->getRepository(User::class)->find(44);
     if (!$user) {
         $this->addFlash('error', 'Utilisateur avec l\'ID 1 non trouvé.');
         return $this->redirectToRoute('product_add');

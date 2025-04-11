@@ -18,30 +18,30 @@
 
 			<link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
 			<link href='https://fonts.googleapis.com/css?family=Work+Sans:400,300,600,400italic,700' rel='stylesheet' type='text/css'>
-				<link
-				href="https://fonts.googleapis.com/css?family=Sacramento" rel="stylesheet">
-                <link rel="stylesheet" href="{{ asset('fonts/dripicons-v2.ttf') }}">
+			<link href="https://fonts.googleapis.com/css?family=Sacramento" rel="stylesheet">
+			<link
+			rel="stylesheet" href="{{ asset('fonts/dripicons-v2.ttf') }}">
 
-				<!-- Animate.css -->
-				<link
-				rel="stylesheet" href="css/animate.css">
-				<!-- Icomoon Icon Fonts-->
-				<link
-				rel="stylesheet" href="css/icomoon.css">
-				<!-- Bootstrap  -->
-				<link
-				rel="stylesheet" href="css/bootstrap.css">
+			<!-- Animate.css -->
+			<link
+			rel="stylesheet" href="css/animate.css">
+			<!-- Icomoon Icon Fonts-->
+			<link
+			rel="stylesheet" href="css/icomoon.css">
+			<!-- Bootstrap  -->
+			<link
+			rel="stylesheet" href="css/bootstrap.css">
 
-				<!-- Magnific Popup -->
-				<link
-				rel="stylesheet" href="css/magnific-popup.css">
+			<!-- Magnific Popup -->
+			<link
+			rel="stylesheet" href="css/magnific-popup.css">
 
-				<!-- Owl Carousel  -->
-				<link rel="stylesheet" href="css/owl.carousel.min.css">
-				<link
-				rel="stylesheet" href="css/owl.theme.default.min.css">
-				<!-- Theme style  -->
-				<link rel="stylesheet" href="css/style.css">
+			<!-- Owl Carousel  -->
+			<link rel="stylesheet" href="css/owl.carousel.min.css">
+			<link
+			rel="stylesheet" href="css/owl.theme.default.min.css">
+			<!-- Theme style  -->
+			<link rel="stylesheet" href="css/style.css">
 
 		{% endblock %}
 	</head>
@@ -90,7 +90,7 @@
 								<li class="{% if app.request.attributes.get('_route') == 'contact_us' %}active{% endif %}">
 									<a href="{{ path('contact_us') }}">Contact</a>
 								</li>
-								
+
 								<li class="{% if app.request.attributes.get('_route') == 'contact_us' %}active{% endif %}">
 									<a href="{{ path('contact_us') }}" class="btn-signin">Sign in</a>
 								</li>
@@ -110,22 +110,16 @@
 				<div class="spinner"></div>
 			</div>
 			<header id="fh5co-header" class="fh5co-cover" role="banner" style="position: relative; height: 100vh; overflow: hidden;">
-				<video autoplay muted loop playsinline style="position: absolute; top: 0; left: 0; min-width: 100%; min-height: 100%; object-fit: cover; z-index: -1;">
-					<source src="{{ asset('images/background1.mp4') }}" type="video/mp4">
-					Your browser does not support the video tag.
-				</video>
+				<img src="{{ asset('images/gallery-6.jpg') }}" alt="Background image" style="position: absolute; top: 0; left: 0; min-width: 100%; min-height: 100%; object-fit: cover; z-index: -1;">
 				<div class="overlay"></div>
 				<div class="container">
 					<div class="row">
 						<div class="col-md-8 col-md-offset-2 text-center">
 							<div class="display-t">
 								<div class="display-tc animate-box" data-animate-effect="fadeIn">
-									<h1>Event Planner</h1>
-									<h2>Elevate Your Events</h2>
+									<h1>List Of Product</h1>
 									<div class="simply-countdown simply-countdown-one"></div>
-									<p>
-										<a href="#" class="btn btn-default btn-sm">Start Now</a>
-									</p>
+
 								</div>
 							</div>
 						</div>
@@ -136,60 +130,61 @@
 		{% endblock %}
 
 
-		{% block title %}Products{% endblock %}
+		{% block section %}
+			<section class="section">
+				<div class="container-fluid">
+					<div class="title-wrapper pt-30">
+						<div class="row align-items-center">
+							<div class="col-md-6">
+								<div class="title">
+									<h2>All Products</h2>
+								</div>
+							</div>
+						</div>
+					</div>
+					<!-- ========= card-style-2 start ========= -->
+					<div class="row">
+						<div class="col-12">
+							<div class="title mt-30 mb-30">
+								<h2>Cards</h2>
+							</div>
+						</div>
 
-{% block section %}
-<section class="section">
-    <div class="container-fluid">
-        <div class="title-wrapper pt-30">
-            <div class="row align-items-center">
-                <div class="col-md-6">
-                    <div class="title">
-                        <h2>All Products</h2>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!-- ========= card-style-2 start ========= -->
-        <div class="row">
-            <div class="col-12">
-                <div class="title mt-30 mb-30">
-                  <h2>Cards</h2>
-                </div>
-              </div>
-  
-              {% for product in products %}
-              <div class="col-xl-4 col-lg-4 col-md-6 col-sm-6">
-                  <div class="card-style-2 mb-30">
-                      <div class="card-image">
-                          <a href="#">
-                              {% if product.imageUrl %}
-                                  <img src="{{ asset(product.imageUrl) }}" alt="{{ product.name }}" />
-                              {% else %}
-                                  <img src="{{ asset('admin/images/cards/default.jpg') }}" alt="No image" />
-                              {% endif %}
-                          </a>
-                      </div>
-                      <div class="card-content">
-                          <h4><a href="#">{{ product.name }}</a></h4>
-                          <p>{{ product.description|length > 120 ? product.description|slice(0, 120) ~ '...' : product.description }}</p>
+						{% for product in products %}
+							<div class="col-xl-4 col-lg-4 col-md-6 col-sm-6">
+								<div class="card-style-2 mb-30">
+									<div class="card-image">
+										<a href="#">
+											{% if product.imageUrl %}
+												<img src="{{ asset(product.imageUrl) }}" alt="{{ product.name }}"/>
+											{% else %}
+												<img src="{{ asset('admin/images/cards/default.jpg') }}" alt="No image"/>
+											{% endif %}
+										</a>
+									</div>
+									<div class="card-content">
+										<h4>
+											<a href="#">{{ product.name }}</a>
+										</h4>
+										<p>{{ product.description|length > 120 ? product.description|slice(0, 120) ~ '...' : product.description }}</p>
 
-                          
-                      </div>
-                  </div>
-              </div>
-              {% endfor %}
-  
-              {% if products is empty %}
-                  <p class="text-center">No products available.</p>
-              {% endif %}
-          
-          <!-- end row -->
-        </div>
-    </section>
-    {% endblock %}
+										<!-- Add to cart button -->
+										<form action="{{ path('aya_cart_add', {'id': product.product_id}) }}" method="post">
+											<button type="submit" class="btn btn-primary">Add to Cart</button>
+										</form>
+									</div>
+								</div>
+							</div>
+						{% endfor %}
 
-			
+						{% if products is empty %}
+							<p class="text-center">No products available.</p>
+						{% endif %}
+
+					</div>
+				</section>
+			{% endblock %}
+
 
 			<!-- ========== footer start =========== -->
 			{% block footer %}
@@ -227,15 +222,15 @@
 		<!-- ========= All Javascript files linkup ======== -->
 
 		{% block javascripts %}
-			 <script src="{{ asset('admin/js/bootstrap.bundle.min.js') }}"></script>
-        <script src="{{ asset('admin/js/Chart.min.js') }}"></script>
-        <script src="{{ asset('admin/js/dynamic-pie-chart.js') }}"></script>
-        <script src="{{ asset('admin/js/moment.min.js') }}"></script>
-        <script src="{{ asset('admin/js/fullcalendar.js') }}"></script>
-        <script src="{{ asset('admin/js/jvectormap.min.js') }}"></script>
-        <script src="{{ asset('admin/js/world-merc.js') }}"></script>
-        <script src="{{ asset('admin/js/polyfill.js') }}"></script>
-        <script src="{{ asset('admin/js/main.js') }}"></script>
+			<script src="{{ asset('admin/js/bootstrap.bundle.min.js') }}"></script>
+			<script src="{{ asset('admin/js/Chart.min.js') }}"></script>
+			<script src="{{ asset('admin/js/dynamic-pie-chart.js') }}"></script>
+			<script src="{{ asset('admin/js/moment.min.js') }}"></script>
+			<script src="{{ asset('admin/js/fullcalendar.js') }}"></script>
+			<script src="{{ asset('admin/js/jvectormap.min.js') }}"></script>
+			<script src="{{ asset('admin/js/world-merc.js') }}"></script>
+			<script src="{{ asset('admin/js/polyfill.js') }}"></script>
+			<script src="{{ asset('admin/js/main.js') }}"></script>
 
 			<script>
 				// ======== jvectormap activation
@@ -866,6 +861,15 @@ padding: 20
 });
 // =========== chart four end
 			</script>
+			<style>
+				.card-image img {
+					width: 100%;
+					height: 200px;
+					object-fit: cover;
+					border-radius: 5px;
+				}
+			</style>
+
 		{% endblock %}
 	</body>
 </html>

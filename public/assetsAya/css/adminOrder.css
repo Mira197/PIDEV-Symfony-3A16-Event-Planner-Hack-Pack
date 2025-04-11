@@ -93,4 +93,7 @@
     background-color: #6b336e;
     color: white;
   }
+  .hidden-column {
+    display: none;
+}
   

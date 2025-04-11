@@ -82,48 +82,50 @@ class AyaCartController extends AbstractController
         ];
     }
     #[Route('/aya/cart/add/{id}', name: 'aya_cart_add', methods: ['POST'])]
-    public function addToCart(
-        int $id,
-        ProductRepository $productRepository,
-        EntityManagerInterface $em,
-        CartRepository $cartRepository,
-        CartProductRepository $cartProductRepository
-    ): JsonResponse {
-        $user = $this->getUser() ?? $em->getRepository(User::class)->find(3);
-        $product = $productRepository->find($id);
+public function addToCart(
+    int $id,
+    ProductRepository $productRepository,
+    EntityManagerInterface $em,
+    CartRepository $cartRepository,
+    CartProductRepository $cartProductRepository
+): Response {
+    $user = $this->getUser() ?? $em->getRepository(User::class)->find(3);
+    $product = $productRepository->find($id);
 
-        if (!$product) {
-            return new JsonResponse(['error' => 'Product not found'], 404);
-        }
-
-        $cart = $cartRepository->findOneBy(['user' => $user]);
-        if (!$cart) {
-            $cart = new Cart();
-            $cart->setUser($user);
-            $em->persist($cart);
-            $em->flush(); // Pour obtenir un cart_id valide
-        }
-
-        $cartProduct = $cartProductRepository->findOneBy(['cart' => $cart, 'product' => $product]);
-
-        if ($cartProduct) {
-            $cartProduct->setQuantity($cartProduct->getQuantity() + 1);
-        } else {
-            $cartProduct = new CartProduct();
-            $cartProduct->setCart($cart);
-            $cartProduct->setProduct($product);
-            $cartProduct->setQuantity(1); // ← initialise ici aussi !
-            $em->persist($cartProduct);
-        }
-
-        $em->flush();
-
-        return new JsonResponse([
-            'message' => 'Product added to cart',
-            'product' => $product->getName(),
-            'quantity' => $cartProduct->getQuantity()
-        ]);
+    if (!$product) {
+        $this->addFlash('error', 'Product not found');
+        return $this->redirectToRoute('aya_cart');
     }
+
+    $cart = $cartRepository->findOneBy(['user' => $user]);
+    if (!$cart) {
+        $cart = new Cart();
+        $cart->setUser($user);
+        $em->persist($cart);
+        $em->flush(); // Pour obtenir un cart_id valide
+    }
+
+    $cartProduct = $cartProductRepository->findOneBy(['cart' => $cart, 'product' => $product]);
+
+    if ($cartProduct) {
+        $cartProduct->setQuantity($cartProduct->getQuantity() + 1);
+    } else {
+        $cartProduct = new CartProduct();
+        $cartProduct->setCart($cart);
+        $cartProduct->setProduct($product);
+        $cartProduct->setQuantity(1); // ← initialise ici aussi !
+        $em->persist($cartProduct);
+    }
+
+    $em->flush();
+
+    // Ajout d'un message Flash
+    $this->addFlash('success', 'Product added to cart');
+
+    // Redirige vers le panier ou affiche une vue HTML avec les détails
+    return $this->redirectToRoute('aya_cart'); // Ou vous pouvez aussi rendre un template Twig avec les détails du produit ajouté
+}
+
 
 
 
