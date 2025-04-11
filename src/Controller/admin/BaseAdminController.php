@@ -11,6 +11,6 @@ class BaseAdminController extends AbstractController
     #[Route('/admin', name: 'admin_dashboard')]
     public function index(): Response
     {
-        return $this->render('admin/signinAdmin.html.twig');
+        return $this->render('admin/baseAdmin.html.twig');
     }
 }

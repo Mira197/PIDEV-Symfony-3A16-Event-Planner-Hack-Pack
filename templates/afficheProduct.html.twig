@@ -17,15 +17,121 @@
 			<link rel="stylesheet" href="{{ asset('admin/css/main.css') }}">
 
 			<link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+			<link href='https://fonts.googleapis.com/css?family=Work+Sans:400,300,600,400italic,700' rel='stylesheet' type='text/css'>
+				<link
+				href="https://fonts.googleapis.com/css?family=Sacramento" rel="stylesheet">
+                <link rel="stylesheet" href="{{ asset('fonts/dripicons-v2.ttf') }}">
+
+				<!-- Animate.css -->
+				<link
+				rel="stylesheet" href="css/animate.css">
+				<!-- Icomoon Icon Fonts-->
+				<link
+				rel="stylesheet" href="css/icomoon.css">
+				<!-- Bootstrap  -->
+				<link
+				rel="stylesheet" href="css/bootstrap.css">
+
+				<!-- Magnific Popup -->
+				<link
+				rel="stylesheet" href="css/magnific-popup.css">
+
+				<!-- Owl Carousel  -->
+				<link rel="stylesheet" href="css/owl.carousel.min.css">
+				<link
+				rel="stylesheet" href="css/owl.theme.default.min.css">
+				<!-- Theme style  -->
+				<link rel="stylesheet" href="css/style.css">
 
 		{% endblock %}
 	</head>
 	<body>
+		<div id="page">
+			{% block nav %}
+				<nav class="fh5co-nav" role="navigation">
+					<div class="container">
+						<div class="row">
+							<div class="col-xs-2">
+								<div id="fh5co-logo">
+									<a href="{{ path('app_home') }}">
+										<img src="{{ asset('images/logo2.png') }}" alt="Logo" style="max-height: 125px; width: auto;">
+									</a>
+								</a>
+							</div>
+						</div>
+						<div class="col-xs-10 text-right menu-1">
+							<ul>
+								<li class="active">
+									<a href="{{ path('app_home') }}">Home</a>
+								</li>
+								<li class="{% if app.request.attributes.get('_route') == 'about_us' %}active{% endif %}">
+									<a href="{{ path('about_us') }}">Story</a>
+								</li>
+
+								<li class="has-dropdown {% if app.request.attributes.get('_route') == 'app_services' %}active{% endif %}">
+									<a href="{{ path('app_services') }}">Services</a>
+
+									<ul class="dropdown">
+										<li>
+											<a href="#">Events</a>
+										</li>
+										<li>
+											<a href="#">Products</a>
+										</li>
+										<li>
+											<a href="#">Forum</a>
+										</li>
+									</ul>
+								</li>
+								<li class="has-dropdown {% if app.request.attributes.get('_route') == 'app_gallery' %}active{% endif %}">
+									<a href="{{ path('app_gallery') }}">Gallery</a>
+								</li>
+
+								<li class="{% if app.request.attributes.get('_route') == 'contact_us' %}active{% endif %}">
+									<a href="{{ path('contact_us') }}">Contact</a>
+								</li>
+								
+								<li class="{% if app.request.attributes.get('_route') == 'contact_us' %}active{% endif %}">
+									<a href="{{ path('contact_us') }}" class="btn-signin">Sign in</a>
+								</li>
+								<li class="{% if app.request.attributes.get('_route') == 'contact_us' %}active{% endif %}">
+									<a href="{{ path('contact_us') }}" class="dripicon-cart">Q</a>
+								</li>
+							</ul>
+						</div>
+					</div>
+
+				</div>
+			</nav>
+		{% endblock %}
 		{% block preloader %}
 			<!-- ======== Preloader =========== -->
 			<div id="preloader">
 				<div class="spinner"></div>
 			</div>
+			<header id="fh5co-header" class="fh5co-cover" role="banner" style="position: relative; height: 100vh; overflow: hidden;">
+				<video autoplay muted loop playsinline style="position: absolute; top: 0; left: 0; min-width: 100%; min-height: 100%; object-fit: cover; z-index: -1;">
+					<source src="{{ asset('images/background1.mp4') }}" type="video/mp4">
+					Your browser does not support the video tag.
+				</video>
+				<div class="overlay"></div>
+				<div class="container">
+					<div class="row">
+						<div class="col-md-8 col-md-offset-2 text-center">
+							<div class="display-t">
+								<div class="display-tc animate-box" data-animate-effect="fadeIn">
+									<h1>Event Planner</h1>
+									<h2>Elevate Your Events</h2>
+									<div class="simply-countdown simply-countdown-one"></div>
+									<p>
+										<a href="#" class="btn btn-default btn-sm">Start Now</a>
+									</p>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</header>
 			<!-- ======== Preloader =========== -->
 		{% endblock %}
 
