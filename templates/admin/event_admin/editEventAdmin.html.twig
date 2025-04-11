@@ -1,0 +1,27 @@
+{% extends 'admin/baseAdmin.html.twig' %}
+
+{% block section %}
+<div class="container-fluid">
+    <div class="title-wrapper pt-30">
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <div class="title">
+                <h2>Edit Event</h2>
+                </div>
+            </div>
+            <div class="col-md-6 text-end">
+                <a href="{{ path('event_admin_index') }}" class="main-btn dark-btn-outline btn-hover px-4 py-2">Back to list</a>
+                {{ include('admin/event_admin/delete_formEventAdmin.html.twig') }}
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-lg-10">
+            <div class="card-style mb-30">
+                {{ include('admin/event_admin/formEventAdmin.html.twig', {'form': form, 'event': event, 'base64Image': base64Image, 'button_label': 'Update'}) }}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -112,7 +112,7 @@ class User
         return $this;
     }
 
-    #[ORM\Column(type: 'string', nullable: true)]
+    #[ORM\Column(name: 'imgPath', type: 'string', nullable: true)]
     private ?string $imgPath = null;
 
     public function getImgPath(): ?string
@@ -140,8 +140,9 @@ class User
         return $this;
     }
 
-    #[ORM\Column(type: 'string', nullable: false)]
+    #[ORM\Column(name: 'numTel', type: 'string', nullable: false)]
     private ?string $numTel = null;
+
 
     public function getNumTel(): ?string
     {
@@ -446,6 +447,11 @@ class User
         $this->first_name = $first_name;
 
         return $this;
+    }
+    
+    public function getId(): ?int
+    {
+    return $this->id_user;
     }
 
 }

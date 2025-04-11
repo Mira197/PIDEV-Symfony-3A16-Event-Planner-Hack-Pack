@@ -6,8 +6,9 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
-
+use App\Enum\City;
 use App\Repository\LocationRepository;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: LocationRepository::class)]
 #[ORM\Table(name: 'location')]
@@ -29,7 +30,14 @@ class Location
         return $this;
     }
 
-    #[ORM\Column(type: 'string', nullable: false)]
+    #[ORM\Column(type: 'string', length: 30, nullable: false)]
+    #[Assert\NotBlank(message: "The name field cannot be empty.")]
+    #[Assert\Length(
+    min: 3,
+    max: 30,
+    minMessage: "The name must have at least 3 characters.",
+    maxMessage: "The name cannot exceed 30 characters."
+    )]
     private ?string $name = null;
 
     public function getName(): ?string
@@ -44,6 +52,7 @@ class Location
     }
 
     #[ORM\Column(type: 'string', nullable: false)]
+    #[Assert\NotBlank(message: "The address field cannot be empty.")]
     private ?string $address = null;
 
     public function getAddress(): ?string
@@ -57,21 +66,28 @@ class Location
         return $this;
     }
 
-    #[ORM\Column(type: 'string', nullable: false)]
-    private ?string $city = null;
+    #[ORM\Column(type: 'string', enumType: City::class)]
+    #[Assert\NotBlank(message: "City is required.")]
+    private ?City $city = null;
 
-    public function getCity(): ?string
+    public function getCity(): ?City
     {
         return $this->city;
     }
 
-    public function setCity(string $city): self
-    {
-        $this->city = $city;
-        return $this;
-    }
+    public function setCity(?City $city): self
+{
+    $this->city = $city;
+    return $this;
+}
 
     #[ORM\Column(type: 'integer', nullable: false)]
+    #[Assert\NotBlank(message: "The capacity field cannot be empty.")]
+    #[Assert\Positive(message: "The capacity must be a positive number.")]
+    #[Assert\Type(
+        type: 'integer',
+        message: "The capacity must be an integer."
+    )]
     private ?int $capacity = null;
 
     public function getCapacity(): ?int
@@ -86,6 +102,7 @@ class Location
     }
 
     #[ORM\Column(type: 'string', nullable: false)]
+    #[Assert\NotBlank(message: "Status is required.")]
     private ?string $status = null;
 
     public function getStatus(): ?string
@@ -99,7 +116,8 @@ class Location
         return $this;
     }
 
-    #[ORM\Column(type: 'text', nullable: true)]
+    #[ORM\Column(type: 'text', nullable: false)]
+    #[Assert\NotBlank(message: "The description field cannot be empty.")]
     private ?string $description = null;
 
     public function getDescription(): ?string
@@ -114,6 +132,7 @@ class Location
     }
 
     #[ORM\Column(type: 'string', nullable: false)]
+    #[Assert\NotBlank(message: "The dimension field cannot be empty.")]
     private ?string $dimension = null;
 
     public function getDimension(): ?string
@@ -128,6 +147,8 @@ class Location
     }
 
     #[ORM\Column(type: 'decimal', nullable: false)]
+    #[Assert\NotNull(message: "The price is required.")]
+    #[Assert\GreaterThanOrEqual(value: 0, message: "The price cannot be negative.")]
     private ?float $price = null;
 
     public function getPrice(): ?float
@@ -142,9 +163,10 @@ class Location
     }
 
     #[ORM\Column(type: 'blob', nullable: true)]
-    private ?string $image_data = null;
+    #[Assert\NotNull(message: "An image is required.", groups: ['image_upload'])]
+    private $image_data = null;
 
-    public function getImage_data(): ?string
+    public function getImage_data()
     {
         return $this->image_data;
     }

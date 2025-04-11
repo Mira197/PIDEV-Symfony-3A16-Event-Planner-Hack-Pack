@@ -1,0 +1,126 @@
+{% extends 'base.html.twig' %}
+{% block title %}Event Details
+{% endblock %}
+
+{% block stylesheets %}
+	{{ parent() }}
+	<link rel="stylesheet" href="{{ asset('css/eventcards.css') }}">
+{% endblock %}
+
+{% block content %}
+	<header id="fh5co-header" class="fh5co-cover fh5co-cover-sm" role="banner" style="background-image:url('{{ asset('images/eventspage8.jpg') }}');">
+		<div class="overlay"></div>
+		<div class="fh5co-container">
+			<div class="row">
+				<div class="col-md-8 col-md-offset-2 text-center">
+					<div class="display-t">
+						<div class="display-tc animate-box" data-animate-effect="fadeIn">
+							<h1>Events Page</h1>
+							<h2>You can now create your events here freely.</h2>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</header>
+
+	<div class="container mt-5">
+		<h2 class="mb-4">Event Details</h2>
+
+		<div class="event-details-container">
+			<div class="row">
+				<div class="col-md-5 text-center">
+					{% if event.base64Image %}
+						<img src="data:image/jpeg;base64,{{ event.base64Image }}" alt="{{ event.name }}" class="event-details-image">
+					{% elseif event.imageFilename %}
+						<img src="{{ asset('uploads/' ~ event.imageFilename) }}" alt="{{ event.name }}" class="event-details-image">
+					{% else %}
+						<p>No image available</p>
+					{% endif %}
+				</div>
+
+				<div class="col-md-7">
+					<table class="event-details-table table ">
+						<tbody>
+							<tr>
+								<th>Name</th>
+								<td>{{ event.name }}</td>
+							</tr>
+							<tr>
+								<th>Description</th>
+								<td>{{ event.description }}</td>
+							</tr>
+							<tr>
+								<th>City</th>
+								<td>{{ event.city }}</td>
+							</tr>
+							<tr>
+								<th>Capacity</th>
+								<td>{{ event.capacity }}</td>
+							</tr>
+							<tr>
+								<th>Start Date</th>
+								<td>{{ event.startDate|date('Y-m-d H:i') }}</td>
+							</tr>
+							<tr>
+								<th>End Date</th>
+								<td>{{ event.endDate|date('Y-m-d H:i') }}</td>
+							</tr>
+						</tbody>
+					</table>
+
+					<div class="event-details-buttons">
+						<a href="{{ path('app_events') }}" class="main-btn dark-btn-outline btn-hover px-4 py-2 me-2">Back to List</a>
+						{# Uncomment if needed:
+						                    <a href="{{ path('event_edit', {'id': event.idEvent}) }}" class="main-btn warning-btn-outline btn-hover px-4 py-2 me-2">Edit</a>
+						                    {{ include('event/_delete_form.html.twig') }}
+						                    #}
+					</div>
+				</div>
+			</div>
+		</div>
+        
+	</div>
+    
+	{#available locations affichage#}
+    <div class="container mt-5">
+	<h2 class="mb-4">Available Venues</h2>
+    </div>
+	<div class="container mt-4 mb-5">
+    <div class="row">
+        {% for location in locations %}
+            <div class="col-xl-4 col-lg-4 col-md-6 col-sm-6">
+                <div class="event-card">
+                    <div class="event-card-image">
+                        {% if location.base64Image is defined %}
+                            <img src="data:image/jpeg;base64,{{ location.base64Image }}" alt="Location image">
+                        {% elseif location.imageFilename %}
+                            <img src="{{ asset('uploads/' ~ location.imageFilename) }}" alt="Location image">
+                        {% else %}
+                            <img src="{{ asset('images/default.jpg') }}" alt="Default image">
+                        {% endif %}
+                    </div>
+                    <div class="event-card-content">
+                        <h4>{{ location.name }}</h4>
+                        <ul>
+                            <li><strong>🏙 City:</strong> {{ location.city.value }}</li>
+                            <li><strong>👥 Capacity:</strong> {{ location.capacity }}</li>
+                            <li><strong>📐 Dimension:</strong> {{ location.dimension }}</li>
+                            <li><strong>💸 Price:</strong> {{ location.price }} DT</li>
+                        </ul>
+                        <div class="event-card-actions">
+            
+                            <a href="{{ path('booking_new', {'id': event.idEvent}) }}" class="btn btn-primary action-btn details">Book this venue</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <div class="col-12 text-center">
+                <p>No compatible venues found for this event.</p>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+
+{% endblock %}

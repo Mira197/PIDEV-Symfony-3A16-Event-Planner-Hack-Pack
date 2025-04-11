@@ -6,6 +6,8 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Symfony\Component\Validator\Constraints as Assert;
+
 
 use App\Repository\CommentRepository;
 
@@ -30,6 +32,13 @@ class Comment
     }
 
     #[ORM\Column(type: 'text', nullable: false)]
+    #[Assert\NotBlank(message: 'The comment cannot be empty.')]
+    #[Assert\Length(
+        min: 5,
+        max: 1000,
+        minMessage: 'The comment must be at least {{ limit }} characters.',
+        maxMessage: 'The comment cannot be longer than {{ limit }} characters.'
+    )]
     private ?string $content = null;
 
     public function getContent(): ?string
