@@ -9,6 +9,7 @@ use Doctrine\Common\Collections\Collection;
 
 use App\Repository\CodePromoRepository;
 use Symfony\Component\Validator\Constraints as Assert;
+
 #[ORM\Entity(repositoryClass: CodePromoRepository::class)]
 #[ORM\Table(name: 'code_promo')]
 class CodePromo
@@ -28,13 +29,14 @@ class CodePromo
         $this->id = $id;
         return $this;
     }
+
     #[ORM\Column(type: 'string', nullable: false)]
     #[Assert\NotBlank(message: "Promo code is required.")]
     #[Assert\Length(
         min: 3,
         max: 20,
-        minMessage: "The code must be at least {{ limit }} characters long.",
-        maxMessage: "The code must not exceed {{ limit }} characters."
+        minMessage: "Promo code must be at least {{ limit }} characters.",
+        maxMessage: "Promo code must not exceed {{ limit }} characters."
     )]
     private ?string $code_promo = null;
 
@@ -71,7 +73,6 @@ class CodePromo
     }
 
     #[ORM\Column(type: 'datetime', nullable: false)]
-    #[Assert\NotNull(message: "Creation date is required.")]
     #[Assert\Type("\DateTimeInterface")]
     private ?\DateTimeInterface $date_creation = null;
 
@@ -86,9 +87,9 @@ class CodePromo
         return $this;
     }
 
-    #[ORM\Column(type: 'datetime', nullable: false)]
+    #[ORM\Column(type: 'datetime', nullable: true)]
     #[Assert\NotNull(message: "Expiration date is required.")]
-    #[Assert\Type("\DateTimeInterface")]
+    #[Assert\Type(\DateTimeInterface::class, message: "Invalid date format.")]
     #[Assert\GreaterThan("today", message: "The expiration date must be in the future.")]
     private ?\DateTimeInterface $date_expiration = null;
 
@@ -97,7 +98,7 @@ class CodePromo
         return $this->date_expiration;
     }
 
-    public function setDate_expiration(\DateTimeInterface $date_expiration): self
+    public function setDate_expiration(?\DateTimeInterface $date_expiration): self
     {
         $this->date_expiration = $date_expiration;
         return $this;
@@ -120,7 +121,7 @@ class CodePromo
         return $this->date_creation;
     }
 
-    public function setDateCreation(\DateTimeInterface $date_creation): static
+    public function setDateCreation(?\DateTimeInterface $date_creation): static
     {
         $this->date_creation = $date_creation;
 
@@ -132,11 +133,10 @@ class CodePromo
         return $this->date_expiration;
     }
 
-    public function setDateExpiration(\DateTimeInterface $date_expiration): static
+    public function setDateExpiration(?\DateTimeInterface $date_expiration): static
     {
         $this->date_expiration = $date_expiration;
 
         return $this;
     }
-
 }

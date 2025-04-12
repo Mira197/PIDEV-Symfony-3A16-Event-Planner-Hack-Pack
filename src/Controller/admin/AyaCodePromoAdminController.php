@@ -11,44 +11,79 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 #[Route('/admin/promo-codes', name: 'aya_admin_code_promo_')]
 class AyaCodePromoAdminController extends AbstractController
 {
-    #[Route('/', name: 'index')]
+
+    #[Route('/', name: 'index', methods: ['GET'])]
     public function index(CodePromoRepository $repo): Response
     {
+        $form = $this->createForm(AyaCodePromoType::class);
+
         return $this->render('admin/aya_code_promo/aya_list_promo_codes.html.twig', [
             'codes' => $repo->findAll(),
+            'form' => $form->createView(), // 👈 Ajouté ici !
         ]);
     }
 
-    #[Route('/new', name: 'new', methods: ['POST'])]
-    public function new(Request $request, EntityManagerInterface $em): JsonResponse
-    {
-        $data = json_decode($request->getContent(), true);
 
-        // 🔐 Vérification des champs
-        if (empty($data['code_promo']) || empty($data['pourcentage']) || empty($data['date_expiration'])) {
-            return new JsonResponse(['success' => false, 'message' => 'All fields are required.']);
+
+    #[Route('/new', name: 'new', methods: ['POST'])]
+    public function new(Request $request, EntityManagerInterface $em): Response
+    {
+        $promo = new CodePromo();
+        $form = $this->createForm(AyaCodePromoType::class, $promo);
+
+        if (str_contains($request->headers->get('Content-Type'), 'application/json')) {
+            $data = json_decode($request->getContent(), true);
+            $form->submit($data);
+        } else {
+            $form->handleRequest($request);
         }
 
-        try {
-            $promo = new CodePromo();
-            $promo->setCodePromo($data['code_promo']);
-            $promo->setPourcentage($data['pourcentage']);
-            $promo->setDateExpiration($data['date_expiration'] ? new \DateTime($data['date_expiration']) : null);
-            $promo->setDateCreation(new \DateTime()); // utile si pas encore défini ailleurs
-
-
+        if ($form->isSubmitted() && $form->isValid()) {
+            // ✅ Date de création seulement si le formulaire est valide
+            $promo->setDateCreation(new \DateTime());
             $em->persist($promo);
             $em->flush();
 
-            return new JsonResponse(['success' => true]);
-        } catch (\Exception $e) {
-            return new JsonResponse(['success' => false, 'message' => $e->getMessage()]);
+            if ($request->isXmlHttpRequest() || $request->headers->get('Content-Type') === 'application/json') {
+                return new JsonResponse([
+                    'success' => true,
+                    'message' => '✅ Promo code added successfully.',
+                    'id' => $promo->getId(),
+                ]);
+            }
+
+            $this->addFlash('success', '✅ Promo code added successfully.');
+            return $this->redirectToRoute('aya_admin_code_promo_index');
         }
+
+        // ❌ Si non valide, renvoyer les erreurs côté JSON ou vue classique
+        if ($request->isXmlHttpRequest() || $request->headers->get('Content-Type') === 'application/json') {
+            $errors = [];
+            foreach ($form->getErrors(true) as $error) {
+                $errors[] = $error->getMessage();
+            }
+
+            return new JsonResponse([
+                'success' => false,
+                'message' => '❌ Failed to add promo code.',
+                'errors' => $errors,
+            ]);
+        }
+
+        // 🔁 Rechargement avec erreurs affichées dans le modal
+        $codes = $em->getRepository(CodePromo::class)->findAll();
+        return $this->render('admin/aya_code_promo/aya_list_promo_codes.html.twig', [
+            'form' => $form->createView(),
+            'codes' => $codes,
+        ]);
     }
+
+
 
 
     #[Route('/edit/{id}', name: 'edit', methods: ['POST'])]
