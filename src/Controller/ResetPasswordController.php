@@ -1,6 +1,9 @@
 <?php
 
 namespace App\Controller;
+use Symfony\Component\Form\FormError;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
+
 
 use App\Entity\User;
 use App\Form\ChangePasswordFormType;
@@ -270,4 +273,74 @@ class ResetPasswordController extends AbstractController
 
         return $this->redirectToRoute('app_check_email');
     }
+
+
+
+
+
+
+
+
+
+
+    #[Route('/change-password', name: 'user_change_password')]
+public function changePassword(
+    Request $request,
+    SessionInterface $session,
+    EntityManagerInterface $em,
+    UserPasswordHasherInterface $hasher
+): Response {
+    // 🔐 Récupérer l'utilisateur connecté depuis la session
+    $userId = $session->get('user_id');
+    $user = $em->getRepository(User::class)->find($userId);
+
+    if (!$user) {
+        throw $this->createNotFoundException("Utilisateur non trouvé");
+    }
+
+    $form = $this->createForm(ChangePasswordFormType::class);
+    $form->handleRequest($request);
+
+    if ($form->isSubmitted() && $form->isValid()) {
+        $oldPasswordInput = $form->get('oldPassword')->getData();
+        $newPassword = $form->get('newPassword')->getData();
+        $confirmPassword = $form->get('confirmPassword')->getData();
+
+        // 🔐 Vérification de l'ancien mot de passe
+        if (!$hasher->isPasswordValid($user, $oldPasswordInput)) {
+            $form->get('oldPassword')->addError(new FormError("L'ancien mot de passe est incorrect."));
+        } elseif ($newPassword !== $confirmPassword) {
+            $form->get('confirmPassword')->addError(new FormError("Les mots de passe ne correspondent pas."));
+        } else {
+            // ✅ Hash du nouveau mot de passe et mise à jour
+            $hashedNewPassword = $hasher->hashPassword($user, $newPassword);
+            $user->setPassword($hashedNewPassword);
+            $em->flush();
+
+            $this->addFlash('success', 'Mot de passe modifié avec succès.');
+            return $this->redirectToRoute('login');
+        }
+    }
+
+    return $this->render('auth/change_password.html.twig', [
+        'form' => $form->createView(),
+    ]);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 }

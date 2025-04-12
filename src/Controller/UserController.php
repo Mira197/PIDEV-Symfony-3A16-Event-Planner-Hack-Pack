@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Controller;
-
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use App\Entity\User;
 use App\Form\AdminRegisterFormType;
 use App\Form\UserType;
@@ -328,6 +328,42 @@ class UserController extends AbstractController
     
 
 
+
+
+
+
+
+
+    
+    #[Route('/profile/upload-image', name: 'change_profile_picture', methods: ['POST'])]
+    public function changeProfilePicture(Request $request, SessionInterface $session, EntityManagerInterface $em): Response
+    {
+        $userId = $session->get('user_id');
+        $user = $em->getRepository(User::class)->find($userId);
+    
+        if (!$user) {
+            throw $this->createNotFoundException("Utilisateur non trouvé.");
+        }
+    
+        $imageFile = $request->files->get('profile_image');
+    
+        if ($imageFile && in_array($imageFile->getMimeType(), ['image/jpeg', 'image/png', 'image/webp'])) {
+            $fileName = uniqid() . '.' . $imageFile->guessExtension();
+            $imageFile->move($this->getParameter('upload_directory'), $fileName);
+    
+            $user->setImgPath($fileName);
+            $em->flush();
+    
+            $session->set('img', $fileName); // Met à jour l'image de session aussi
+    
+            $this->addFlash('success', 'Photo de profil mise à jour avec succès.');
+        } else {
+            $this->addFlash('error', 'Veuillez uploader une image valide.');
+        }
+    
+        return $this->redirectToRoute('prof'); // ou une autre page
+    }
+    
 
 
 

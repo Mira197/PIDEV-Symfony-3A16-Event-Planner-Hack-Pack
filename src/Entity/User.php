@@ -13,7 +13,6 @@ use App\Repository\UserRepository;
 
 
 
-
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: 'user')]
 

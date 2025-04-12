@@ -93,8 +93,8 @@ class AuthController extends AbstractController
                 // Authentification réussie
                 $session->set('user_id', $user->getIdUser());
                 $session->set('username', $user->getUsername());
-        
                 $session->set('email', $user->getEmail());
+                
                 $session->set('first_name', $user->getFirstName());
                 $session->set('last_name', $user->getLastName());
                 $session->set('phone', $user->getNumTel());

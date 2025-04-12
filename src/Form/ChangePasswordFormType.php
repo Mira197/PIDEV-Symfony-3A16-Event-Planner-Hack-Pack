@@ -15,6 +15,15 @@ class ChangePasswordFormType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
+    ->add('oldPassword', PasswordType::class, [
+        'label' => 'Ancien mot de passe',
+        'mapped' => false,
+        'attr' => ['autocomplete' => 'current-password'],
+        'constraints' => [
+            new NotBlank(['message' => 'Veuillez entrer votre mot de passe actuel.']),
+        ],
+    ]);
+        $builder
             ->add('plainPassword', RepeatedType::class, [
                 'type' => PasswordType::class,
                 'options' => [
