@@ -95,4 +95,41 @@ class AyaCodePromoAdminController extends AbstractController
         $this->addFlash('success', 'Promo code deleted.');
         return $this->redirectToRoute('aya_admin_code_promo_index');
     }
+    #[Route('/search', name: 'search', methods: ['GET'])]
+    public function search(Request $request, EntityManagerInterface $em): JsonResponse
+    {
+        $query = strtolower($request->query->get('q', ''));
+
+        // On récupère tous les codes promo si la recherche est vide
+        $codes = $em->getRepository(CodePromo::class)->findAll();
+
+        // On filtre manuellement en PHP (plus souple pour les formats comme date ou status)
+        $results = [];
+
+        foreach ($codes as $code) {
+            $expirationDate = $code->getDateExpiration()?->format('Y-m-d');
+            $status = $expirationDate && $expirationDate < (new \DateTime())->format('Y-m-d') ? 'expired' : 'active';
+
+            // Convertir les champs à comparer en chaînes simples
+            $fields = [
+                strtolower($code->getCodePromo()),
+                (string)$code->getPourcentage(),
+                strtolower($expirationDate),
+                strtolower($status),
+            ];
+
+            // Inclure si une des colonnes contient le mot-clé
+            if ($query === '' || array_filter($fields, fn($val) => str_contains($val, $query))) {
+                $results[] = [
+                    'id' => $code->getId(),
+                    'codePromo' => $code->getCodePromo(),
+                    'pourcentage' => $code->getPourcentage(),
+                    'dateExpiration' => $expirationDate,
+                    'status' => $status,
+                ];
+            }
+        }
+
+        return new JsonResponse($results);
+    }
 }

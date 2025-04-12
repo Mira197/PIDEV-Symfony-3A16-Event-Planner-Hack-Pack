@@ -73,7 +73,7 @@
 				<h2>Your cart is empty</h2>
 				<p>Sign in to view your cart and start shopping.</p>
 				<a href="{{ path('contact_us') }}" class="btn btn-primary">Sign In / Register</a>
-				<a href="{{ path('app_services') }}" class="btn btn-outline-secondary">Shop Now</a>
+				<a href="{{ path('afficheclient') }}" class="btn btn-outline-secondary">Shop Now</a>
 			</div>
 
 		{% elseif cartProducts is empty %}
@@ -81,7 +81,7 @@
 				<img src="{{ asset('images/empty-cart.png') }}" alt="Cart Empty" class="mb-3" width="120">
 				<h2>Your cart is empty</h2>
 				<p>Add items to your cart to begin your order.</p>
-				<a href="{{ path('app_services') }}" class="btn btn-outline-secondary">Shop Now</a>
+				<a href="{{ path('afficheclient') }}" class="btn btn-outline-secondary">Shop Now</a>
 			</div>
 
 		{% else %}
