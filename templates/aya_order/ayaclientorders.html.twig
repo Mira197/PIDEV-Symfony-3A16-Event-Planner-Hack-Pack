@@ -263,10 +263,24 @@ document.getElementById("orderSearch").addEventListener("input", function() {
     clearTimeout(searchTimeout);
     
     // Si la recherche est vide, recharge les commandes originales
-    if (query.length === 0) {
-        window.location.reload();
-        return;
-    }
+	if (query.length === 0) {
+    // Recharger les données d'origine sans recharger toute la page
+    fetch(`/client/orders/search`, {
+        headers: {
+            'Accept': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        updateOrdersTable(data);
+    })
+    .catch(error => {
+        console.error('Erreur AJAX lors du reset :', error);
+    });
+    return;
+}
+
+   
     
     // Délai de 300ms avant l'envoi de la requête
     searchTimeout = setTimeout(() => {

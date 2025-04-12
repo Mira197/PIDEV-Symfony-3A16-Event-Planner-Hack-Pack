@@ -53,23 +53,23 @@ class AyaAdminOrderController extends AbstractController
         return new JsonResponse(['success' => true]);
     }
     #[Route('/delete/{id}', name: 'admin_order_delete', methods: ['DELETE'])]
-public function deleteOrder($id, OrderRepository $orderRepository, EntityManagerInterface $em): JsonResponse
-{
-    $order = $orderRepository->find($id);
+    public function deleteOrder($id, OrderRepository $orderRepository, EntityManagerInterface $em): JsonResponse
+    {
+        $order = $orderRepository->find($id);
 
-    if (!$order) {
-        return new JsonResponse(['success' => false, 'message' => 'Order not found.'], 404);
+        if (!$order) {
+            return new JsonResponse(['success' => false, 'message' => 'Order not found.'], 404);
+        }
+
+        if ($order->getStatus() === 'DELIVERED') {
+            return new JsonResponse(['success' => false, 'message' => 'You cannot delete an order that has already been delivered.'], 400);
+        }
+
+        $em->remove($order);
+        $em->flush();
+
+        return new JsonResponse(['success' => true]);
     }
-
-    if ($order->getStatus() === 'DELIVERED') {
-        return new JsonResponse(['success' => false, 'message' => 'You cannot delete an order that has already been delivered.'], 400);
-    }
-
-    $em->remove($order);
-    $em->flush();
-
-    return new JsonResponse(['success' => true]);
-}
 
 
 
@@ -96,5 +96,41 @@ public function deleteOrder($id, OrderRepository $orderRepository, EntityManager
         return $this->render('admin/order/view.html.twig', [
             'order' => $order,
         ]);
+    }
+    #[Route('/search', name: 'admin_orders_search', methods: ['GET'])]
+    public function search(Request $request, OrderRepository $orderRepository): JsonResponse
+    {
+        $query = strtolower($request->query->get('q', ''));
+
+        $qb = $orderRepository->createQueryBuilder('o')
+            ->join('o.user', 'u') // si tu veux filtrer aussi par nom d'utilisateur
+            ->addSelect('u');
+
+        if (!empty($query)) {
+            $qb->andWhere(
+                $qb->expr()->orX(
+                    'LOWER(o.status) LIKE :q',
+                    'LOWER(u.username) LIKE :q',
+                    'o.total_price LIKE :q',
+                    "CAST(o.ordered_at AS string) LIKE :q"
+                )
+            )->setParameter('q', '%' . $query . '%');
+        }
+
+        $orders = $qb->getQuery()->getResult();
+
+        $results = [];
+
+        foreach ($orders as $order) {
+            $results[] = [
+                'id' => $order->getOrderId(),
+                'username' => $order->getUser()->getUsername(),
+                'status' => $order->getStatus(),
+                'totalPrice' => $order->getTotalPrice(),
+                'orderedAt' => $order->getOrderedAt()->format('Y-m-d'),
+            ];
+        }
+
+        return new JsonResponse($results);
     }
 }

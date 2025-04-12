@@ -118,12 +118,51 @@ document.querySelectorAll('.delete-btn').forEach(btn => {
     });
   
     // 🔍 Search
-    document.getElementById("adminOrderSearch").addEventListener("keyup", function () {
-      const value = this.value.toLowerCase();
-      document.querySelectorAll("#adminOrdersTable tr").forEach(row => {
-        row.style.display = row.textContent.toLowerCase().includes(value) ? "" : "none";
-      });
-    });
+    document.getElementById("adminOrderSearch").addEventListener("input", function () {
+      const query = this.value.trim();
+  
+      fetch(`/admin/orders/search?q=${encodeURIComponent(query)}`)
+          .then(response => response.json())
+          .then(data => {
+              const tbody = document.getElementById("adminOrdersTable");
+              tbody.innerHTML = '';
+  
+              if (data.length === 0) {
+                  tbody.innerHTML = `<tr><td colspan="6" class="empty-row">No orders found.</td></tr>`;
+                  return;
+              }
+  
+              data.forEach(order => {
+                  const row = `
+                  <tr data-status="${order.status}">
+                      <td class="hidden-column">${order.id}</td>
+                      <td><strong>${order.username}</strong></td>
+                      <td>
+                          <select class="status-select" data-id="${order.id}">
+                              ${['PENDING', 'CONFIRMED', 'DELIVERED', 'CANCELLED'].map(status => `
+                                  <option value="${status}" ${status === order.status ? 'selected' : ''}>${status}</option>
+                              `).join('')}
+                          </select>
+                      </td>
+                      <td>${order.totalPrice} DT</td>
+                      <td class="editable" data-id="${order.id}" data-field="orderedAt">${order.orderedAt}</td>
+                      <td>
+                          <button type="button" class="btn-delete delete-btn" data-id="${order.id}">🗑️</button>
+                      </td>
+                  </tr>
+                  `;
+                  tbody.insertAdjacentHTML('beforeend', row);
+              });
+  
+              // Réinitialise les actions JS après mise à jour du DOM
+              attachDeleteHandlers(); 
+              attachStatusUpdateHandlers();
+          })
+          .catch(error => {
+              console.error("Erreur AJAX recherche admin :", error);
+          });
+  });
+  
   
     // 🟣 Filter by status
     document.querySelectorAll('.status-filter').forEach(btn => {
