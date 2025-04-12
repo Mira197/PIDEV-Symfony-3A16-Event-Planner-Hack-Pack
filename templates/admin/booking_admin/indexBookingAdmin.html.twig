@@ -1,55 +1,100 @@
 {% extends 'admin/baseAdmin.html.twig' %}
+{% block head %}
+	<link rel="stylesheet" href="{{ asset('assetsAya/css/adminOrder.css') }}">
+	{{ parent() }}
+{% endblock %}
 
 {% block section %}
-<section class="section">
-    <div class="container-fluid">
-        <div class="title-wrapper pt-30">
-            <div class="row align-items-center">
-                <div class="col-md-6">
-                    <div class="title">
-                        <h2>Manage Bookings</h2>
-                    </div>
-                </div>
-            </div>
-        </div>
+	<div class="admin-mui-wrapper">
+		<h2>📅 Manage Bookings</h2>
 
-        <div class="row mt-4">
-            <div class="col-12">
-                <div class="card-style mb-30">
-                    <table class="table table-striped">
-                        <thead>
-                            <tr>
-                                <th>Event</th>
-                                <th>Location</th>
-                                <th>Start Date</th>
-                                <th>End Date</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for booking in bookings %}
-                                <tr>
-                                    <td>{{ booking.event.name }}</td>
-                                    <td>{{ booking.location.name }}</td>
-                                    <td>{{ booking.startDate|date('Y-m-d H:i') }}</td>
-                                    <td>{{ booking.endDate|date('Y-m-d H:i') }}</td>
-                                    <td>
-                                        {#<a href="{{ path('booking_admin_show', {'id': booking.idBooking}) }}" class="main-btn secondary-btn-outline btn-hover px-3 py-1">Show</a>#}
-                                        
-                                        <a href="{{ path('booking_admin_edit', { 'id': booking.idBooking }) }}" class="main-btn warning-btn-outline btn-hover px-4 py-2">Edit</a>
-                                        {{ include('admin/booking_admin/delete_formBookingAdmin.html.twig') }}
-                                    </td>
-                                </tr>
-                            {% else %}
-                                <tr>
-                                    <td colspan="5">No bookings found.</td>
-                                </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
+		<!-- Barre de recherche -->
+		<div class="admin-filters">
+			<div class="left-search">
+				<input type="text" id="bookingSearchInput" placeholder="🔍 Search bookings..." class="form-control">
+			</div>
+		</div>
+
+		<table class="admin-mui-table">
+			<thead>
+				<tr>
+					<th>Event</th>
+					<th>Location</th>
+					<th>Start Date</th>
+					<th>End Date</th>
+					<th>Actions</th>
+				</tr>
+			</thead>
+
+			<tbody id="bookingsTable">
+				{% for booking in bookings %}
+					<tr>
+						<td>{{ booking.event.name }}</td>
+						<td>{{ booking.location.name }}</td>
+						<td>{{ booking.startDate|date('Y-m-d H:i') }}</td>
+						<td>{{ booking.endDate|date('Y-m-d H:i') }}</td>
+						<td>
+							<a href="{{ path('booking_admin_edit', { 'id': booking.idBooking }) }}" class="btn btn-outline-warning btn-sm">🖊️</a>
+							{{ include('admin/booking_admin/delete_formBookingAdmin.html.twig') }}
+						</td>
+					</tr>
+				{% else %}
+					<tr>
+						<td colspan="5" class="empty-row">No bookings found.</td>
+					</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+	</div>
 {% endblock %}
+{% block javascripts %}
+{{ parent() }}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script>
+    $(document).ready(function () {
+        $('#bookingSearchInput').on('keyup', function () {
+            let query = $(this).val();
+
+            if (query.trim() === '') {
+                window.location.reload();
+                return;
+            }
+
+            $.ajax({
+                url: "{{ path('booking_ajax_search') }}",
+                type: 'GET',
+                data: { q: query },
+                success: function (data) {
+                    let tbody = $('#bookingsTable');
+                    tbody.empty();
+
+                    if (data.length === 0) {
+                        tbody.append('<tr><td colspan="5">No bookings found.</td></tr>');
+                        return;
+                    }
+
+                    data.forEach(function (booking) {
+                        tbody.append(`
+                            <tr>
+                            <td>${booking.event.name}</td>
+                            <td>${booking.location.name}</td>
+                            <td>${booking.startDate}</td>
+                            <td>${booking.endDate}</td>
+                            <td>
+                                <a href="/admin/booking/${booking.idBooking}/edit" class="btn btn-outline-warning btn-sm">🖊️</a>
+                                {#<em class="text-muted">Reload page to delete</em>#}
+                            </td>
+                        </tr>
+                        `);
+                    });
+                },
+                error: function () {
+                    alert("Error fetching booking results.");
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}
+

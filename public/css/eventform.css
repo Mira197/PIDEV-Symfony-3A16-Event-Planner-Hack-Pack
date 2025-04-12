@@ -107,5 +107,37 @@
     box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
 }
 
+/*arrow*/
+#fh5co-header {
+    position: relative; /* Assure-toi que le header a une position relative */
+}
+.scroll-indicator {
+    position: absolute;
+    bottom: 30px;
+    right: 40px;
+    z-index: 10;
+    pointer-events: auto;
+}
+
+.svg-arrow {
+    width: 150px;
+    height: 150px;
+    animation: arrowBounce 2s infinite;
+}
+@keyframes arrowBounce {
+    0%, 20%, 50%, 80%, 100% {
+        transform: translateY(0);
+    }
+    40% {
+        transform: translateY(8px);
+    }
+    60% {
+        transform: translateY(4px);
+    }
+}
+
+
+
+
 
 

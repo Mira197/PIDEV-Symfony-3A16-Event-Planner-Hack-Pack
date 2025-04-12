@@ -3,5 +3,5 @@
       style="display:inline-block;"
       onsubmit="return confirm('Are you sure you want to delete this booking?');">
     <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ booking.idBooking) }}">
-    <button class="main-btn danger-btn-outline btn-hover px-4 py-2">Delete</button>
+    <button class="main-btn danger-btn-outline btn-hover px-4 py-2">🗑️</button>
 </form>
