@@ -77,11 +77,52 @@ class AyaOrderClientController extends AbstractController
             return $this->redirectToRoute('client_orders');
         }
 
-        $order->setStatus('CANCELLED'); 
+        $order->setStatus('CANCELLED');
         $em->flush();
 
         $this->addFlash('success', 'Order canceled successfully!');
         return $this->redirectToRoute('client_orders');
     }
-    
+    #[Route('/client/orders/search', name: 'client_orders_search', methods: ['GET'])]
+    public function search(Request $request, OrderRepository $orderRepository, EntityManagerInterface $em): JsonResponse
+    {
+        $user = $this->getUser() ?? $em->getRepository(User::class)->find(3);
+        $query = strtolower($request->query->get('q', ''));
+
+        $qb = $orderRepository->createQueryBuilder('o')
+            ->andWhere('o.user = :user')
+            ->setParameter('user', $user);
+
+        if (!empty($query)) {
+            $qb->andWhere(
+                $qb->expr()->orX(
+                    'LOWER(o.status) LIKE :q',
+                    'LOWER(o.payment_method) LIKE :q',
+                    'LOWER(o.exact_address) LIKE :q',
+                    'o.total_price LIKE :q',
+                    "DATE_FORMAT(o.ordered_at, '%Y-%m-%d %H:%i') LIKE :q",
+                    "DATE_FORMAT(o.event_date, '%Y-%m-%d %H:%i') LIKE :q"
+                )
+            )
+                ->setParameter('q', '%' . $query . '%');
+        }
+
+        $orders = $qb->getQuery()->getResult();
+
+        $results = [];
+
+        foreach ($orders as $order) {
+            $results[] = [
+                'id' => $order->getOrderId(),
+                'eventDate' => $order->getEventDate()?->format('Y-m-d H:i'),
+                'exactAddress' => $order->getExactAddress(),
+                'status' => $order->getStatus(),
+                'paymentMethod' => $order->getPaymentMethod(),
+                'orderedAt' => $order->getOrderedAt()?->format('Y-m-d H:i'),
+                'totalPrice' => $order->getTotalPrice(),
+            ];
+        }
+
+        return new JsonResponse($results);
+    }
 }

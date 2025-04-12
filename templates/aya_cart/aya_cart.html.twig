@@ -133,7 +133,9 @@
 							<input type="text" class="form-control" placeholder="Promo Code">
 							<button class="btn btn-outline-primary">Apply</button>
 						</div>
-						<a href="{{ path('app_services') }}" class="btn btn-outline-secondary">← Continue Shopping</a>
+						<a href="{{ path('afficheclient') }}" class="text-decoration-none text-dark fw-medium">
+							<span style="font-size: 18px;">← Continue Shopping</span>
+						</a>
 					</div>
 				</div>
 
@@ -163,6 +165,10 @@
 
 						<a href="{{ path('aya_order_new') }}" class="btn btn-success btn-checkout">Proceed to Checkout</a>
 					</div>
+					<a href="{{ path('client_orders') }}" class="text-decoration-none text-dark fw-medium">
+						<span style="font-size: 18px;">🧾Consult Orders →</span>
+					
+					</a>
 				</div>
 			</div>
 		{% endif %}
