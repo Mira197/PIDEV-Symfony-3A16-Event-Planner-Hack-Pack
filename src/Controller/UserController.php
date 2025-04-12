@@ -164,32 +164,6 @@ class UserController extends AbstractController
         ]);
     }
 
-    #[Route('/{idUser}', name: 'app_user_show', methods: ['GET'])]
-    public function show(User $user): Response
-    {
-        $role = $user->getRole();
-
-        // Déterminer le template à utiliser en fonction du rôle de l'utilisateur
-        switch ($role) {
-            case 'CLIENT':
-                $editTemplate = 'user/show.html.twig';
-                break;
-            case 'Fournissuer':
-                $editTemplate = 'user/profileFournissuer.html.twig';
-                break;
-            case 'ADMIN':
-                $editTemplate = 'user/profileAdmin.html.twig';
-                break;
-            default:
-                // Rediriger vers une page d'erreur ou la page d'accueil si le rôle n'est pas reconnu
-                return $this->redirectToRoute('homepage');
-        }
-
-      
-        return $this->render($editTemplate, [
-            'user' => $user,
-        ]);
-    }
 
     private $security;
 
@@ -344,6 +318,29 @@ class UserController extends AbstractController
         // Rediriger vers une autre page ou afficher un message de confirmation
         return $this->redirectToRoute('app_user_index');
     }
+ 
+
+    #[Route('/prof', name: 'prof')]
+    public function profileAdmin(): Response
+    {
+        return $this->render('admin/pAdmin.html.twig'); // Ton template statique
+    }                                                       
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

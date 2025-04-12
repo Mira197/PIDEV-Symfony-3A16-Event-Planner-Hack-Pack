@@ -2,7 +2,30 @@
 <html lang="en">
 
 	<head>
+
 		{% block head %}
+<style>
+
+.tooltip-profile .tooltip-text {
+    visibility: hidden;
+    width: 100px;
+    background-color: #6c5ce7;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px 8px;
+    position: absolute;
+    z-index: 1;
+
+    /* 👇 Affiche le tooltip en bas */
+    top: 130%; /* au lieu de bottom: 130% */
+    left: 50%;
+    transform: translateX(-50%);
+    opacity: 0;
+    transition: opacity 0.3s;
+    font-size: 12px;
+}
+</style>
 			<meta charset="UTF-8"/>
 			<meta http-equiv="X-UA-Compatible" content="IE=edge"/>
 			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -10,6 +33,8 @@
 			<title>3alaKifiAdmin | Event Planner</title>
 
 			<!-- ========== All CSS files linkup ========= -->
+
+			
 			<link rel="stylesheet" href="{{ asset('admin/css/bootstrap.min.css') }}">
 			<link rel="stylesheet" href="{{ asset('admin/css/lineicons.css') }}">
 			<link rel="stylesheet" href="{{ asset('admin/css/materialdesignicons.min.css') }}">
@@ -19,6 +44,7 @@
 			<link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
 
 		{% endblock %}
+		
 	</head>
 	<body>
 		{% block preloader %}
@@ -287,6 +313,7 @@
 				<header class="header">
 					<div class="container-fluid">
 						<div class="row">
+						
 							<div class="col-lg-5 col-md-5 col-6">
 								<div class="header-left d-flex align-items-center">
 									<div class="menu-toggle-btn mr-15">
@@ -308,6 +335,18 @@
 							<div class="col-lg-7 col-md-7 col-6">
 								<div
 									class="header-right">
+<!-- Icône profil avec tooltip -->
+<div class="profile-icon-box ml-15 d-none d-md-flex align-items-center tooltip-profile">
+    <a href="{{ path('prof') }}" class="btn btn-light p-2 d-flex align-items-center justify-content-center" style="border-radius: 50%; width: 42px; height: 42px;">
+        <i class="bx bx-user" style="font-size: 22px; color: #6c5ce7;"></i>
+    </a>
+    <span class="tooltip-text">View Profile</span>
+</div>
+
+
+
+
+
 									<!-- notification start -->
 									<div class="notification-box ml-15 d-none d-md-flex">
 										<button class="dropdown-toggle" type="button" id="notification" data-bs-toggle="dropdown" aria-expanded="false">
@@ -317,6 +356,11 @@
 											</svg>
 											<span></span>
 										</button>
+
+
+
+
+
 										<ul class="dropdown-menu dropdown-menu-end" aria-labelledby="notification">
 											<li>
 												<a href="#0">
@@ -332,7 +376,7 @@
 														</h6>
 														<p>
 															Lorem ipsum dolor sit amet, consect etur adipiscing
-																																																																											                            elit Vivamus tortor.
+																																																																																																																								                            elit Vivamus tortor.
 														</p>
 														<span>10 mins ago</span>
 													</div>
@@ -352,7 +396,7 @@
 														</h6>
 														<p>
 															Lorem ipsum dolor sit amet, consect etur adipiscing
-																																																																											                            elit Vivamus tortor.
+																																																																																																																								                            elit Vivamus tortor.
 														</p>
 														<span>10 mins ago</span>
 													</div>
@@ -415,28 +459,44 @@
 										<button class="dropdown-toggle bg-transparent border-0" type="button" id="profile" data-bs-toggle="dropdown" aria-expanded="false">
 											<div class="profile-info">
 												<div class="info">
+												    <a href="{{ path('prof') }}" style="text-decoration: none; color: inherit;">
 													<div class="image">
-														<img src="admin/images/profile/profile-image.png" alt=""/>
+														<img src="/images/profile.png" alt="img"/>
 													</div>
-													<div>
-														<h6 class="fw-500">Adam Joe</h6>
-														<p>Admin</p>
-													</div>
+													{% if app.session.get('username') %}
+														<p>Bonjour,
+															{{ app.session.get('username') }}</p>
+																</a>
+													{% else %}
+														<p>Bonjour, invité</p>
+													{% endif %}
 												</div>
+											
 											</div>
 										</button>
 										<ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profile">
-											<li>
-												<div class="author-info flex items-center !p-1">
-													<div class="image">
-														<img src="admin/images/profile/profile-image.png" alt="image">
-													</div>
-													<div class="content">
-														<h4 class="text-sm">Adam Joe</h4>
-														<a class="text-black/40 dark:text-white/40 hover:text-black dark:hover:text-white text-xs" href="#">Email@gmail.com</a>
-													</div>
-												</div>
-											</li>
+			
+
+
+
+<li>
+    <a href="{{ path('prof') }}" style="text-decoration: none; color: inherit;">
+        <div class="author-info flex items-center !p-1">
+            <div class="image">
+                <img src="/images/profile.png" alt="image">
+            </div>
+            {% if app.user %}
+                <h4 class="text-sm">app.session.get('username')</h4>
+                <span class="text-xs">{{ app.user.email }}</span>
+            {% else %}
+                <h4 class="text-sm">Guest</h4>
+
+            {% endif %}
+        </div>
+    </a>
+</li>
+
+
 											<li class="divider"></li>
 											<li>
 												<a href="#0">
@@ -1907,5 +1967,8 @@ padding: 20
 // =========== chart four end
 			</script>
 		{% endblock %}
+		<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
 	</body>
 </html>

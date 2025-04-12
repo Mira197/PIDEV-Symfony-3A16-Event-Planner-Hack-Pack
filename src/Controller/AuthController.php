@@ -92,7 +92,13 @@ class AuthController extends AbstractController
     
                 // Authentification réussie
                 $session->set('user_id', $user->getIdUser());
-    
+                $session->set('username', $user->getUsername());
+        
+                $session->set('email', $user->getEmail());
+                $session->set('first_name', $user->getFirstName());
+                $session->set('last_name', $user->getLastName());
+                $session->set('phone', $user->getNumTel());
+                $session->set('img', $user->getImgPath());
                 // Redirection selon le rôle
                 switch ($user->getRole()) {
                     case 'ADMIN':
@@ -298,5 +304,19 @@ public function registerAdmin(Request $request, EntityManagerInterface $entityMa
 
     return $this->redirectToRoute('app_user_index');
 }
+
+
+
+
+#[Route('/test-session', name: 'test_session')]
+public function testSession(SessionInterface $session): Response
+{
+    dd($session->all());
+}
+
+
+
+
+
 
 }
