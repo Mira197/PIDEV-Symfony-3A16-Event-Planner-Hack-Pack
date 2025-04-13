@@ -1,79 +1,62 @@
 {% extends 'admin/base.html.twig' %}
 
-{% block title %}Mon Profil
-{% endblock %}
+{% block title %}Mon Profil{% endblock %}
 
 {% block stylesheets %}
 	{{ parent() }}
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-alpha1/dist/css/bootstrap.min.css">
 	<style>
-		body {
-			background: rgb(99, 39, 120);
-		}
-
-		.form-control:focus {
-			box-shadow: none;
-			border-color: #BA68C8;
-		}
-
+		body { background: rgb(99, 39, 120); }
+		.form-control:focus { box-shadow: none; border-color: #BA68C8; }
 		.profile-button {
-			background: rgb(99, 39, 120);
-			color: white;
-			box-shadow: none;
-			border: none;
+			background: rgb(99, 39, 120); color: white; box-shadow: none; border: none;
 		}
-
-		.profile-button:hover,
-		.profile-button:focus,
-		.profile-button:active {
-			background: #682773;
-			color: white;
-			box-shadow: none;
+		.profile-button:hover, .profile-button:focus, .profile-button:active {
+			background: #682773; color: white; box-shadow: none;
 		}
-
-		.back:hover {
-			color: #682773;
-			cursor: pointer;
-		}
-
-		.labels {
-			font-size: 11px;
-		}
-
+		.back:hover { color: #682773; cursor: pointer; }
+		.labels { font-size: 11px; }
 		.add-experience:hover {
-			background: #BA68C8;
-			color: #fff;
-			cursor: pointer;
-			border: solid 1px #BA68C8;
+			background: #BA68C8; color: #fff; cursor: pointer; border: solid 1px #BA68C8;
 		}
 	</style>
 {% endblock %}
 
 {% block section %}
 	<div class="container rounded bg-white mt-5 mb-5">
-		<div
-			class="row">
-			<!-- Colonne gauche avec image et infos -->
+		{% for message in app.flashes('success') %}
+			<div class="alert alert-success mt-3">{{ message }}</div>
+		{% endfor %}
+
+		<!-- Barre de progression -->
+		<div class="mb-4">
+			<label class="form-label">Profile Completion: {{ completion }}%</label>
+			<div class="progress">
+				<div class="progress-bar bg-success" role="progressbar" style="width: {{ completion }}%;" aria-valuenow="{{ completion }}" aria-valuemin="0" aria-valuemax="100">
+					{{ completion }}%
+				</div>
+			</div>
+		</div>
+
+		<!-- Données utilisateur -->
+		<div class="row">
 			<div class="col-md-3 border-right">
 				<div class="d-flex flex-column align-items-center text-center p-3 py-5">
-					<img class="rounded-circle mt-5" src="{{ asset('uploads/profile_images/' ~ app.session.get('img')) }}" alt="Profile image" width="150px">
-					<span class="font-weight-bold">{{ app.session.get('username') }}</span>
-					<span class="text-black-50">{{ app.session.get('email') }}</span>
+					<img class="rounded-circle mt-5" src="{{ asset('uploads/profile_images/' ~ user.getImgPath) }}" alt="Profile image" width="150px">
+					<span class="font-weight-bold">{{ user.getUsername }}</span>
+					<span class="text-black-50">{{ user.getEmail }}</span>
 					<div class="d-flex justify-content-center mt-2">
 						<form action="{{ path('change_profile_picture') }}" method="POST" enctype="multipart/form-data">
 							<label class="main-btn primary-btn btn-hover" style="font-weight: 300; width: 120px; cursor: pointer;">
-								<i class="lni lni-camera me-2"></i>
-								Upload
+								<i class="lni lni-camera me-2"></i> Upload
 								<input type="file" name="profile_image" accept="image/*" style="display: none;" onchange="this.form.submit();">
 							</label>
 						</form>
 					</div>
-
-
 				</div>
 			</div>
 
-			<!-- Colonne centrale avec les inputs -->
+			<!-- Info statiques -->
 			<div class="col-md-5 border-right">
 				<div class="p-3 py-5">
 					<div class="d-flex justify-content-between align-items-center mb-3">
@@ -82,35 +65,36 @@
 					<div class="row mt-2">
 						<div class="col-md-6">
 							<label class="labels">First Name</label>
-							<input type="text" class="form-control" placeholder="{{ app.session.get('first_name') }}">
+							<input type="text" class="form-control" placeholder="{{ user.getFirstName }}">
 						</div>
 						<div class="col-md-6">
 							<label class="labels">Last Name</label>
-							<input type="text" class="form-control" placeholder="{{ app.session.get('last_name') }}">
+							<input type="text" class="form-control" placeholder="{{ user.getLastName }}">
 						</div>
 					</div>
 					<div class="row mt-3">
 						<div class="col-md-12">
 							<label class="labels">Mobile Number</label>
-							<input type="text" class="form-control" placeholder="{{ app.session.get('phone') }}">
+							<input type="text" class="form-control" placeholder="{{ user.getNumTel }}">
 						</div>
 						<div class="col-md-12">
 							<label class="labels">Email</label>
-							<input type="text" class="form-control" placeholder="{{ app.session.get('email') }}">
+							<input type="text" class="form-control" placeholder="{{ user.getEmail }}">
 						</div>
 					</div>
 				</div>
 			</div>
 
-			<!-- Colonne droite avec le bouton -->
+			<!-- Colonne droite : boutons -->
 			<div class="col-md-4">
-				<div class="p-3 py-5 d-flex align-items-center justify-content-center h-100">
+				<div class="p-3 py-5 d-flex flex-column align-items-center justify-content-center h-100 gap-2">
 					<a href="{{ path('user_change_password') }}" class="main-btn primary-btn btn-hover w-100" style="font-weight: 600;">
-						<i class="lni lni-lock-alt me-2"></i>
-						Reset Password
+						<i class="lni lni-lock-alt me-2"></i> Reset Password
 					</a>
 
-
+					<a href="{{ path('edit_profile') }}" class="main-btn primary-btn btn-hover w-100" style="font-weight: 600;">
+						<i class="lni lni-pencil-alt me-2"></i> Modifier mon profil
+					</a>
 				</div>
 			</div>
 		</div>
@@ -119,6 +103,5 @@
 
 {% block javascripts %}
 	{{ parent() }}
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 {% endblock %}

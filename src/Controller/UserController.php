@@ -1,9 +1,11 @@
 <?php
 
 namespace App\Controller;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use App\Entity\User;
 use App\Form\AdminRegisterFormType;
+use App\Form\UpdateProfileType;
 use App\Form\UserType;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -220,16 +222,6 @@ class UserController extends AbstractController
         ]);
     }
 
-    #[Route('/{idUser}', name: 'app_user_delete', methods: ['POST'])]
-    public function delete(Request $request, User $user, EntityManagerInterface $entityManager): Response
-    {
-        if ($this->isCsrfTokenValid('delete'.$user->getIdUser(), $request->request->get('_token'))) {
-            $entityManager->remove($user);
-            $entityManager->flush();
-        }
-
-        return $this->redirectToRoute('app_user_index', [], Response::HTTP_SEE_OTHER);
-    }
 /**
      * @Route("/saisir-duree/{id}", name="saisir_duree")
      */
@@ -320,11 +312,43 @@ class UserController extends AbstractController
     }
  
 
-    #[Route('/prof', name: 'prof')]
+   
+
+
+
+
+
+    /* #[Route('/prof', name: 'prof')]
     public function profileAdmin(): Response
     {
         return $this->render('admin/pAdmin.html.twig'); // Ton template statique
     }                                                       
+    * */
+
+
+    #[Route('/edit-profile', name: 'edit_profile')]
+    public function editProfile(SessionInterface $session, Request $request, EntityManagerInterface $em): Response
+    {
+        $user = $em->getRepository(User::class)->find($session->get('user_id'));
+    
+        if (!$user) {
+            throw $this->createNotFoundException("Utilisateur introuvable.");
+        }
+    
+        $form = $this->createForm(UpdateProfileType::class, $user);
+        $form->handleRequest($request);
+    
+        if ($form->isSubmitted() && $form->isValid()) {
+            $em->flush();
+            $this->addFlash('success', 'Profil mis à jour avec succès.');
+            return $this->redirectToRoute('prof'); // ✅ Redirection vers la page du profil
+        }
+    
+        return $this->render('admin/edit_profile.html.twig', [
+            'form' => $form->createView(),
+            'user' => $user,
+        ]);
+    }
     
 
 
@@ -333,7 +357,32 @@ class UserController extends AbstractController
 
 
 
-
+    #[Route('/prof', name: 'prof')]
+    public function profile(SessionInterface $session, EntityManagerInterface $em): Response
+    {
+        $user = $em->getRepository(User::class)->find($session->get('user_id'));
+    
+        if (!$user) {
+            throw $this->createNotFoundException("Utilisateur introuvable");
+        }
+    
+        // Calcul du pourcentage de complétion
+        $fields = ['firstName', 'lastName', 'email', 'username', 'address', 'numTel', 'imgPath'];
+        $filled = 0;
+        foreach ($fields as $field) {
+            $getter = 'get' . ucfirst($field);
+            if (!empty($user->$getter())) {
+                $filled++;
+            }
+        }
+        $completion = round(($filled / count($fields)) * 100);
+    
+        return $this->render('admin/pAdmin.html.twig', [
+            'user' => $user,
+            'completion' => $completion
+        ]);
+    }
+    
     
     #[Route('/profile/upload-image', name: 'change_profile_picture', methods: ['POST'])]
     public function changeProfilePicture(Request $request, SessionInterface $session, EntityManagerInterface $em): Response
