@@ -121,6 +121,12 @@
             </div>
         {% endfor %}
     </div>
+
+	<!-- 🔍 BOUTON Suggestions -->
+<div class="text-center mt-4"> 
+    <a href="{{ path('suggested_locations', { eventId: event.idEvent }) }}" class="btn btn-outline-secondary">
+        🔍 Explore Suggested Locations
+    </a>
 </div>
 
 {% endblock %}
