@@ -104,9 +104,9 @@ class AuthController extends AbstractController
                     case 'ADMIN':
                         return $this->redirectToRoute('app_user_index');
                     case 'CLIENT':
-                        return $this->redirectToRoute('userpage');
+                        return $this->redirectToRoute('prof');
                     case 'FOURNISSEUR':
-                        return $this->redirectToRoute('FourniPage');
+                        return $this->redirectToRoute('prof');
                    
                     default:
                         return $this->redirectToRoute('homepage');

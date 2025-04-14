@@ -458,8 +458,16 @@
 												<div class="info">
 													<a href="{{ path('prof') }}" style="text-decoration: none; color: inherit;">
 														<div class="image">
-															<img src="/images/profile.png" alt="img"/>
-														</div>
+             {% set img = app.session.get('img') %}
+
+{% if img is not empty %}
+    <img class="rounded-circle" src="{{ asset('uploads/profile_images/' ~ img) }}" alt="Profile image">
+{% else %}
+    <img class="rounded-circle" src="{{ asset('images/profile.png') }}" alt="Default profile image" width="150px">
+{% endif %}
+
+            </div>
+
 														{% if app.session.get('username') %}
 															<p>Bonjour,
 																{{ app.session.get('username') }}</p>
