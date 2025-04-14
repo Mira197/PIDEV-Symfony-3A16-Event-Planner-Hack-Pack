@@ -21,7 +21,7 @@ use Symfony\Component\VarDumper\VarDumper; // pour debug
 final class EventController extends AbstractController
 {
     #[Route(name: 'app_events', methods: ['GET'])]
-    public function index(EventRepository $eventRepository, Request $request,EntityManagerInterface $em): Response
+    public function index(EventRepository $eventRepository, BookingRepository $bookingRepo, Request $request, EntityManagerInterface $em): Response
     {
         //sans session :$events = $eventRepository->findAll(); and remove $em and $user. $events devient:$events = $eventRepository->findAll();
         //avec session: $user = $this->getUser();
@@ -31,6 +31,9 @@ final class EventController extends AbstractController
             if ($event->getImageData()) {
                 $event->base64Image = base64_encode(stream_get_contents($event->getImageData()));
             }
+            //  Injecter statut temporaire :booked/not booked
+            $hasBooking = $bookingRepo->findOneBy(['event' => $event]);
+            $event->status = $hasBooking ? 'booked' : 'not booked';
         }
 
         return $this->render('event/events.html.twig', [
@@ -82,7 +85,7 @@ final class EventController extends AbstractController
     }
 
     #[Route('/{id}', name: 'event_show', methods: ['GET'])]
-    public function show(Event $event, LocationRepository $locationRepo,BookingRepository $bookingRepo,EntityManagerInterface $em): Response
+    public function show(Event $event, LocationRepository $locationRepo, BookingRepository $bookingRepo, EntityManagerInterface $em): Response
     {
         //session : $user = $this->getUser();
         $user = $this->getUser() ?? $em->getRepository(User::class)->find(3);
@@ -103,7 +106,7 @@ final class EventController extends AbstractController
         $availableLocations = array_filter($allLocations, function (Location $loc) use ($event, $bookingRepo) {
             $sameCity = strtolower($loc->getCity()->value) === strtolower($event->getCity());
             $enoughCapacity = $loc->getCapacity() >= $event->getCapacity();
-        
+
             if (!$sameCity || !$enoughCapacity) {
                 return false;
             }
@@ -114,10 +117,10 @@ final class EventController extends AbstractController
         // Injecter base64 pour les locations (si imageData existe)
         foreach ($availableLocations as $loc) {
             if ($loc->getImageData()) {
-            $loc->base64Image = base64_encode(stream_get_contents($loc->getImageData()));
+                $loc->base64Image = base64_encode(stream_get_contents($loc->getImageData()));
             }
         }
-        
+
         return $this->render('event/showEvent.html.twig', [
             'event' => $event,
             'locations' => $availableLocations,
@@ -133,7 +136,7 @@ final class EventController extends AbstractController
         if ($event->getUser() !== $user) {
             throw $this->createAccessDeniedException('You are not allowed to edit this event.');
         }
-        
+
         // 🔁 Base64 si image BLOB SANS filename
         $base64Image = null;
         if ($event->getImageData() && !$event->getImageFilename()) {

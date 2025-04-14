@@ -71,62 +71,76 @@
 
 					<div class="event-details-buttons">
 						<a href="{{ path('app_events') }}" class="main-btn dark-btn-outline btn-hover px-4 py-2 me-2">Back to List</a>
+						<a href="{{ path('booking_list') }}" class="main-btn dark-btn-outline btn-hover px-4 py-2 me-2">Booking List</a>
 						{# Uncomment if needed:
-						                    <a href="{{ path('event_edit', {'id': event.idEvent}) }}" class="main-btn warning-btn-outline btn-hover px-4 py-2 me-2">Edit</a>
-						                    {{ include('event/_delete_form.html.twig') }}
-						                    #}
+												                    <a href="{{ path('event_edit', {'id': event.idEvent}) }}" class="main-btn warning-btn-outline btn-hover px-4 py-2 me-2">Edit</a>
+												                    {{ include('event/_delete_form.html.twig') }}
+												                    #}
 					</div>
 				</div>
 			</div>
 		</div>
-        
+
 	</div>
-    
+
 	{#available locations affichage#}
-    <div class="container mt-5">
-	<h2 class="mb-4">Available Venues</h2>
-    </div>
+	<div class="container mt-5">
+		<h2 class="mb-4">Available Venues</h2>
+	</div>
 	<div class="container mt-4 mb-5">
-    <div class="row">
-        {% for location in locations %}
-            <div class="col-xl-4 col-lg-4 col-md-6 col-sm-6">
-                <div class="event-card">
-                    <div class="event-card-image">
-                        {% if location.base64Image is defined %}
-                            <img src="data:image/jpeg;base64,{{ location.base64Image }}" alt="Location image">
-                        {% elseif location.imageFilename %}
-                            <img src="{{ asset('uploads/' ~ location.imageFilename) }}" alt="Location image">
-                        {% else %}
-                            <img src="{{ asset('images/default.jpg') }}" alt="Default image">
-                        {% endif %}
-                    </div>
-                    <div class="event-card-content">
-                        <h4>{{ location.name }}</h4>
-                        <ul>
-                            <li><strong>🏙 City:</strong> {{ location.city.value }}</li>
-                            <li><strong>👥 Capacity:</strong> {{ location.capacity }}</li>
-                            <li><strong>📐 Dimension:</strong> {{ location.dimension }}</li>
-                            <li><strong>💸 Price:</strong> {{ location.price }} DT</li>
-                        </ul>
-                        <div class="event-card-actions">
-            
-                            <a href="{{ path('booking_new', {'id': event.idEvent}) }}" class="btn btn-primary action-btn details">Book this venue</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        {% else %}
-            <div class="col-12 text-center">
-                <p>No compatible venues found for this event.</p>
-            </div>
-        {% endfor %}
-    </div>
+		<div class="row">
+			{% for location in locations %}
+				<div class="col-xl-4 col-lg-4 col-md-6 col-sm-6">
+					<div class="event-card">
+						<div class="event-card-image">
+							{% if location.base64Image is defined %}
+								<img src="data:image/jpeg;base64,{{ location.base64Image }}" alt="Location image">
+							{% elseif location.imageFilename %}
+								<img src="{{ asset('uploads/' ~ location.imageFilename) }}" alt="Location image">
+							{% else %}
+								<img src="{{ asset('images/default.jpg') }}" alt="Default image">
+							{% endif %}
+						</div>
+						<div class="event-card-content">
+							<h4>{{ location.name }}</h4>
+							<ul>
+								<li>
+									<strong>🏙 City:</strong>
+									{{ location.city.value }}</li>
+								<li>
+									<strong>👥 Capacity:</strong>
+									{{ location.capacity }}</li>
+								<li>
+									<strong>📐 Dimension:</strong>
+									{{ location.dimension }}</li>
+								<li>
+									<strong>💸 Price:</strong>
+									{{ location.price }}
+									DT</li>
+							</ul>
+							<div
+								class="event-card-actions">
 
-	<!-- 🔍 BOUTON Suggestions -->
-<div class="text-center mt-4"> 
-    <a href="{{ path('suggested_locations', { eventId: event.idEvent }) }}" class="btn btn-outline-secondary">
-        🔍 Explore Suggested Locations
-    </a>
-</div>
+								{#<a href="{{ path('booking_new', {'id': event.idEvent}) }}" class="btn btn-primary action-btn details">Book this venue</a>#}
+								<a href="{{ path('booking_new', { id: event.idEvent }) ~ '?location_id=' ~ location.idLocation }}" class="btn btn-primary action-btn details">
+									Book this venue
+								</a>
+							</div>
+						</div>
+					</div>
+				</div>
+			{% else %}
+				<div class="col-12 text-center">
+					<p>No compatible venues found for this event.</p>
+				</div>
+			{% endfor %}
+		</div>
 
-{% endblock %}
+		<!-- 🔍 BOUTON Suggestions -->
+		<div class="text-center mt-4">
+			<a href="{{ path('suggested_locations', { eventId: event.idEvent }) }}" class="btn btn-outline-secondary">
+				🔍 Explore Suggested Locations
+			</a>
+		</div>
+
+	{% endblock %}

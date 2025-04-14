@@ -154,6 +154,57 @@
     background-color: #1f2937;
     color: #fff;
 }
+/* --- Event Status Style --- */
+.event-status {
+    display: inline-block;
+    padding: 5px 12px;
+    font-size: 13px;
+    font-weight: bold;
+    border-radius: 20px;
+    color: #fff;
+    margin-top: 5px;
+}
+
+.event-status.booked {
+    background-color: #d4edda; /* vert */
+    color: #155724;
+    border-radius: 12px;
+    
+}
+
+.event-status.not-booked {
+    background-color: #f8d7da; /* rouge */
+    color: #721c24;
+    border-radius: 12px; 
+    
+}
+
+.event-status i {
+    margin-right: 5px;
+}
+/*booking status style*/
+.badge {
+    font-size: 13px;
+    padding: 6px 12px;
+    border-radius: 12px;
+    font-weight: 500;
+}
+
+.bg-info {
+    background-color: #d0ebff !important;
+    color: #055160;
+}
+
+.bg-success {
+    background-color: #d4edda !important;
+    color: #155724;
+}
+
+.bg-secondary {
+    background-color: #e2e3e5 !important;
+    color: #383d41;
+}
+
 
 
 

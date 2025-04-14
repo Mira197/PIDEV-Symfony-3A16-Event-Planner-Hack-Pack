@@ -1,73 +1,102 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}My Bookings{% endblock %}
+{% block title %}My Bookings
+{% endblock %}
 
 {% block stylesheets %}
-    {{ parent() }}
-    <link rel="stylesheet" href="{{ asset('css/eventcards.css') }}">
+	{{ parent() }}
+	<link rel="stylesheet" href="{{ asset('css/eventcards.css') }}">
 {% endblock %}
 
 {% block content %}
-<header id="fh5co-header" class="fh5co-cover fh5co-cover-sm" role="banner" style="background-image:url('{{ asset('images/eventspage9.jpg') }}');">
-        <div class="overlay"></div>
-        <div class="fh5co-container">
-            <div class="row">
-                <div class="col-md-8 col-md-offset-2 text-center">
-                    <div class="display-t">
-                        <div class="display-tc animate-box" data-animate-effect="fadeIn">
-                            <h1>My Bookings</h1>
-                            <h2>You can now create your events here freely.</h2>
-                            <p>
-										<a href="{{ path('event_new') }}" class="btn btn-default btn-sm">Create Now</a>
-									</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </header>
-<div class="container mt-5">
-<h2 class="mb-4">My Bookings</h2>
-</div>
+	<header id="fh5co-header" class="fh5co-cover fh5co-cover-sm" role="banner" style="background-image:url('{{ asset('images/eventspage9.jpg') }}');">
+		<div class="overlay"></div>
+		<div class="fh5co-container">
+			<div class="row">
+				<div class="col-md-8 col-md-offset-2 text-center">
+					<div class="display-t">
+						<div class="display-tc animate-box" data-animate-effect="fadeIn">
+							<h1>My Bookings</h1>
+							<h2>Manage Your Bookings Freely.</h2>
+							<p>
+								<a href="{{ path('app_events') }}" class="btn btn-default btn-sm">My Events</a>
+							</p>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</header>
+	<div class="container mt-5">
+		<h2 class="mb-4">My Bookings</h2>
+	</div>
 
-<div class="container mt-5 mb-5">
-    <div class="row">
-        {% for booking in bookings %}
-            <div class="col-xl-4 col-lg-4 col-md-6 col-sm-6">
-                <div class="event-card">
-                    <div class="event-card-content">
-                        <h4>{{ booking.event.name }}</h4>
-                        <ul>
-                            <li><strong>📍 Location:</strong> {{ booking.location.name }} ({{ booking.location.city.value }})</li>
-                            <li><strong>📅</strong> {{ booking.startDate|date('d/m/Y H:i') }} → {{ booking.endDate|date('d/m/Y H:i') }}</li>
-                        </ul>
-                        <!-- Action Buttons -->
-                            <div class="event-card-actions">
-                                <button
-                                    class="action-btn edit"
-                                    title="Edit"
-                                    onclick="window.location.href='{{ path('booking_edit', {'id': booking.idBooking}) }}'">
-                                    ✏️
-                                </button>
-                                <!-- Delete -->
-                                {{ include('booking/delete_formBooking.html.twig', { 'booking': booking }) }}
-                                <!-- Details -->
-                                {#<button
-                                    class="action-btn details"
-                                    title="Details"
-                                    onclick="window.location.href='{{ path('event_show', {'id': event.idEvent}) }}'">
-                                    ℹ️
-                                </button>#}
-                            </div>
-                    </div>
-                </div>
-            </div>
-        {% else %}
-            <div class="col-12 text-center">
-                <p>No bookings yet.</p>
-            </div>
-        {% endfor %}
-    </div>
-</div>
+	<div class="container mt-5 mb-5">
+		<div class="row">
+			{% for booking in bookings %}
+				<div class="col-xl-4 col-lg-4 col-md-6 col-sm-6">
+					<div class="event-card">
+						<div class="event-card-content">
+							<h4>{{ booking.event.name }}</h4>
+							<!-- Booking Status Badge -->
+							{% if booking.status == 'upcoming' %}
+								<p>
+									<span class="badge bg-info text-dark">
+										<i class="fas fa-calendar-alt me-1"></i>
+										Upcoming
+									</span>
+								</p>
+							{% elseif booking.status == 'in_progress' %}
+								<p>
+									<span class="badge bg-success">
+										<i class="fas fa-hourglass-half me-1"></i>
+										In Progress
+									</span>
+								</p>
+							{% elseif booking.status == 'completed' %}
+								<p>
+									<span class="badge bg-secondary">
+										<i class="fas fa-check-circle me-1"></i>
+										Completed
+									</span>
+								</p>
+							{% endif %}
+
+							<ul>
+								<li>
+									<strong>📍 Location:</strong>
+									{{ booking.location.name }}
+									({{ booking.location.city.value }})</li>
+								<li>
+									<strong>📅</strong>
+									{{ booking.startDate|date('d/m/Y H:i') }}
+									→
+									{{ booking.endDate|date('d/m/Y H:i') }}</li>
+							</ul>
+							<!-- Action Buttons -->
+							<div class="event-card-actions">
+								<button class="action-btn edit" title="Edit" onclick="window.location.href='{{ path('booking_edit', {'id': booking.idBooking}) }}'">
+									✏️
+								</button>
+								<!-- Delete -->
+								{{ include('booking/delete_formBooking.html.twig', { 'booking': booking }) }}
+							<!-- Details -->
+								{#<button
+																																                                    class="action-btn details"
+																																                                    title="Details"
+																																                                    onclick="window.location.href='{{ path('event_show', {'id': event.idEvent}) }}'">
+																																                                    ℹ️
+																																                                </button>#}
+							</div>
+						</div>
+					</div>
+				</div>
+			{% else %}
+				<div class="col-12 text-center">
+					<p>No bookings yet.</p>
+				</div>
+			{% endfor %}
+		</div>
+	</div>
 
 {% endblock %}

@@ -1,15 +1,15 @@
 {% for location in locations %}
 	<div class="col-md-4 mb-4">
 		<div class="card h-100">
-        {#affichage image avant#}
+			{#affichage image avant#}
 			{#{% if location.imageFilename %}
-				<img src="{{ asset('uploads/' ~ location.imageFilename) }}" class="card-img-top" alt="{{ location.name }}">
-			{% elseif location.base64Image %}
-				<img src="data:image/jpeg;base64,{{ location.base64Image }}" class="card-img-top" alt="{{ location.name }}">
-			{% else %}
-				<div class="card-img-top text-center py-5 bg-light">No Image</div>
-			{% endif %}#}
-			{% if location.base64Image is defined %}
+							<img src="{{ asset('uploads/' ~ location.imageFilename) }}" class="card-img-top" alt="{{ location.name }}">
+						{% elseif location.base64Image %}
+							<img src="data:image/jpeg;base64,{{ location.base64Image }}" class="card-img-top" alt="{{ location.name }}">
+						{% else %}
+							<div class="card-img-top text-center py-5 bg-light">No Image</div>
+						{% endif %}#}
+				{% if location.base64Image is defined %}
 				<img src="data:image/jpeg;base64,{{ location.base64Image }}" class="card-img-top" alt="{{ location.name }}">
 			{% else %}
 				<img src="{{ asset('images/default.jpg') }}" class="card-img-top" alt="{{ location.name }}">
@@ -35,7 +35,11 @@
 						<i class="fas fa-circle-check me-1"></i>
 						{{ location.status }}</span>
 				</p>
-				<a href="{{ path('booking_new', { id: event.idEvent }) }}" class="btn btn-outline-success">Book This Venue</a>
+				{#<a href="{{ path('booking_new', { id: event.idEvent }) }}" class="btn btn-outline-success">Book This Venue</a>#}
+				<a href="{{ path('booking_new', { id: event.idEvent }) ~ '?location_id=' ~ location.idLocation }}" class="btn btn-outline-success">
+					Book This Venue
+				</a>
+
 			</div>
 		</div>
 	</div>
