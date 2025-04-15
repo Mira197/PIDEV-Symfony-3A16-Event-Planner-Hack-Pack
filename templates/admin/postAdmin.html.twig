@@ -1,0 +1,135 @@
+{% extends 'admin/baseAdmin.html.twig' %}
+
+{% block head %}
+	<link rel="stylesheet" href="{{ asset('assetsAya/css/adminOrder.css') }}">
+	{{ parent() }}
+	<style>
+		.hidden-column {
+			display: none;
+		}
+		.publication-img {
+			width: 40px;
+			height: auto;
+			border-radius: 4px;
+			margin-right: 8px;
+		}
+		.checkbox-item {
+			transform: scale(1.2);
+		}
+	</style>
+{% endblock %}
+
+{% block section %}
+	<div class="admin-mui-wrapper">
+		<h2>📰 Publications Management</h2>
+
+		<div class="admin-filters">
+			<div class="left-search">
+				<input type="text" id="adminPublicationSearch" placeholder="🔍 Search publications..." class="form-control">
+			</div>
+			<div class="center-filters">
+				<button class="status-filter active" data-filter="">All</button>
+				<button class="status-filter" data-filter="Inappropriate">Inappropriate</button>
+				<button class="status-filter" data-filter="Appropriate">Appropriate</button>
+			</div>
+			<div class="right-actions">
+				<a href="{{ path('app_publication_new_admin') }}" class="btn btn-outline-secondary">➕ Add Post</a>
+				<button class="btn btn-outline-secondary" id="exportPublicationCsvBtn">⬇️ Export</button>
+				<button type="submit" form="bulkDeleteForm" class="btn btn-outline-danger">🗑️ Delete Selected</button>
+			</div>
+		</div>
+
+		<form method="post" id="bulkDeleteForm" action="{{ path('publication_bulk_delete') }}">
+			<table class="admin-mui-table">
+				<thead>
+					<tr>
+						<th><input type="checkbox" id="checkAll"></th>
+						<th>Title</th>
+						<th>Description</th>
+						<th>User</th>
+						<th>Status</th>
+						<th>Date</th>
+						<th>Actions</th>
+					</tr>
+				</thead>
+				<tbody id="adminPublicationsTable">
+					{% include 'admin/_publication_rows.html.twig' with { publications: publications } %}
+				</tbody>
+			</table>
+		</form>
+	</div>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const searchInput = document.getElementById('adminPublicationSearch');
+    const filters = document.querySelectorAll('.status-filter');
+    let currentFilter = '';
+
+    function fetchPublications(query = '', filter = '') {
+        fetch(`{{ path('admin_publication_search') }}?q=${encodeURIComponent(query)}&status=${encodeURIComponent(filter)}`, {
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(response => response.text())
+        .then(html => {
+            document.getElementById('adminPublicationsTable').innerHTML = html;
+            attachDeleteEvents(); // réattacher delete après maj DOM
+        });
+    }
+
+    searchInput.addEventListener('input', () => {
+        fetchPublications(searchInput.value, currentFilter);
+    });
+
+    filters.forEach(btn => {
+        btn.addEventListener('click', function () {
+            filters.forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            currentFilter = this.dataset.filter;
+            fetchPublications(searchInput.value, currentFilter);
+        });
+    });
+
+    // 👇 Fonction pour gérer la suppression AJAX avec SweetAlert
+    function attachDeleteEvents() {
+        document.querySelectorAll('.delete-btn').forEach(button => {
+            button.addEventListener('click', function () {
+                const id = this.dataset.id;
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: 'This publication will be deleted!',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Yes, delete it!',
+                    cancelButtonText: 'Cancel'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        fetch(`/admin/publication/delete/${id}`, {
+                            method: 'POST',
+                            headers: {
+                                'X-Requested-With': 'XMLHttpRequest',
+                                'Content-Type': 'application/json'
+                            }
+                        }).then(response => {
+                            if (response.ok) {
+                                Swal.fire('Deleted!', '', 'success').then(() => {
+                                    fetchPublications(searchInput.value, currentFilter);
+                                });
+                            } else {
+                                Swal.fire('Error', 'Failed to delete.', 'error');
+                            }
+                        });
+                    }
+                });
+            });
+        });
+    }
+
+    attachDeleteEvents(); // init au chargement
+});
+</script>
+{% endblock %}
+

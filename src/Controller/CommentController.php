@@ -54,7 +54,7 @@ class CommentController extends AbstractController
             $em->flush();
     
             $this->addFlash('success', 'Comment added successfully!');
-            return $this->redirectToRoute('app_forum');
+            return $this->redirectToRoute('app_publication_client', ['comment_success' => 1]);
         }
     
         return $this->render('newComment.html.twig', [
@@ -94,7 +94,7 @@ class CommentController extends AbstractController
                 // Si tout est ok, sauvegarde les modifications
                 $em->flush();
                 $this->addFlash('success', 'Comment updated successfully.');
-                return $this->redirectToRoute('app_forum');
+                return $this->redirectToRoute('app_publication_client', ['comment_edited' => 1]);
             }
         }
     
@@ -116,8 +116,9 @@ public function delete(Comment $comment, EntityManagerInterface $em, Security $s
     $em->flush();
 
     $this->addFlash('success', 'Comment deleted successfully.');
-    return $this->redirectToRoute('app_forum');
+    return $this->redirectToRoute('app_forum', ['comment_deleted' => 1]);
 }
+
 #[Route('/forum', name: 'app_forum')]
 public function forum(EntityManagerInterface $em): Response
 {

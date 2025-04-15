@@ -1,0 +1,108 @@
+{% extends 'admin/baseAdmin.html.twig' %}
+
+{% block head %}
+	<link rel="stylesheet" href="{{ asset('assetsAya/css/adminOrder.css') }}">
+	{{ parent() }}
+	<style>
+		.publication-img {
+			width: 40px;
+			height: auto;
+			border-radius: 4px;
+			margin-right: 8px;
+		}
+		.checkbox-item {
+			transform: scale(1.2);
+		}
+		.comment-text {
+			max-width: 350px;
+			white-space: nowrap;
+			overflow: hidden;
+			text-overflow: ellipsis;
+		}
+	</style>
+{% endblock %}
+
+{% block section %}
+	<div class="admin-mui-wrapper">
+		<h2>💬 Comments Management</h2>
+
+		<div class="admin-filters">
+			<div class="left-search">
+				<input type="text" id="commentSearch" placeholder="🔍 Search comments..." class="form-control">
+			</div>
+			<div class="right-actions">
+				<button class="btn btn-outline-secondary" id="exportCommentsCsvBtn">⬇️ Export </button>
+			</div>
+		</div>
+
+		<table class="admin-mui-table">
+			<thead>
+				<tr>
+					<th>Content</th>
+					<th>Date</th>
+					<th>Publication</th>
+					<th>User</th>
+					<th>Actions</th>
+				</tr>
+			</thead>
+			<tbody id="commentTable">
+				{% for comment in comments %}
+					<tr>
+						<td class="comment-text">{{ comment.content }}</td>
+						<td>{{ comment.comment_date ? comment.comment_date|date('Y-m-d H:i') : '—' }}</td>
+						<td>{{ comment.publication.title ?? '—' }}</td>
+						<td>{{ comment.user.username ?? '—' }}</td>
+						<td>
+							{#<a href="{{ path('app_comment_editAdmin', {'id': comment.comment_id}) }}" class="btn-edit">✏️</a>#}
+							<button type="button" class="btn-delete delete-comment-btn" data-id="{{ comment.comment_id }}">
+								🗑️</button>
+						</td>
+					</tr>
+				{% else %}
+					<tr>
+						<td colspan="5" class="text-center">No comments found.</td>
+					</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+	</div>
+{% endblock %}
+
+{% block javascripts %}
+	{{ parent() }}
+	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+	<script>
+		document.addEventListener('DOMContentLoaded', function () {
+const searchInput = document.getElementById('commentSearch');
+const rows = document.querySelectorAll('#commentTable tr');
+
+searchInput.addEventListener('input', function () {
+const term = this.value.toLowerCase();
+rows.forEach(row => {
+const searchableText = Array.from(row.querySelectorAll('td')).slice(0, 4).map(td => td.innerText.toLowerCase()).join(' ');
+row.style.display = searchableText.includes(term) ? '' : 'none';
+});
+});
+
+const deleteButtons = document.querySelectorAll('.delete-comment-btn');
+deleteButtons.forEach(button => {
+button.addEventListener('click', function () {
+const id = this.dataset.id;
+Swal.fire({
+title: "Are you sure?",
+text: "This comment will be deleted!",
+icon: "warning",
+showCancelButton: true,
+confirmButtonColor: "#533C56",
+cancelButtonColor: "#aaa",
+confirmButtonText: "Yes, delete it"
+}).then((result) => {
+if (result.isConfirmed) {
+window.location.href = `/admin/publication/comment/delete/${id}`;
+}
+});
+});
+});
+});
+	</script>
+{% endblock %}
