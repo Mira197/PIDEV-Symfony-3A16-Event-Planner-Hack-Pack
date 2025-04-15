@@ -89,8 +89,9 @@ class CodePromo
 
     #[ORM\Column(type: 'datetime', nullable: true)]
     #[Assert\NotNull(message: "Expiration date is required.")]
-    #[Assert\Type(\DateTimeInterface::class, message: "Invalid date format.")]
+    #[Assert\Type(\DateTimeInterface::class, message: "The expiration date must be a valid date (yyyy-mm-dd).")]
     #[Assert\GreaterThan("today", message: "The expiration date must be in the future.")]
+
     private ?\DateTimeInterface $date_expiration = null;
 
     public function getDate_expiration(): ?\DateTimeInterface

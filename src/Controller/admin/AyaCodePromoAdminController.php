@@ -87,22 +87,49 @@ class AyaCodePromoAdminController extends AbstractController
 
 
     #[Route('/edit/{id}', name: 'edit', methods: ['POST'])]
-    public function edit(Request $request, CodePromo $codePromo, EntityManagerInterface $em): JsonResponse
-    {
+public function edit(
+    Request $request,
+    CodePromo $codePromo,
+    EntityManagerInterface $em
+): JsonResponse {
+    try {
         $data = json_decode($request->getContent(), true);
 
-        if (!isset($data['code_promo'], $data['pourcentage'], $data['date_expiration'])) {
-            return new JsonResponse(['success' => false, 'message' => 'Missing fields']);
+        $form = $this->createForm(AyaCodePromoType::class, $codePromo);
+        $form->submit($data);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $em->flush();
+            return new JsonResponse(['success' => true]);
         }
 
-        $codePromo->setCodePromo($data['code_promo']);
-        $codePromo->setPourcentage($data['pourcentage']);
-        $codePromo->setDateExpiration(new \DateTime($data['date_expiration']));
+        $errors = [];
+        foreach ($form->getErrors(true, true) as $error) {
+            $field = $error->getOrigin()->getName();
 
-        $em->flush();
+            $mappedField = match ($field) {
+                'code_promo' => 'codePromo',
+                'date_expiration' => 'dateExpiration',
+                'pourcentage'  => 'pourcentage',
+                default => $field
+            };
 
-        return new JsonResponse(['success' => true]);
+            $errors[$mappedField][] = $error->getMessage();
+        }
+
+        return new JsonResponse([
+            'success' => false,
+            'errors' => $errors
+        ]);
+    } catch (\Throwable $e) {
+        return new JsonResponse([
+            'success' => false,
+            'message' => $e->getMessage()
+        ], 500);
     }
+}
+
+
 
 
     #[Route('/delete/{id}', name: 'delete', methods: ['POST'])]
