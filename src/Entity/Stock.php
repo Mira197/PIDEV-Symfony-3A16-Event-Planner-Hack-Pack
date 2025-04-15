@@ -32,10 +32,10 @@ class Stock
     }
 
     #[ORM\Column(type: 'integer', nullable: false)]
-    #[Assert\NotBlank(message: "La quantité disponible est obligatoire.")]
+    #[Assert\NotBlank(message: "Avaible quantity is necessary")]
     #[Assert\GreaterThanOrEqual(
         propertyPath: "minimum_quantity",
-        message: "La quantité disponible doit être supérieure ou égale à la quantité minimale."
+        message: "Avaible quantity must be superior or equal to minimum quantity"
     )]
     private ?int $available_quantity = null;
 
@@ -51,8 +51,8 @@ class Stock
     }
 
     #[ORM\Column(type: 'integer', nullable: false)]
-    #[Assert\NotBlank(message: "La quantité minimale est obligatoire.")]
-    #[Assert\PositiveOrZero(message: "La quantité minimale ne peut pas être négative.")]
+    #[Assert\NotBlank(message: "Minimum quantity is necessary")]
+    #[Assert\PositiveOrZero(message: "Minimum quantity cant be negatif")]
     private ?int $minimum_quantity = null;
 
     public function getMinimum_quantity(): ?int

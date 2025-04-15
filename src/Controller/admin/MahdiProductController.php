@@ -76,11 +76,17 @@ class MahdiProductController extends AbstractController
             //$reference = strtoupper(preg_replace('/\s+/', '', $product->getName())) . '-' . $user->getId() . '-' . time();
             //$product->setReference($reference);
             //$product->setStockId($form->get('stock_id')->getData());
+            $uploadedImage = $request->files->get('image_file');
+                if ($uploadedImage && $uploadedImage->isValid()) {
+                    $imageData = file_get_contents($uploadedImage->getPathname());
+                    $product->setImage($imageData);
+                }
             $em->persist($product);
             $em->flush();
         
             $this->addFlash('success', 'Produit ajouté avec succès !');
             return $this->redirectToRoute('product_add');
+            dump($form->getErrors(true));
         }
         
 
@@ -127,16 +133,69 @@ class MahdiProductController extends AbstractController
         return $this->redirectToRoute('affiche');
     }
     #[Route('/afficheclient', name: 'afficheclient')]
-    public function afficheclient(ProductRepository $productRepository): Response
+    public function index(ProductRepository $productRepository): Response
     {
         $products = $productRepository->findAll();
-
-
-
+        $groupedProducts = [];
+    
+        foreach ($products as $product) {
+            $category = $product->getCategory(); // Assure-toi que getCategory() retourne une string
+            if (!isset($groupedProducts[$category])) {
+                $groupedProducts[$category] = [];
+            }
+            $groupedProducts[$category][] = $product;
+        }
+    
         return $this->render('afficheProduct.html.twig', [
-            'products' => $products,
+            'groupedProducts' => $groupedProducts
         ]);
     }
+    
+
+#[Route('/products', name: 'product_list')]
+public function listProducts(Request $request, ProductRepository $productRepo): Response
+{
+    $category = $request->query->get('category');
+
+    if ($category) {
+        $products = $productRepo->findBy(['category' => $category]);
+    } else {
+        $products = $productRepo->findAll();
+    }
+
+    // Grouper par catégorie
+    $grouped = [];
+    foreach ($products as $product) {
+        $cat = $product->getCategory();
+        $grouped[$cat][] = $product;
+    }
+
+    return $this->render('afficheProduct.html.twig', [
+        'groupedProducts' => $grouped
+    ]);
+}
+#[Route('/products/ajax', name: 'ajax_filter_products')]
+public function ajaxFilterProducts(Request $request, ProductRepository $productRepository): Response
+{
+    $category = $request->query->get('category');
+
+    if ($category) {
+        $products = $productRepository->findBy(['category' => $category]);
+    } else {
+        $products = $productRepository->findAll();
+    }
+
+    // Group by category
+    $groupedProducts = [];
+    foreach ($products as $product) {
+        $cat = $product->getCategory();
+        $groupedProducts[$cat][] = $product;
+    }
+
+    return $this->render('partials/_products.html.twig', [
+        'groupedProducts' => $groupedProducts
+    ]);
+}
 
 
 }
