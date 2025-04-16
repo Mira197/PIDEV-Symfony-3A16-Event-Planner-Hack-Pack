@@ -13,6 +13,8 @@ use App\Entity\Stock;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use App\Entity\User;
 use App\Repository\ProductRepository;
+use Symfony\Component\Security\Core\Security;
+
 
 
 
@@ -60,7 +62,7 @@ class MahdiProductController extends AbstractController
             $stock = $product->getStock();
         if (!$stock) {
             $this->addFlash('error', 'Veuillez sélectionner un stock.');
-            return $this->redirectToRoute('product_add');
+            return $this->redirectToRoute('app_product_list');
         }
         
             //$product->setStockId($stock_id);
@@ -99,9 +101,6 @@ class MahdiProductController extends AbstractController
     public function affiche(ProductRepository $productRepository): Response
     {
         $products = $productRepository->findAll();
-
-
-
         return $this->render('admin/affiche.html.twig', [
             'products' => $products,
         ]);
@@ -122,16 +121,21 @@ class MahdiProductController extends AbstractController
             'editMode' => true,
         ]);
     }
-    #[Route('/admin/product/delete/{id}', name: 'product_delete', methods: ['POST'])]
-    public function delete(Request $request, Product $product, EntityManagerInterface $em): Response
+    #[Route('/admin/product/delete/{id}', name: 'product_delete')]
+    public function delete(Request $request, Product $product, EntityManagerInterface $em,Security $security): Response
     {
-        if ($this->isCsrfTokenValid('delete' . $product->getProduct_id(), $request->request->get('_token'))) {
+        /* if ($product->getUser() !== $security->getUser()) {
+        throw $this->createAccessDeniedException("You are not allowed to delete this product.");
+    }*/
             $em->remove($product);
             $em->flush();
-        }
-
-        return $this->redirectToRoute('affiche');
+            $this->addFlash('success', 'Produit supprimé avec succès !'); 
+    
+        return $this->redirectToRoute('app_product_list');
     }
+   
+   
+    
     #[Route('/afficheclient', name: 'afficheclient')]
     public function index(ProductRepository $productRepository): Response
     {
@@ -196,6 +200,14 @@ public function ajaxFilterProducts(Request $request, ProductRepository $productR
         'groupedProducts' => $groupedProducts
     ]);
 }
+#[Route('/admin/product', name: 'app_product_list')]
+public function listProductsAdmin(ProductRepository $repo): Response
+{
+    $products = $repo->findAll();
+    
+    return $this->render('admin/affiche.html.twig', [
+        'products' => $products,
+    ]);
 
 
-}
+}}

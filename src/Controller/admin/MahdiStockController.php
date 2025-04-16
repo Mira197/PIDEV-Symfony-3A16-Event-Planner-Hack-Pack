@@ -67,7 +67,7 @@ class MahdiStockController extends AbstractController
             $em->flush();
         
             $this->addFlash('success', 'Stock ajouté avec succès !');
-            return $this->redirectToRoute('stock_add');
+            return $this->redirectToRoute('app_product_list');
         }
         
 
@@ -95,7 +95,7 @@ class MahdiStockController extends AbstractController
         $form1->handleRequest($request);
         if ($form1->isSubmitted() && $form1->isValid()) {
             $em->flush();
-            return $this->redirectToRoute('affichestock');
+            return $this->redirectToRoute('app_product_list');
         }
 
         return $this->render('admin/addstock.html.twig', [
@@ -113,7 +113,18 @@ class MahdiStockController extends AbstractController
 
         return $this->redirectToRoute('affichestock');
     }
+    #[Route('/admin/stock', name: 'app_stock_list')]
+public function listStocks(StockRepository $repo): Response
+{
+    $stocks = $repo->findAll();
+    
+    return $this->render('admin/affichestock.html.twig', [
+        'stocks' => $stocks,
+    ]);
+}
 
+        
+     
 
 
 

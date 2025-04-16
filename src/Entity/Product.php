@@ -221,19 +221,6 @@ public function setStock(?Stock $stock): self
     {
         return $this->product_id;
     }
-    #[ORM\Column(type: 'string', nullable: true)]
-    #[Assert\NotBlank(message: "La category est obligatoire.")]
-    private ?string $image_url = null;
-    public function getImageUrl(): ?string
-    {
-        return $this->image_url;
-    }
-
-    public function setImageUrl(?string $image_url): static
-    {
-        $this->image_url = $image_url;
-
-        return $this;
-    }
+    
 
 }
