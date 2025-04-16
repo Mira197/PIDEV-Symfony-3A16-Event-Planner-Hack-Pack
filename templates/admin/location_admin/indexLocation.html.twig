@@ -1,6 +1,7 @@
 {% extends 'admin/baseAdmin.html.twig' %}
 {% block head %}
 	<link rel="stylesheet" href="{{ asset('assetsAya/css/adminOrder.css') }}">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 	{{ parent() }}
 	<style>
 		.pagination {
@@ -92,8 +93,12 @@
 							DT</td>
 						<td>{{ location.status }}</td>
 						<td>
-							<a href="{{ path('location_admin_show', {'id': location.idLocation}) }}" class="btn btn-outline-info btn-sm">👁️</a>
-							<a href="{{ path('location_admin_edit', {'id': location.idLocation}) }}" class="btn btn-outline-warning btn-sm">🖊️</a>
+							<a href="{{ path('location_admin_show', {'id': location.idLocation}) }}" class="btn btn-outline-info btn-sm">
+								<i class="fa-solid fa-circle-info" style="color: #533C56;"></i>
+							</a>
+							<a href="{{ path('location_admin_edit', {'id': location.idLocation}) }}" class="btn btn-outline-warning btn-sm">
+								<i class="fa-solid fa-pen" style="font-size: 14px;color: #533C56;"></i>
+							</a>
 						</td>
 					</tr>
 				{% else %}
@@ -118,10 +123,10 @@
         $('#locationSearchInput').on('keyup', function () {
             let query = $(this).val();
 
-            if (query.trim() === '') {
+            /*if (query.trim() === '') {
                 window.location.reload();
                 return;
-            }
+            }*/
 
             $.ajax({
                 url: "{{ path('location_ajax_search') }}",

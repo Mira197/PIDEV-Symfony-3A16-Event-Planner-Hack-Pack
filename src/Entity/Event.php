@@ -71,6 +71,7 @@ class Event
     #[ORM\Column(type: 'datetime', nullable: false)]
     #[Assert\NotBlank(message: "Start date is required.")]
     #[Assert\Type(type: \DateTimeInterface::class, message: "Start date must be a valid datetime.")]
+    #[Assert\GreaterThanOrEqual("now", message: "Start date cannot be in the past.")]
     private ?\DateTimeInterface $start_date = null;
 
     public function getStart_date(): ?\DateTimeInterface

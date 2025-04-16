@@ -1,6 +1,7 @@
 {% extends 'admin/baseAdmin.html.twig' %}
 {% block head %}
 	<link rel="stylesheet" href="{{ asset('assetsAya/css/adminOrder.css') }}">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 	{{ parent() }}
 {% endblock %}
 
@@ -34,7 +35,9 @@
 						<td>{{ booking.startDate|date('Y-m-d H:i') }}</td>
 						<td>{{ booking.endDate|date('Y-m-d H:i') }}</td>
 						<td>
-							<a href="{{ path('booking_admin_edit', { 'id': booking.idBooking }) }}" class="btn btn-outline-warning btn-sm">🖊️</a>
+							<a href="{{ path('booking_admin_edit', { 'id': booking.idBooking }) }}" class="btn btn-outline-warning btn-sm px-3 py-2">
+								<i class="fa-solid fa-pen" style="font-size: 14px;color: #533C56;"></i>
+							</a>
 							{{ include('admin/booking_admin/delete_formBookingAdmin.html.twig') }}
 						</td>
 					</tr>

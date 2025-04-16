@@ -64,11 +64,13 @@
 
 							<ul>
 								<li>
-									<strong>📍 Location:</strong>
+									<i class="fa-solid fa-location-dot" style="color: #99707E;"></i>
+									<strong>Location:</strong>
 									{{ booking.location.name }}
 									({{ booking.location.city.value }})</li>
 								<li>
-									<strong>📅</strong>
+									<i class="fas fa-calendar-alt me-1"style="color: #99707E;"></i>
+									<strong></strong>
 									{{ booking.startDate|date('d/m/Y H:i') }}
 									→
 									{{ booking.endDate|date('d/m/Y H:i') }}</li>
@@ -76,7 +78,7 @@
 							<!-- Action Buttons -->
 							<div class="event-card-actions">
 								<button class="action-btn edit" title="Edit" onclick="window.location.href='{{ path('booking_edit', {'id': booking.idBooking}) }}'">
-									✏️
+									<i class="fa-solid fa-pen" style="font-size: 14px;color: #cebec9;"></i>
 								</button>
 								<!-- Delete -->
 								{{ include('booking/delete_formBooking.html.twig', { 'booking': booking }) }}

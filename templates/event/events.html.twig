@@ -47,21 +47,27 @@
 							<p>{{ event.description|slice(0, 100) ~ '...' }}</p>
 							<ul>
 								<li>
-									<strong>📍City:</strong>
+									<i class="fa-solid fa-location-dot" style="color: #6b336e;"></i>
+									<strong>City:</strong>
 									{{ event.city }}</li>
 								<li>
-									<strong>👥Capacity:</strong>
+									<i class="fas fa-users me-1" style="color: #6b336e;"></i>
+									<strong>Capacity:</strong>
 									{{ event.capacity }}</li>
 								<li>
-									<strong>🕒Start:</strong>
+									<i class="fas fa-calendar-alt me-1"style="color: #6b336e;"></i>
+									<strong>Start:</strong>
 									{{ event.startDate|date('d/m/Y H:i') }}</li>
 								<li>
-									<strong>🕔End:</strong>
+									<i class="fas fa-clock me-1"style="color: #6b336e;"></i>
+									<strong>End:</strong>
 									{{ event.endDate|date('d/m/Y H:i') }}</li>
 							</ul>
 							<!-- ✅ STATUT -->
 							<p>
-								<strong><i class="fas fa-thumbtack me-1"></i> Status:</strong>
+								<strong>
+									<i class="fas fa-thumbtack me-1"></i>
+									Status:</strong>
 								{% if event.status == 'booked' %}
 									<span class="event-status booked">
 										<i class="fas fa-check-circle me-1"></i>
@@ -77,12 +83,12 @@
 							<!-- Action Buttons -->
 							<div class="event-card-actions">
 								<button class="action-btn edit" title="Edit" onclick="window.location.href='{{ path('event_edit', {'id': event.idEvent}) }}'">
-									✏️
+									<i class="fa-solid fa-pen" style="font-size: 14px;color: #cebec9;"></i>
 								</button>
 								<!-- Delete -->
 								{{ include('event/delete_formEvent.html.twig', { 'event': event }) }}
 								<button class="action-btn details" title="Details" onclick="window.location.href='{{ path('event_show', {'id': event.idEvent}) }}'">
-									ℹ️
+									<i class="fa-solid fa-circle-info" style="font-size: 14px;color: #cebec9;"></i>
 								</button>
 							</div>
 

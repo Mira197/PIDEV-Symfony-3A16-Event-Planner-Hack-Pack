@@ -48,7 +48,11 @@ class BookingAdminController extends AbstractController
     #[Route('/{id}/edit', name: 'booking_admin_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Booking $booking, EntityManagerInterface $em): Response
     {
-        $form = $this->createForm(BookingType::class, $booking);
+        /*$form = $this->createForm(BookingType::class, $booking);*/
+        // ✅ Passe le nom de la location pour l'afficher comme champ en lecture seule
+        $form = $this->createForm(BookingType::class, $booking, [
+            'location_name' => $booking->getLocation()?->getName(),
+        ]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {

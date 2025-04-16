@@ -3,5 +3,5 @@
       style="display:inline;"
       onsubmit="return confirm('Are you sure you want to delete this event?');">
     <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ event.idEvent) }}">
-    <button class="action-btn delete" title="Delete">🗑️</button>
+    <button class="action-btn delete" title="Delete"><i class="fa-solid fa-trash"style="font-size: 14px;color: #cebec9;"></i></button>
 </form>

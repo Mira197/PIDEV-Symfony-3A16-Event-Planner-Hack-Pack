@@ -135,6 +135,52 @@
         transform: translateY(4px);
     }
 }
+/* Custom alert styles for new Booking*/
+.custom-alert {
+    padding: 12px 20px;
+    margin: 20px 0;
+    border-radius: 6px;
+    position: relative;
+    font-size: 14px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.custom-alert-success {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.custom-alert-error,
+.custom-alert-danger {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.custom-alert-icon {
+    margin-right: 10px;
+}
+
+.custom-alert-close {
+    margin-left: 15px;
+    cursor: pointer;
+    font-weight: bold;
+    color: inherit;
+    font-size: 18px;
+}
+/* ✅ Centrage des alertes */
+.alert-wrapper {
+    max-width: 800px;
+    margin: 0 auto;
+    margin-top: 20px;
+    padding: 0 15px;
+}
+
+
 
 
 
