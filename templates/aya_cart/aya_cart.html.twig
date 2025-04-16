@@ -83,11 +83,11 @@
 				<p>Add items to your cart to begin your order.</p>
 				<a href="{{ path('afficheclient') }}" class="btn btn-outline-secondary">Shop Now</a>
 				<a href="{{ path('client_orders') }}" class="text-decoration-none text-dark fw-medium">
-						<span style="font-size: 18px;">🧾Consult Orders →</span>
-					
-					</a>
+					<span style="font-size: 18px;">🧾Consult Orders →</span>
+
+				</a>
 			</div>
-			
+
 
 		{% else %}
 			<div class="row">
@@ -107,6 +107,7 @@
 						<tbody>
 							{% for item in cartProducts %}
 								<tr>
+									
 									<td>
 										<img src="data:image/jpeg;base64,{{ item.getProduct().getBase64Image() }}" alt="{{ item.getProduct().getName() }}"style="width: 50px; height: 50px; object-fit: cover; border-radius: 6px;">
 									</td>
@@ -172,7 +173,7 @@
 					</div>
 					<a href="{{ path('client_orders') }}" class="text-decoration-none text-dark fw-medium">
 						<span style="font-size: 18px;">🧾Consult Orders →</span>
-					
+
 					</a>
 				</div>
 			</div>
