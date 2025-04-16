@@ -8,13 +8,16 @@ use App\Entity\User;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use App\Form\AdminRegisterFormType;
 use App\Form\AuthFormType;
-use App\Form\InscriptionFormType;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Form\FormError;
+use Symfony\Component\HttpClient\HttpClient;
+use App\Form\InscriptionFormType;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+
 use Symfony\Component\Routing\Annotation\Route;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\Form\FormError;
+
 use Symfony\Component\Console\Output\ConsoleOutput;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Security\Core\Security;
@@ -47,8 +50,9 @@ class AuthController extends AbstractController
 
 
     
+
     
-    #[Route('/login', name: 'login')]#[Route('/login', name: 'login')]
+    #[Route('/login', name: 'login')]
     public function login(
         Request $request,
         SessionInterface $session,
@@ -66,86 +70,48 @@ class AuthController extends AbstractController
     
             $user = $entityManager->getRepository(User::class)->findOneBy(['email' => $email]);
     
-            // Check if the email field is empty
-            if (empty($email)) {
-                $form->get('email')->addError(new FormError('L\'email ne peut pas être vide.'));
+            // Récupérer la réponse du reCAPTCHA
+            $recaptchaResponse = $request->get('g-recaptcha-response');
+            $secretKey = '6LcibOYqAAAAAD978kowbYusB7LoAv6f4QLLGZKZ'; // Votre clé secrète
+    
+            // Créer un client HTTP pour interroger Google reCAPTCHA
+            $httpClient = HttpClient::create();
+            $response = $httpClient->request('POST', 'https://www.google.com/recaptcha/api/siteverify', [
+                'query' => [
+                    'secret' => $secretKey,
+                    'response' => $recaptchaResponse,
+                ],
+            ]);
+    
+            $data = $response->toArray();
+    
+            if (!$data['success']) {
+                // Si reCAPTCHA échoue, ajouter une erreur au formulaire
+                $form->get('email')->addError(new FormError('La validation reCAPTCHA a échoué. Veuillez réessayer.'));
+                return $this->render('auth/login.html.twig', [
+                    'form' => $form->createView(),
+                ]);
             }
     
-            // Additional email validation: check for '@' and '.'
-            if (!strpos($email, '@') || !strpos($email, '.')) {
-                $form->get('email')->addError(new FormError('L\'email doit etre  valide.'));
-            }
-    
-            // Check that the part before '@' is at least 3 characters long
-            $emailBeforeAt = substr($email, 0, strpos($email, '@'));
-            if (strlen($emailBeforeAt) < 3) {
-                $form->get('email')->addError(new FormError('L\'email doit etre  valide.'));
-            }
-    
-            // Check if the password field is empty
-            if (empty($plainPassword)) {
-                $form->get('password')->addError(new FormError('Le mot de passe ne peut pas être vide.'));
-            }
-    
-            // Check if the email is valid
-            if ($user) {
-                if (!$passwordHasher->isPasswordValid($user, $plainPassword)) {
-                    $form->get('password')->addError(new FormError('Mot de passe incorrect.'));
-                }
-            } else {
-                $form->get('email')->addError(new FormError('L\'email n\'est pas enregistré.'));
-            }
-    
-            // Check if the account is blocked
-            if ($user && $user->isBlocked()) {
-                $now = new \DateTime();
-                if ($user->getBlockEndDate() !== null && $user->getBlockEndDate() > $now) {
-                    $form->get('email')->addError(new FormError('Votre compte est bloqué jusqu\'au ' . $user->getBlockEndDate()->format('d/m/Y H:i')));
-                    return $this->render('auth/login.html.twig', [
-                        'form' => $form->createView(),
-                    ]);
-                }
-    
-                // Unblocking account if the block date is expired
-                $user->setBlocked(false);
-                $user->setBlockEndDate(null);
-                $entityManager->flush();
-            }
-    
-            // If the form is valid and there are no errors
-            if ($form->isValid() && !$user->isBlocked()) {
-                // Set session variables for the authenticated user
+            // Continuez avec votre logique d'authentification
+            if ($user && $passwordHasher->isPasswordValid($user, $plainPassword)) {
+                // Authentification réussie
                 $session->set('user_id', $user->getIdUser());
                 $session->set('username', $user->getUsername());
-                $session->set('email', $user->getEmail());
-                $session->set('first_name', $user->getFirstName());
-                $session->set('last_name', $user->getLastName());
-                $session->set('phone', $user->getNumTel());
-                $session->set('img', $user->getImgPath());
+                // Ajoutez les autres informations nécessaires
     
-                // Redirect based on user role
-                switch ($user->getRole()) {
-                    case 'ADMIN':
-                        return $this->redirectToRoute('app_user_index');
-                    case 'CLIENT':
-                        return $this->redirectToRoute('prof');
-                    case 'FOURNISSEUR':
-                        return $this->redirectToRoute('prof');
-                    default:
-                        return $this->redirectToRoute('homepage');
-                }
+                return $this->redirectToRoute('homepage');
             }
-            
-            // If the form is invalid, stay on the same page with error messages
-            if (!$form->isValid()) {
-                $form->get('email')->addError(new FormError('Veuillez vérifier les champs et réessayer.'));
-            }
+    
+            // Si les informations sont incorrectes
+            $form->get('email')->addError(new FormError('Email ou mot de passe incorrect.'));
         }
     
         return $this->render('auth/login.html.twig', [
             'form' => $form->createView(),
         ]);
     }
+    
     
     
     

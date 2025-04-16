@@ -27,6 +27,7 @@
 				margin-bottom: 20px;
 			}
 		</style>
+		  <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 	</head>
 	<body>
 		<div class="wrapper" style="background-image: url('{{ asset('img/output-onlinepngtools.png') }}');">
@@ -47,6 +48,8 @@
 					<div class="forgot-pass">
 						<a href="#">mot de passe oublié ?</a>
 					</div>
+					 <!-- Ajout du widget reCAPTCHA -->
+    <div class="g-recaptcha" data-sitekey="6LcibOYqAAAAAN6gkKprKoPYsQOlIOGF9bBHuN_2"></div>
 					{{ form_row(form.submit, {'attr': {'class': 'button'}}) }}
 
 					<div class="signup">
