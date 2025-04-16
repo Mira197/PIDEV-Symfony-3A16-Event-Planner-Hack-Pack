@@ -10,6 +10,8 @@ use Symfony\Component\Routing\Annotation\Route;
 use App\Form\BookingType;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 
 #[Route('/admin/booking')]
 class BookingAdminController extends AbstractController
@@ -24,10 +26,33 @@ class BookingAdminController extends AbstractController
         ]);
     }
 
+    #[Route('/ajax/search', name: 'booking_ajax_search', methods: ['GET'])]
+    public function ajaxSearch(Request $request, BookingRepository $bookingRepo, NormalizerInterface $normalizer): JsonResponse
+    {
+        $keyword = $request->query->get('q', '');
+        $bookings = $bookingRepo->searchByKeyword($keyword);
+
+        $json = $normalizer->normalize($bookings, 'json', [
+            'attributes' => [
+                'idBooking',
+                'startDate',
+                'endDate',
+                'event' => ['name'],
+                'location' => ['name']
+            ]
+        ]);
+
+        return new JsonResponse($json);
+    }
+
     #[Route('/{id}/edit', name: 'booking_admin_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Booking $booking, EntityManagerInterface $em): Response
     {
-        $form = $this->createForm(BookingType::class, $booking);
+        /*$form = $this->createForm(BookingType::class, $booking);*/
+        // ✅ Passe le nom de la location pour l'afficher comme champ en lecture seule
+        $form = $this->createForm(BookingType::class, $booking, [
+            'location_name' => $booking->getLocation()?->getName(),
+        ]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {

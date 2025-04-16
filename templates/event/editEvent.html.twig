@@ -1,35 +1,48 @@
 {% extends 'base.html.twig' %}
-{% block title %}Edit Event{% endblock %}
+{% block title %}Edit Event
+{% endblock %}
 
 {% block stylesheets %}
-    {{ parent() }}
-    <link rel="stylesheet" href="{{ asset('css/eventform.css') }}">
+	{{ parent() }}
+	<link rel="stylesheet" href="{{ asset('css/eventform.css') }}">
 {% endblock %}
 {% block content %}
-    <header id="fh5co-header" class="fh5co-cover fh5co-cover-sm" role="banner" style="background-image:url('{{ asset('images/eventspage8.jpg') }}');">
-        <div class="overlay"></div>
-        <div class="fh5co-container">
-            <div class="row">
-                <div class="col-md-8 col-md-offset-2 text-center">
-                    <div class="display-t">
-                        <div class="display-tc animate-box" data-animate-effect="fadeIn">
-                            <h1>Events Page</h1>
-                            <h2>You can now create your events here freely.</h2>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </header>
-    <!-- Section Title + Back Button -->
-    <div class="title-wrapper pt-30">
-    <div class="title-bar">
-        <div class="title">
-            <h2>Edit Event</h2>
-        </div>
-        <a href="{{ path('app_events') }}" class="main-btn dark-btn-outline btn-hover px-4 py-2">Back to list</a>
-        {#{{ include('admin/location_admin/delete_form.html.twig') }}#}
-    </div>
-</div>
-    {{ include('event/formEvent.html.twig', {'button_label': 'Update'}) }}
+	<header id="fh5co-header" class="fh5co-cover fh5co-cover-sm" role="banner" style="background-image:url('{{ asset('images/eventspage8.jpg') }}');">
+		<div class="overlay"></div>
+		<div class="fh5co-container">
+			<div class="row">
+				<div class="col-md-8 col-md-offset-2 text-center">
+					<div class="display-t">
+						<div class="display-tc animate-box" data-animate-effect="fadeIn">
+							<h1>Events Page</h1>
+							<h2>You can now create your events here freely.</h2>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</header>
+	<!-- Section Title + Back Button -->
+	<div id="create-form" class="title-wrapper pt-30">
+		<div class="title-bar">
+			<div class="title">
+				<h2>Edit Event</h2>
+			</div>
+			<a href="{{ path('app_events') }}" class="main-btn dark-btn-outline btn-hover px-4 py-2">Back to list</a>
+			{#{{ include('admin/location_admin/delete_form.html.twig') }}#}
+		</div>
+	</div>
+	{{ include('event/formEvent.html.twig', {'button_label': 'Update'}) }}
+{% endblock %}
+{#pour defiler automatiqument vers le form#}
+{% block javascripts %}
+	{{ parent() }}
+	<script>
+		document.addEventListener('DOMContentLoaded', function () {
+            const target = document.getElementById('create-form');
+            if (target) {
+                target.scrollIntoView({behavior: 'smooth'});
+            }
+        });
+	</script>
 {% endblock %}

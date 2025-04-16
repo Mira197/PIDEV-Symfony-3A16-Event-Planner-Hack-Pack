@@ -10,14 +10,43 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
+use Knp\Component\Pager\PaginatorInterface; // Pagination
 
 #[Route('/admin/event')]
 class EventAdminController extends AbstractController
 {
     #[Route('/', name: 'event_admin_index', methods: ['GET'])]
-    public function index(EventRepository $eventRepository): Response
+    public function index(Request $request, EventRepository $eventRepository, PaginatorInterface $paginator): Response
     {
-        $events = $eventRepository->findAll();
+        $query = $eventRepository->createQueryBuilder('e')
+            ->orderBy('e.start_date', 'DESC')
+            ->getQuery();
+
+        $pagination = $paginator->paginate(
+            $query,
+            $request->query->getInt('page', 1),
+            5
+        );
+
+        // Convertir les images en base64 si nécessaire
+        foreach ($pagination as $event) {
+            if ($event->getImageData()) {
+                $event->base64Image = base64_encode(stream_get_contents($event->getImageData()));
+            }
+        }
+
+        return $this->render('admin/event_admin/indexEventAdmin.html.twig', [
+            'events' => $pagination,
+        ]);
+    }
+
+    #[Route('/ajax/search', name: 'event_ajax_search', methods: ['GET'])]
+    public function ajaxSearch(Request $request, EventRepository $eventRepository, NormalizerInterface $normalizer): JsonResponse
+    {
+        $keyword = $request->query->get('q', '');
+        $events = $eventRepository->searchByKeyword($keyword)->getQuery()->getResult();
 
         // Convertir les images en base64 si nécessaire
         foreach ($events as $event) {
@@ -26,23 +55,37 @@ class EventAdminController extends AbstractController
             }
         }
 
-        return $this->render('admin/event_admin/indexEventAdmin.html.twig', [
-            'events' => $events,
+        $json = $normalizer->normalize($events, 'json', [
+            'attributes' => [
+                'idEvent',
+                'name',
+                'city',
+                'capacity',
+                'startDate',
+                'endDate',
+                'imageFilename',
+                'base64Image'
+            ]
         ]);
+
+        return new JsonResponse($json);
     }
 
     #[Route('/{id}', name: 'event_admin_show', methods: ['GET'])]
     public function show(Event $event): Response
     {
         // Convertir en base64 si image BLOB sans filename
-        $base64Image = null;
+        /*$base64Image = null;
         if ($event->getImageData() && !$event->getImageFilename()) {
             $base64Image = base64_encode(stream_get_contents($event->getImageData()));
+        }*/
+        if ($event->getImageData()) {
+            $event->base64Image = base64_encode(stream_get_contents($event->getImageData()));
         }
 
         return $this->render('admin/event_admin/showEventAdmin.html.twig', [
             'event' => $event,
-            'base64Image' => $base64Image,
+            //'base64Image' => $base64Image,
         ]);
     }
 

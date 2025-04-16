@@ -2,16 +2,16 @@
     {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
 
     <div class="select-style-1">
-        {{ form_label(form.location) }}
+        {{ form_label(form.locationName) }}
         <div class="select-position">
-            {{ form_widget(form.location, {
+            {{ form_widget(form.locationName, {
                 'attr': {
-                    'class': form_errors(form.location) ? 'is-invalid' : ''
+                    'class': form_errors(form.locationName) ? 'is-invalid' : ''
                 }
             }) }}
         </div>
-        {% if form_errors(form.location) %}
-            <div class="form-error">{{ form_errors(form.location) }}</div>
+        {% if form_errors(form.locationName) %}
+            <div class="form-error">{{ form_errors(form.locationName) }}</div>
         {% endif %}
     </div>
 

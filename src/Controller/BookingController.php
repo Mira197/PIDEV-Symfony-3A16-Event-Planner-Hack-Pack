@@ -34,11 +34,26 @@ class BookingController extends AbstractController
         }
 
         $booking = new Booking();
-        $form = $this->createForm(BookingType::class, $booking);
+
+        // 👉 Récupérer la location choisie via une requête GET
+        $locationId = $request->query->get('location_id');
+        $location = $em->getRepository(Location::class)->findOneBy([
+            'id_location' => $locationId
+        ]);
+        if (!$location) {
+            $this->addFlash('error', 'No location selected.');
+            return $this->redirectToRoute('suggested_locations', ['eventId' => $event->getIdEvent()]);
+        }
+        $booking->setLocation($location);
+
+        /*$form = $this->createForm(BookingType::class, $booking);*/
+        $form = $this->createForm(BookingType::class, $booking, [
+            'location_name' => $location->getName(),
+        ]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $location = $booking->getLocation();
+            /*$location = $booking->getLocation();*/
             $start = $booking->getStartDate();
             $end = $booking->getEndDate();
 
@@ -69,6 +84,18 @@ class BookingController extends AbstractController
         $events = $em->getRepository(Event::class)->findBy(['user' => $user]);
         $bookings = $em->getRepository(Booking::class)->findBy(['event' => $events]);
 
+        // 🕒 Calcul du statut de chaque réservation (sans modifier l'entité)
+        $now = new \DateTime();
+        foreach ($bookings as $booking) {
+            if ($booking->getStartDate() > $now) {
+                $booking->status = 'upcoming';
+            } elseif ($booking->getEndDate() < $now) {
+                $booking->status = 'completed';
+            } else {
+                $booking->status = 'in_progress';
+            }
+        }
+
         return $this->render('booking/listBooking.html.twig', [
             'bookings' => $bookings,
         ]);
@@ -84,7 +111,10 @@ class BookingController extends AbstractController
             throw $this->createAccessDeniedException('You are not allowed to edit this booking.');
         }
 
-        $form = $this->createForm(BookingType::class, $booking);
+        /*$form = $this->createForm(BookingType::class, $booking);*/
+        $form = $this->createForm(BookingType::class, $booking, [
+            'location_name' => $booking->getLocation()?->getName(),
+        ]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
