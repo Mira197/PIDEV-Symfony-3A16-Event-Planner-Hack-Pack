@@ -42,6 +42,9 @@
 			rel="stylesheet" href="css/owl.theme.default.min.css">
 			<!-- Theme style  -->
 			<link rel="stylesheet" href="css/style.css">
+			<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+			<link
+				rel="stylesheet" href="{{ asset('css/AyaCSS.css') }}">
 
 		{% endblock %}
 	</head>
@@ -73,14 +76,15 @@
 
 									<ul class="dropdown">
 										<li>
-											<a href="#">Events</a>
+											<a href="{{ path('app_events') }}">Events</a>
 										</li>
 										<li>
-											<a href="#">Products</a>
+											<a href="{{ path('afficheclient') }}">Products</a>
 										</li>
-										<li>
-											<a href="#">Forum</a>
+										<li class="{% if app.request.attributes.get('_route') == 'app_publication_client' %}active{% endif %}">
+											<a href="{{ path('app_publication_client') }}">Forum</a>
 										</li>
+
 									</ul>
 								</li>
 								<li class="has-dropdown {% if app.request.attributes.get('_route') == 'app_gallery' %}active{% endif %}">
@@ -94,8 +98,62 @@
 								<li class="{% if app.request.attributes.get('_route') == 'contact_us' %}active{% endif %}">
 									<a href="{{ path('contact_us') }}" class="btn-signin">Sign in</a>
 								</li>
-								<li class="{% if app.request.attributes.get('_route') == 'contact_us' %}active{% endif %}">
-									<a href="{{ path('contact_us') }}" class="dripicon-cart">Q</a>
+								
+								{% set summary = aya_cart_summary() %}
+								<li class="nav-item-cart" id="aya-cart-hover" style="position: relative;">
+									<a href="{{ path('aya_cart') }}" style="position: relative;">
+										<i class="dripicon-cart" style="font-size: 22px;">Q</i>
+										{% if summary.cartProducts is not empty %}
+											<span class="aya-cart-badge">{{ summary.cartProducts|length }}</span>
+										{% endif %}
+									</a>
+
+									<div class="aya-cart-preview">
+										{% if summary.cartProducts is not empty %}
+											<div class="cart-items-list">
+												{% for item in summary.cartProducts %}
+													<div class="preview-item">
+														<img src="data:image/jpeg;base64,{{ item.getProduct().getImage() }}" class="product-thumb" alt="{{ item.getProduct().getName() }}">
+														<div class="item-info">
+															<strong class="product-name">{{ item.getProduct().getName() }}</strong>
+															<div class="item-meta">
+																x{{ item.getQuantity() }}
+																•
+																{{ item.getTotalPrice() }}
+																TND
+															</div>
+														</div>
+													</div>
+												{% endfor %}
+											</div>
+
+											<hr class="preview-divider">
+											<div class="cart-total">
+												<span>Total:</span>
+												<strong>{{ summary.total }}
+													TND</strong>
+											</div>
+
+											<div class="cart-actions">
+												<a href="{{ path('aya_cart') }}" class="btn-view-cart">🛒 View Cart</a>
+											</div>
+										{% else %}
+											<div class="preview-empty">
+												<img src="{{ asset('images/empty-cart.png') }}" alt="Cart Empty">
+												<p>
+													<strong>Shopping cart is Empty</strong>
+												</p>
+												<p class="empty-note">
+													Welcome back! If you had items in your cart, we saved them for you.<br>
+													<a href="{{ path('contact_us') }}">
+														<u>SIGN IN</u>
+													</a>
+													now to see them.
+												</p>
+											</div>
+										{% endif %}
+									</div>
+
 								</li>
 							</ul>
 						</div>
@@ -109,17 +167,16 @@
 			<div id="preloader">
 				<div class="spinner"></div>
 			</div>
-			<header id="fh5co-header" class="fh5co-cover" role="banner" style="position: relative; height: 100vh; overflow: hidden;">
-				<img src="{{ asset('images/gallery-6.jpg') }}" alt="Background image" style="position: absolute; top: 0; left: 0; min-width: 100%; min-height: 100%; object-fit: cover; z-index: -1;">
+			<header id="fh5co-header" class="fh5co-cover fh5co-cover-sm" role="banner" style="background-image:url('{{ asset('images/eventspage9.jpg') }}');">
 				<div class="overlay"></div>
-				<div class="container">
+				<div class="fh5co-container">
 					<div class="row">
 						<div class="col-md-8 col-md-offset-2 text-center">
 							<div class="display-t">
 								<div class="display-tc animate-box" data-animate-effect="fadeIn">
-									<h1>List Of Product</h1>
-									<div class="simply-countdown simply-countdown-one"></div>
-
+									<h1>List of Products</h1>
+								   
+									
 								</div>
 							</div>
 						</div>
@@ -136,9 +193,21 @@
 					<div class="title-wrapper pt-30">
 						<div class="row align-items-center">
 							<div class="col-md-6">
-								<div class="title">
-									<h2>All Products</h2>
-								</div>
+								
+								<form id="filter-form" class="mb-4">
+									<div class="row justify-content-center">
+										<div class="col-md-4">
+											<select name="category" id="category" class="form-control">
+												<option value="">All Categories</option>
+												{% for category in groupedProducts|keys %}
+													<option value="{{ category }}">{{ category }}</option>
+												{% endfor %}
+											</select>
+										</div>
+									</div>
+								</form>
+								
+								
 							</div>
 						</div>
 					</div>
@@ -146,40 +215,19 @@
 					<div class="row">
 						<div class="col-12">
 							<div class="title mt-30 mb-30">
-								<h2>Cards</h2>
+								
 							</div>
 						</div>
 
-						{% for product in products %}
-							<div class="col-xl-4 col-lg-4 col-md-6 col-sm-6">
-								<div class="card-style-2 mb-30">
-									<div class="card-image">
-										<a href="#">
-											{% if product.imageUrl %}
-												<img src="{{ asset(product.imageUrl) }}" alt="{{ product.name }}"/>
-											{% else %}
-												<img src="{{ asset('admin/images/cards/default.jpg') }}" alt="No image"/>
-											{% endif %}
-										</a>
-									</div>
-									<div class="card-content">
-										<h4>
-											<a href="#">{{ product.name }}</a>
-										</h4>
-										<p>{{ product.description|length > 120 ? product.description|slice(0, 120) ~ '...' : product.description }}</p>
+						<div id="product-list">
+							{% include 'partials/_products.html.twig' %}
+						</div>
+						
 
-										<!-- Add to cart button -->
-										<form action="{{ path('aya_cart_add', {'id': product.product_id}) }}" method="post">
-											<button type="submit" class="btn btn-primary">Add to Cart</button>
-										</form>
-									</div>
-								</div>
-							</div>
-						{% endfor %}
-
-						{% if products is empty %}
-							<p class="text-center">No products available.</p>
-						{% endif %}
+		{% if groupedProducts is empty %}
+		<p class="text-center">No products available.</p>
+	{% endif %}
+	
 
 					</div>
 				</section>
@@ -861,6 +909,54 @@ padding: 20
 });
 // =========== chart four end
 			</script>
+			<!-- jQuery -->
+<script src="{{ asset('js/jquery.min.js') }}"></script>
+<!-- jQuery Easing -->
+<script src="{{ asset('js/jquery.easing.1.3.js') }}"></script>
+<!-- Bootstrap -->
+<script src="{{ asset('js/bootstrap.min.js') }}"></script>
+<!-- Waypoints -->
+<script src="{{ asset('js/jquery.waypoints.min.js') }}"></script>
+<!-- Carousel -->
+<script src="{{ asset('js/owl.carousel.min.js') }}"></script>
+<!-- countTo -->
+<script src="{{ asset('js/jquery.countTo.js') }}"></script>
+
+<!-- Stellar -->
+<script src="{{ asset('js/jquery.stellar.min.js') }}"></script>
+<!-- Magnific Popup -->
+<script src="{{ asset('js/jquery.magnific-popup.min.js') }}"></script>
+<script src="{{ asset('js/magnific-popup-options.js') }}"></script>
+
+<!-- // <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/0.0.1/prism.min.js"></script> -->
+<script src="{{ asset('js/simplyCountdown.js') }}"></script>
+<script>
+	document.addEventListener('DOMContentLoaded', function () {
+		window.scrollTo({
+			top: 500,
+			behavior: 'smooth'
+		});
+	});
+</script>
+<!-- Main -->
+<script src="{{ asset('js/main.js') }}"></script>
+
+			<script>
+				document.getElementById('category').addEventListener('change', function () {
+					const selectedCategory = this.value;
+				
+					fetch('{{ path("ajax_filter_products") }}?category=' + encodeURIComponent(selectedCategory), {
+						headers: {
+							'X-Requested-With': 'XMLHttpRequest'
+						}
+					})
+					.then(response => response.text())
+					.then(html => {
+						document.getElementById('product-list').innerHTML = html;
+					});
+				});
+				</script>
+				
 			<style>
 				.card-image img {
 					width: 100%;

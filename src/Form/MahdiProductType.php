@@ -34,7 +34,7 @@ class MahdiProductType extends AbstractType
                 'label' => 'Stock',
                 'required' => true,
             ])
-            ->add('imageUrl', TextType::class)
+            
             ->add('category', TextType::class);
     }
 

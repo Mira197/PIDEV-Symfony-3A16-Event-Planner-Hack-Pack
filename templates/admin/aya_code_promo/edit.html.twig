@@ -6,12 +6,11 @@
         <div class="card-style mb-30">
             <h4 class="mb-4">Edit Promo Code</h4>
 
-            {{ form_start(form) }}
-
+            {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
             <div class="mb-3">
-                {{ form_label(form.codePromo, 'Code') }}
-                {{ form_widget(form.codePromo, {'attr': {'class': 'form-control'}}) }}
-                {{ form_errors(form.codePromo) }}
+                {{ form_label(form.code_promo, 'Code') }}
+                {{ form_widget(form.code_promo, {'attr': {'class': 'form-control'}}) }}
+                {{ form_errors(form.code_promo) }}
             </div>
 
             <div class="mb-3">

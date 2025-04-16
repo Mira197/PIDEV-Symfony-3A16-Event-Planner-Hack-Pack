@@ -36,8 +36,13 @@
               
 
                 <div>
-                    <button type="submit" class="btn btn-primary">            {{ editMode is defined and editMode ? 'Update Stock' : 'Add Stock' }}
+                    <button type="submit" class="main-btn primary-btn btn-hover">            {{ editMode is defined and editMode ? 'Update Stock' : 'Add Stock' }}
                     </button>
+                    
+                    <a href="{{ path('affichestock') }}" class="main-btn primary-btn btn-hover">
+                        List of stocks
+                      </a>
+                    
                 </div>
             {{ form_end(form) }}
         </div>

@@ -13,6 +13,8 @@ use App\Entity\Stock;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use App\Entity\User;
 use App\Repository\ProductRepository;
+use Symfony\Component\Security\Core\Security;
+
 
 
 
@@ -60,7 +62,7 @@ class MahdiProductController extends AbstractController
             $stock = $product->getStock();
         if (!$stock) {
             $this->addFlash('error', 'Veuillez sélectionner un stock.');
-            return $this->redirectToRoute('product_add');
+            return $this->redirectToRoute('app_product_list');
         }
         
             //$product->setStockId($stock_id);
@@ -76,11 +78,17 @@ class MahdiProductController extends AbstractController
             //$reference = strtoupper(preg_replace('/\s+/', '', $product->getName())) . '-' . $user->getId() . '-' . time();
             //$product->setReference($reference);
             //$product->setStockId($form->get('stock_id')->getData());
+            $uploadedImage = $request->files->get('image_file');
+                if ($uploadedImage && $uploadedImage->isValid()) {
+                    $imageData = file_get_contents($uploadedImage->getPathname());
+                    $product->setImage($imageData);
+                }
             $em->persist($product);
             $em->flush();
         
             $this->addFlash('success', 'Produit ajouté avec succès !');
             return $this->redirectToRoute('product_add');
+            dump($form->getErrors(true));
         }
         
 
@@ -93,9 +101,6 @@ class MahdiProductController extends AbstractController
     public function affiche(ProductRepository $productRepository): Response
     {
         $products = $productRepository->findAll();
-
-
-
         return $this->render('admin/affiche.html.twig', [
             'products' => $products,
         ]);
@@ -116,27 +121,93 @@ class MahdiProductController extends AbstractController
             'editMode' => true,
         ]);
     }
-    #[Route('/admin/product/delete/{id}', name: 'product_delete', methods: ['POST'])]
-    public function delete(Request $request, Product $product, EntityManagerInterface $em): Response
+    #[Route('/admin/product/delete/{id}', name: 'product_delete')]
+    public function delete(Request $request, Product $product, EntityManagerInterface $em,Security $security): Response
     {
-        if ($this->isCsrfTokenValid('delete' . $product->getProduct_id(), $request->request->get('_token'))) {
+        /* if ($product->getUser() !== $security->getUser()) {
+        throw $this->createAccessDeniedException("You are not allowed to delete this product.");
+    }*/
             $em->remove($product);
             $em->flush();
-        }
-
-        return $this->redirectToRoute('affiche');
+            $this->addFlash('success', 'Produit supprimé avec succès !'); 
+    
+        return $this->redirectToRoute('app_product_list');
     }
+   
+   
+    
     #[Route('/afficheclient', name: 'afficheclient')]
-    public function afficheclient(ProductRepository $productRepository): Response
+    public function index(ProductRepository $productRepository): Response
     {
         $products = $productRepository->findAll();
-
-
-
+        $groupedProducts = [];
+    
+        foreach ($products as $product) {
+            $category = $product->getCategory(); // Assure-toi que getCategory() retourne une string
+            if (!isset($groupedProducts[$category])) {
+                $groupedProducts[$category] = [];
+            }
+            $groupedProducts[$category][] = $product;
+        }
+    
         return $this->render('afficheProduct.html.twig', [
-            'products' => $products,
+            'groupedProducts' => $groupedProducts
         ]);
     }
+    
 
+#[Route('/products', name: 'product_list')]
+public function listProducts(Request $request, ProductRepository $productRepo): Response
+{
+    $category = $request->query->get('category');
 
+    if ($category) {
+        $products = $productRepo->findBy(['category' => $category]);
+    } else {
+        $products = $productRepo->findAll();
+    }
+
+    // Grouper par catégorie
+    $grouped = [];
+    foreach ($products as $product) {
+        $cat = $product->getCategory();
+        $grouped[$cat][] = $product;
+    }
+
+    return $this->render('afficheProduct.html.twig', [
+        'groupedProducts' => $grouped
+    ]);
 }
+#[Route('/products/ajax', name: 'ajax_filter_products')]
+public function ajaxFilterProducts(Request $request, ProductRepository $productRepository): Response
+{
+    $category = $request->query->get('category');
+
+    if ($category) {
+        $products = $productRepository->findBy(['category' => $category]);
+    } else {
+        $products = $productRepository->findAll();
+    }
+
+    // Group by category
+    $groupedProducts = [];
+    foreach ($products as $product) {
+        $cat = $product->getCategory();
+        $groupedProducts[$cat][] = $product;
+    }
+
+    return $this->render('partials/_products.html.twig', [
+        'groupedProducts' => $groupedProducts
+    ]);
+}
+#[Route('/admin/product', name: 'app_product_list')]
+public function listProductsAdmin(ProductRepository $repo): Response
+{
+    $products = $repo->findAll();
+    
+    return $this->render('admin/affiche.html.twig', [
+        'products' => $products,
+    ]);
+
+
+}}

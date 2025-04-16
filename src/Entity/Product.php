@@ -31,7 +31,7 @@ class Product
     }
 
     #[ORM\Column(type: 'string', nullable: false)]
-    #[Assert\NotBlank(message: "Le nom du produit est obligatoire.")]
+    #[Assert\NotBlank(message: "You must enter the name")]
     private ?string $name = null;
 
     public function getName(): ?string
@@ -46,7 +46,7 @@ class Product
     }
 
     #[ORM\Column(type: 'text', nullable: true)]
-    #[Assert\NotBlank(message: "La description est requise.")]
+    #[Assert\NotBlank(message: "Description is required")]
     private ?string $description = null;
 
     public function getDescription(): ?string
@@ -61,8 +61,8 @@ class Product
     }
 
     #[ORM\Column(type: 'float', nullable: true)]
-    #[Assert\NotBlank(message: "Le prix est obligatoire.")]
-    #[Assert\PositiveOrZero(message: "Le prix ne peut pas être négatif.")]
+    #[Assert\NotBlank(message: "Price is necessary")]
+    #[Assert\PositiveOrZero(message: "Price must be positif.")]
     private ?float $price = null;
 
     public function getPrice(): ?float
@@ -103,25 +103,36 @@ public function setStock(?Stock $stock): self
     $this->stock = $stock;
     return $this;
 }
+#[ORM\Column(type: 'blob', nullable: true)]
+    private $image;
 
-    #[ORM\Column(type: 'string', nullable: true)]
-    #[Assert\NotBlank(message: "L'image est obligatoire.")]
-
-    private ?string $image_url = null;
-
-    public function getImage_url(): ?string
+    public function getImage()
     {
-        return $this->image_url;
+    return $this->image;
     }
 
-    public function setImage_url(?string $image_url): self
+    public function setImage($image): self
     {
-        $this->image_url = $image_url;
-        return $this;
+    $this->image = $image;
+    return $this;
     }
+
+    public function getBase64Image(): ?string
+    {
+        if (!$this->image) {
+            return null;
+        }
+    
+        if (is_resource($this->image)) {
+            return base64_encode(stream_get_contents($this->image));
+        }
+    
+        return base64_encode($this->image);
+    }
+    
 
     #[ORM\Column(type: 'string', nullable: false)]
-    #[Assert\NotBlank(message: "La category est obligatoire.")]
+    #[Assert\NotBlank(message: "Category is necessary")]
     private ?string $category = null;
 
     public function getCategory(): ?string
@@ -210,17 +221,6 @@ public function setStock(?Stock $stock): self
     {
         return $this->product_id;
     }
-
-    public function getImageUrl(): ?string
-    {
-        return $this->image_url;
-    }
-
-    public function setImageUrl(?string $image_url): static
-    {
-        $this->image_url = $image_url;
-
-        return $this;
-    }
+    
 
 }
