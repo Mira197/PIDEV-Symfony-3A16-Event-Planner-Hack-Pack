@@ -6,6 +6,7 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Symfony\Component\Validator\Constraints as Assert;
 
 use App\Repository\PublicationRepository;
 
@@ -30,6 +31,15 @@ class Publication
     }
 
     #[ORM\Column(type: 'string', nullable: false)]
+    #[Assert\NotBlank(message: 'The title is mandatory.')]
+    #[Assert\Regex(
+        pattern: '/^[a-zA-ZÀ-ÿ\s\'\-]+$/u',
+        message: 'The title can only contain letters, spaces and dashes.'
+    )]    
+    #[Assert\Length(
+        min: 5,
+        minMessage: 'The title must be at least {{ limit }} characters long.'
+    )]    
     private ?string $title = null;
 
     public function getTitle(): ?string
@@ -42,8 +52,38 @@ class Publication
         $this->title = $title;
         return $this;
     }
+    #[ORM\Column(type: 'blob', nullable: true)]
+    private $image;
+
+    public function getImage()
+    {
+    return $this->image;
+    }
+
+    public function setImage($image): self
+    {
+    $this->image = $image;
+    return $this;
+    }
+
+    public function getBase64Image(): ?string
+    {
+        if (!$this->image) {
+            return null;
+        }
+    
+        if (is_resource($this->image)) {
+            return base64_encode(stream_get_contents($this->image));
+        }
+    
+        return base64_encode($this->image);
+    }
+
+
+
 
     #[ORM\Column(type: 'text', nullable: true)]
+    #[Assert\NotBlank(message: 'Description is required.')]
     private ?string $description = null;
 
     public function getDescription(): ?string
@@ -204,5 +244,6 @@ class Publication
 
         return $this;
     }
+    
 
 }

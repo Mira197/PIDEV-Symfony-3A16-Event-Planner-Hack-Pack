@@ -1,0 +1,98 @@
+.admin-mui-wrapper {
+    margin: 100px auto;
+    max-width: 1100px;
+    background: #fff;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+  }
+  
+  .admin-mui-wrapper h2 {
+    text-align: center;
+    color: #6b336e;
+    font-size: 24px;
+    margin-bottom: 25px;
+  }
+  
+  table.admin-mui-table {
+    width: 100%;
+    border-collapse: collapse;
+    border-spacing: 0;
+  }
+  
+  table.admin-mui-table th,
+  table.admin-mui-table td {
+    padding: 12px 15px;
+    text-align: center;
+    border-bottom: 1px solid #eee;
+    vertical-align: middle;
+    font-size: 14px;
+  }
+  
+  table.admin-mui-table th {
+    background-color: #6b336e;
+    color: white;
+    font-weight: 600;
+    font-size: 13px;
+  }
+  
+  .status-select {
+    padding: 4px 8px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    font-size: 13px;
+  }
+  
+  .editable input {
+    padding: 4px 6px;
+    font-size: 13px;
+    width: 130px;
+  }
+  
+  .btn-delete {
+    background: transparent;
+    border: 1px solid #dc3545;
+    color: #dc3545;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 14px;
+    cursor: pointer;
+  }
+  
+  .empty-row {
+    color: #aaa;
+    font-style: italic;
+    text-align: center;
+  }
+  .admin-filters {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-bottom: 20px;
+    gap: 10px;
+  }
+  
+  .admin-filters .form-control {
+    border-radius: 8px;
+  }
+  
+  .status-filter {
+    background: #f1f1f1;
+    border: none;
+    color: #6b336e;
+    font-weight: bold;
+    padding: 6px 16px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: 0.3s;
+  }
+  
+  .status-filter.active,
+  .status-filter:hover {
+    background-color: #6b336e;
+    color: white;
+  }
+  .hidden-column {
+    display: none;
+}

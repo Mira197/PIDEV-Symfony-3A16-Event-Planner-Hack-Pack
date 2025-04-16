@@ -40,4 +40,12 @@ class EventRepository extends ServiceEntityRepository
 //            ->getOneOrNullResult()
 //        ;
 //    }
+public function searchByKeyword(string $keyword): \Doctrine\ORM\QueryBuilder
+{
+    return $this->createQueryBuilder('e')
+        ->where('e.name LIKE :kw OR e.city LIKE :kw OR e.capacity LIKE :kw')
+        ->setParameter('kw', '%' . $keyword . '%')
+        ->orderBy('e.start_date', 'DESC');
+}
+
 }

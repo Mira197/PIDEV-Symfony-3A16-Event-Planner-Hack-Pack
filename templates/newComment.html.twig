@@ -1,0 +1,179 @@
+{% extends 'base.html.twig' %}
+
+{% block stylesheets %}
+	{{ parent() }}
+	<style>
+		nav.fh5co-nav {
+			background-color: #cebec9 !important;
+			padding: 1px 0 !important;
+			max-height: 130px !important;
+			z-index: 9999;
+		}
+
+		.publication-form-container {
+			margin-top: 140px; /* Pour laisser la place à la navbar */
+		}
+
+		.publication-form {
+			max-width: 800px;
+			margin: 0 auto;
+			padding: 2rem;
+			background-color: #ffffff;
+			border-radius: 10px;
+			box-shadow: 0 4px 15px rgba(83, 60, 86, 0.1);
+		}
+
+		.form-title {
+			color: #533C56;
+			text-align: center;
+			margin-bottom: 2rem;
+			font-weight: 600;
+		}
+
+		.form-group {
+			margin-bottom: 1.5rem;
+		}
+
+		.form-label {
+			display: block;
+			margin-bottom: 0.5rem;
+			color: #533C56;
+			font-weight: 500;
+		}
+
+		.form-input,
+		.form-textarea {
+			width: 100%;
+			padding: 0.75rem;
+			border: 1px solid #cebec9;
+			border-radius: 5px;
+			font-size: 1rem;
+			background-color: #ffffff;
+		}
+
+		.form-textarea {
+			min-height: 150px;
+			resize: vertical;
+		}
+
+		.btn-submit {
+			background-color: #533C56;
+			color: white;
+			border: none;
+			padding: 0.75rem 1.5rem;
+			font-size: 2rem;
+			border-radius: 5px;
+			cursor: pointer;
+			display: block;
+			width: 100%;
+			font-weight: 500;
+		}
+
+		.btn-submit:hover {
+			background-color: #99707E;
+			transform: translateY(-2px);
+			box-shadow: 0 4px 8px rgba(83, 60, 86, 0.2);
+		}
+
+		.form-error {
+			color: #d9534f;
+			font-size: 0.875rem;
+			margin-top: 0.25rem;
+		}
+
+		.custom-file-upload {
+			display: flex;
+			align-items: center;
+			gap: 15px;
+		}
+
+		.custom-upload-label {
+			background-color: #533C56;
+			color: white;
+			padding: 0.5rem 1.2rem;
+			border-radius: 5px;
+			cursor: pointer;
+			font-size: 0.95rem;
+			transition: background-color 0.3s ease;
+		}
+
+		.custom-upload-label:hover {
+			background-color: #99707E;
+		}
+
+		.form-file-hidden {
+			display: none;
+		}
+
+		.file-name {
+			color: #533C56;
+			font-size: 0.9rem;
+		}
+		.d-flex {
+			display: flex;
+			gap: 10px;
+		}
+	</style>
+{% endblock %}
+{% block content %}
+	<div class="container" style="max-width: 800px; margin: 160px auto 40px; padding: 0 15px;">
+		<div class="comment-form-container" style="background: white; border-radius: 10px; box-shadow: 0 5px 15px rgba(83, 60, 86, 0.1); padding: 30px;">
+			<h2 style="color: #533C56; margin-bottom: 25px; text-align: center; position: relative; padding-bottom: 15px;">
+				Comment on: "{{ publication.title }}"
+				<span style="position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: 80px; height: 3px; background: #99707E;"></span>
+			</h2>
+
+			{{ form_start(form, {'attr': {'novalidate': 'novalidate', 'class': 'comment-form'}}) }}
+			<div class="form-group" style="margin-bottom: 20px;">
+				{{ form_label(form.username, null, {'label_attr': {'style': 'display: block; margin-bottom: 8px; color: #533C56; font-weight: 500;'}}) }}
+				{{ form_widget(form.username, {'attr': {
+                    'style': 'width: 100%; padding: 12px 15px; border: 1px solid #d9c7df; border-radius: 6px; font-size: 1rem; transition: all 0.3s;',
+                    'class': 'form-control'
+                }}) }}
+				<div style="color: #e74c3c; font-size: 0.85rem; margin-top: 5px;">
+					{{ form_errors(form.username) }}
+				</div>
+			</div>
+
+			<div class="form-group" style="margin-bottom: 25px;">
+				{{ form_label(form.content, null, {'label_attr': {'style': 'display: block; margin-bottom: 8px; color: #533C56; font-weight: 500;'}}) }}
+				{{ form_widget(form.content, {'attr': {
+                    'style': 'width: 100%; padding: 12px 15px; border: 1px solid #d9c7df; border-radius: 6px; font-size: 1rem; min-height: 150px; resize: vertical; transition: all 0.3s;',
+                    'class': 'form-control'
+                }}) }}
+				<div style="color: #e74c3c; font-size: 0.85rem; margin-top: 5px;">
+					{{ form_errors(form.content) }}
+				</div>
+			</div>
+
+			<div style="text-align: center;">
+				<button type="button" onclick="window.location.href='{{ path('app_publication_client') }}'" class="btn btn-primary" style="background-color: #533C56; color: white; border: none; padding: 12px 30px; border-radius: 30px; font-size: 1rem; transition: all 0.3s ease; with:48%;">Cancel</button>
+				<button type="submit" class="btn btn-primary" style="background-color: #533C56; color: white; border: none; padding: 12px 30px; border-radius: 30px; font-size: 1rem; transition: all 0.3s ease;">
+					Post Comment
+				</button>
+
+			</div>
+			{{ form_end(form) }}
+		</div>
+	</div>
+
+	<style>
+		.form-control:focus {
+			border-color: #99707E;
+			box-shadow: 0 0 0 0.2rem rgba(153, 112, 126, 0.25);
+			outline: none;
+		}
+
+		.btn-primary:hover {
+			background-color: #7a5a6a !important;
+			transform: translateY(-2px);
+			box-shadow: 0 4px 12px rgba(83, 60, 86, 0.2);
+		}
+
+		.btn-secondary:hover {
+			background-color: #f0e5f2 !important;
+			transform: translateY(-2px);
+			box-shadow: 0 4px 12px rgba(83, 60, 86, 0.1);
+		}
+	</style>
+{% endblock %}

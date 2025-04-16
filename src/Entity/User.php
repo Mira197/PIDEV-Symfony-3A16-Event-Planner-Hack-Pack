@@ -164,6 +164,7 @@ public function setBlockEndDate(?\DateTimeInterface $blockEndDate): self
         $this->address = $address;
         return $this;
     }
+
     #[ORM\Column(name: 'imgPath', type: 'string', nullable: true)]
     private ?string $imgPath = null;
 
@@ -196,6 +197,7 @@ public function setBlockEndDate(?\DateTimeInterface $blockEndDate): self
     }
 
     #[ORM\Column(name: 'numTel', type: 'string', nullable: false)]
+
     #[Assert\NotBlank(message: "Le numéro de téléphone ne peut pas être vide.")]
     #[Assert\Length(
         min: 8,
@@ -203,7 +205,9 @@ public function setBlockEndDate(?\DateTimeInterface $blockEndDate): self
         exactMessage: "Le numéro de téléphone '{{ value }}' doit contenir exactement 8 chiffres."
     )]
     
+
     private ?string $numTel = null;
+
 
     public function getNumTel(): ?string
     {
@@ -508,6 +512,11 @@ public function setBlockEndDate(?\DateTimeInterface $blockEndDate): self
         $this->first_name = $first_name;
 
         return $this;
+    }
+    
+    public function getId(): ?int
+    {
+    return $this->id_user;
     }
 
 

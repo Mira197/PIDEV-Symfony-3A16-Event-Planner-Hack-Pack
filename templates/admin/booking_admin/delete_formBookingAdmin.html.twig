@@ -1,0 +1,7 @@
+<form method="post"
+      action="{{ path('booking_admin_delete', {'id': booking.idBooking}) }}"
+      style="display:inline-block;"
+      onsubmit="return confirm('Are you sure you want to delete this booking?');">
+    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ booking.idBooking) }}">
+    <button class="main-btn danger-btn-outline btn-hover px-3 py-2"><i class="fa-solid fa-trash"style="font-size: 18px;color: #533C56;"></i></button>
+</form>

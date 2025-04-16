@@ -1,0 +1,351 @@
+{% extends 'admin/baseAdmin.html.twig' %}
+
+{% block section %}
+	<section class="section">
+		<div
+			class="container-fluid">
+			<!-- ========== title-wrapper start ========== -->
+			<div class="title-wrapper pt-30">
+				<div class="row align-items-center">
+					<div class="col-md-6">
+						<div class="title">
+							<h2>Forum Dashboard</h2>
+						</div>
+					</div>
+					<!-- end col -->
+					<div class="col-md-6">
+						<div class="breadcrumb-wrapper">
+							<nav aria-label="breadcrumb">
+								<ol class="breadcrumb">
+									<li class="breadcrumb-item">
+										<a href="#0">Dashboard</a>
+									</li>
+									<li class="breadcrumb-item active" aria-current="page">
+										Forum
+									</li>
+								</ol>
+							</nav>
+						</div>
+					</div>
+					<!-- end col -->
+				</div>
+				<!-- end row -->
+			</div>
+			<!-- ========== title-wrapper end ========== -->
+			<div
+				class="row">
+				<!-- Total Posts -->
+				<div class="col-xl-3 col-lg-4 col-sm-6">
+					<div class="icon-card mb-30">
+						<div class="icon purple">
+							<i class="lni lni-pencil-alt"></i>
+						</div>
+						<div class="content">
+							<h6 class="mb-10">Total Posts</h6>
+							<h3 class="text-bold mb-10">{{ totalPosts }}</h3>
+							<p class="text-sm text-success">
+								<i class="lni lni-arrow-up"></i>
+								+3.4%
+								<span class="text-gray">(Monthly)</span>
+							</p>
+						</div>
+					</div>
+				</div>
+
+				<!-- Total Comments -->
+				<div class="col-xl-3 col-lg-4 col-sm-6">
+					<div class="icon-card mb-30">
+						<div class="icon success">
+							<i class="lni lni-comments"></i>
+						</div>
+						<div class="content">
+							<h6 class="mb-10">Total Comments</h6>
+							<h3 class="text-bold mb-10">{{ totalComments }}</h3>
+							<p class="text-sm text-success">
+								<i class="lni lni-arrow-up"></i>
+								+1.8%
+								<span class="text-gray">(Engagement)</span>
+							</p>
+						</div>
+					</div>
+				</div>
+
+				<!-- Reported Posts -->
+				<div class="col-xl-3 col-lg-4 col-sm-6">
+					<div class="icon-card mb-30">
+						<div class="icon danger">
+							<i class="lni lni-warning"></i>
+						</div>
+						<div class="content">
+							<h6 class="mb-10">Reported Posts</h6>
+							<h3 class="text-bold mb-10">{{ reportedPosts }}</h3>
+							<p class="text-sm text-danger">
+								<i class="lni lni-arrow-down"></i>
+								-1.2%
+								<span class="text-gray">(Pending)</span>
+							</p>
+						</div>
+					</div>
+				</div>
+
+				<!-- Active Users (ou registered users si tu n’as pas encore cette logique) -->
+				<div class="col-xl-3 col-lg-4 col-sm-6">
+					<div class="icon-card mb-30">
+						<div class="icon primary">
+							<i class="lni lni-users"></i>
+						</div>
+						<div class="content">
+							<h6 class="mb-10">Active Users</h6>
+							<h3 class="text-bold mb-10">{{ activeUsers ?? 'N/A' }}</h3>
+							<p class="text-sm text-success">
+								<i class="lni lni-arrow-up"></i>
+								+4.2%
+								<span class="text-gray">(This week)</span>
+							</p>
+						</div>
+					</div>
+				</div>
+			</div>
+
+		</div>
+		<!-- End Row -->
+		<div class="row">
+			<div class="col-lg-7">
+				<div class="card-style mb-30">
+					<div class="title d-flex flex-wrap justify-content-between">
+						<div class="left">
+							<h6 class="text-medium mb-10">Yearly Stats</h6>
+							<h3 class="text-bold">$245,479</h3>
+						</div>
+						<div class="right">
+							<div class="select-style-1">
+								<div class="select-position select-sm">
+									<select class="light-bg">
+										<option value="">Yearly</option>
+										<option value="">Monthly</option>
+										<option value="">Weekly</option>
+									</select>
+								</div>
+							</div>
+							<!-- end select -->
+						</div>
+					</div>
+					<!-- End Title -->
+					<div class="chart">
+						<canvas id="Chart1" style="width: 100%; height: 400px; margin-left: -35px;"></canvas>
+					</div>
+					<!-- End Chart -->
+				</div>
+			</div>
+			<!-- End Col -->
+			<div class="col-lg-5">
+				<div class="card-style mb-30">
+					<div class="title d-flex flex-wrap align-items-center justify-content-between">
+						<div class="left">
+							<h6 class="text-medium mb-30">Sales/Revenue</h6>
+						</div>
+						<div class="right">
+							<div class="select-style-1">
+								<div class="select-position select-sm">
+									<select class="light-bg">
+										<option value="">Yearly</option>
+										<option value="">Monthly</option>
+										<option value="">Weekly</option>
+									</select>
+								</div>
+							</div>
+							<!-- end select -->
+						</div>
+					</div>
+					<!-- End Title -->
+					<div class="chart">
+						<canvas id="Chart2" style="width: 100%; height: 400px; margin-left: -45px;"></canvas>
+					</div>
+					<!-- End Chart -->
+				</div>
+			</div>
+			<!-- End Col -->
+		</div>
+		<!-- End Row -->
+		<div class="row">
+			<div class="col-lg-5">
+				<div class="card-style mb-30">
+					<div class="title d-flex justify-content-between align-items-center">
+						<div class="left">
+							<h6 class="text-medium mb-30">Sells by State</h6>
+						</div>
+					</div>
+					<!-- End Title -->
+					<div id="map" style="width: 100%; height: 400px; overflow: hidden;"></div>
+					<p>Last updated: 7 days ago</p>
+				</div>
+			</div>
+			<!-- End Col -->
+			
+		</div>
+	</div>
+	<!-- End Col -->
+</div>
+<!-- End Row -->
+<div class="row">
+	<div class="col-lg-7">
+		<div class="card-style mb-30">
+			<div class="title d-flex flex-wrap align-items-center justify-content-between">
+				<div class="left">
+					<h6 class="text-medium mb-2">Sales Forecast</h6>
+				</div>
+				<div class="right">
+					<div class="select-style-1 mb-2">
+						<div class="select-position select-sm">
+							<select class="light-bg">
+								<option value="">Last Month</option>
+								<option value="">Last 3 Months</option>
+								<option value="">Last Year</option>
+							</select>
+						</div>
+					</div>
+					<!-- end select -->
+				</div>
+			</div>
+			<!-- End Title -->
+			<div class="chart">
+				<div id="legend3">
+					<ul class="legend3 d-flex flex-wrap align-items-center mb-30">
+						<li>
+							<div class="d-flex">
+								<span class="bg-color primary-bg"></span>
+								<div class="text">
+									<p class="text-sm text-success">
+										<span class="text-dark">Revenue</span>
+										+25.55%
+										<i class="lni lni-arrow-up"></i>
+									</p>
+								</div>
+							</div>
+						</li>
+						<li>
+							<div class="d-flex">
+								<span class="bg-color purple-bg"></span>
+								<div class="text">
+									<p class="text-sm text-success">
+										<span class="text-dark">Net Profit</span>
+										+45.55%
+										<i class="lni lni-arrow-up"></i>
+									</p>
+								</div>
+							</div>
+						</li>
+						<li>
+							<div class="d-flex">
+								<span class="bg-color orange-bg"></span>
+								<div class="text">
+									<p class="text-sm text-danger">
+										<span class="text-dark">Order</span>
+										-4.2%
+										<i class="lni lni-arrow-down"></i>
+									</p>
+								</div>
+							</div>
+						</li>
+					</ul>
+				</div>
+				<canvas id="Chart3" style="width: 100%; height: 450px; margin-left: -35px;"></canvas>
+			</div>
+		</div>
+	</div>
+	<!-- End Col -->
+	<div class="col-lg-5">
+		<div class="card-style mb-30">
+			<div class="title d-flex flex-wrap align-items-center justify-content-between">
+				<div class="left">
+					<h6 class="text-medium mb-2">Traffic</h6>
+				</div>
+				<div class="right">
+					<div class="select-style-1 mb-2">
+						<div class="select-position select-sm">
+							<select class="bg-ligh">
+								<option value="">Last 6 Months</option>
+								<option value="">Last 3 Months</option>
+								<option value="">Last Year</option>
+							</select>
+						</div>
+					</div>
+					<!-- end select -->
+				</div>
+			</div>
+			<!-- End Title -->
+			<div class="chart">
+				<div id="legend4">
+					<ul class="legend3 d-flex flex-wrap gap-3 gap-sm-0 align-items-center mb-30">
+						<li>
+							<div class="d-flex">
+								<span class="bg-color primary-bg"></span>
+								<div class="text">
+									<p class="text-sm text-success">
+										<span class="text-dark">Store Visits</span>
+										+25.55%
+										<i class="lni lni-arrow-up"></i>
+									</p>
+									<h2>3456</h2>
+								</div>
+							</div>
+						</li>
+						<li>
+							<div class="d-flex">
+								<span class="bg-color danger-bg"></span>
+								<div class="text">
+									<p class="text-sm text-danger">
+										<span class="text-dark">Visitors</span>
+										-2.05%
+										<i class="lni lni-arrow-down"></i>
+									</p>
+									<h2>3456</h2>
+								</div>
+							</div>
+						</li>
+					</ul>
+				</div>
+				<canvas id="Chart4" style="width: 100%; height: 420px; margin-left: -35px;"></canvas>
+			</div>
+			<!-- End Chart -->
+		</div>
+	</div>
+	<!-- End Col -->
+</div>
+<!-- End Row -->
+<div class="row">
+	<div class="col-lg-5">
+		<div class="card-style calendar-card mb-30">
+			<div id="calendar-mini"></div>
+		</div>
+	</div>
+	<!-- End Col -->
+	
+</div></div></div></div><!-- End Col --></div><!-- End Row --></div><!-- end container -->{% endblock %}{% block javascripts %}{{ parent() }}<script>document.addEventListener('DOMContentLoaded', function () {
+const checkAll = document.getElementById('checkAll');
+const checkboxes = document.querySelectorAll('.checkbox-item');
+
+if (checkAll) {
+checkAll.addEventListener('change', function () {
+checkboxes.forEach(cb => cb.checked = this.checked);
+});
+}
+});</script><style>.btn-mauve {
+	background-color: #533C56; /* Mauve */
+	color: #fff;
+	border: none;
+	padding: 10px 20px;
+	border-radius: 6px;
+	font-weight: 500;
+	transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.btn-mauve:hover {
+	background-color: #99707E;
+	box-shadow: 0 4px 12px #ffffff;
+	cursor: pointer;
+}
+
+.btn-mauve i {
+	margin-right: 5px;
+}</style>{% endblock %}
