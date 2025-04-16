@@ -80,11 +80,7 @@
 													⚠️ Report
 												</a>
 											</li>
-											<li style="padding: 0;">
-												<a href="{{ path('app_comment_new', {'id': publication.publication_id}) }}" style="display: block; padding: 8px 15px; color: #533C56; text-decoration: none;">
-													💬 Add Comment
-												</a>
-											</li>
+											
 
 										</ul>
 									</div>
@@ -172,6 +168,13 @@
 										</div>
 									{% endfor %}
 								</div>
+								<!-- ✅ BOUTON ADD COMMENT -->
+								<div style="text-align: right; margin-top: 10px;">
+									<a href="{{ path('app_comment_new', {'id': publication.publication_id}) }}" class="btn btn-sm" style="background-color: #533C56; color: white; padding: 8px 18px; border-radius: 20px; text-decoration: none; font-size: 0.9rem;">
+										💬 Add Comment
+									</a>
+								</div>
+
 							</div>
 
 
@@ -231,5 +234,136 @@ this.textContent = '💬 Comment';
 });
 });
 });
+
+	document.addEventListener('DOMContentLoaded', function () {
+		// Scroll vers la section "Your Posts" avec un léger décalage (ex : 200px)
+		window.onload = function () {
+		window.scrollTo({
+			top: 500,
+			behavior: 'smooth'
+		});
+	};
+	
+	});
+
+
 		</script>
-	{% endblock %}
+	{% endblock %} 
+	{% block javascripts %}
+	{{ parent() }}
+	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+	{% if app.request.get('post_success') %}
+	<script>
+		Swal.fire({
+			icon: 'success',
+			title: '🎉 Post Created Successfully!',
+			text: 'Your publication has been published on the forum.',
+			showCancelButton: true,
+			confirmButtonText: 'Create Another Post',
+			cancelButtonText: 'Back to Forum',
+			confirmButtonColor: '#533C56',
+			cancelButtonColor: '#aaa',
+			footer: '<i class="fa fa-thumbs-up"></i> Thank you for contributing!',
+			background: '#fdf7fd',
+			color: '#533C56'
+		}).then((result) => {
+			if (result.isConfirmed) {
+				window.location.href = "{{ path('app_publication_new') }}";
+			}
+		});
+	</script>
+	{% endif %}
+
+	{% if app.request.get('edit_success') %}
+	<script>
+		Swal.fire({
+			icon: 'success',
+			title: '✅ Post Updated!',
+			text: 'Your publication has been successfully updated.',
+			confirmButtonText: 'Back to Forum',
+			confirmButtonColor: '#533C56',
+			background: '#fdf7fd',
+			color: '#533C56',
+			timer: 3000,
+			timerProgressBar: true
+		}).then(() => {
+			window.location.href = "{{ path('app_publication_client') }}";
+		});
+	</script>
+	{% endif %}
+	{% if app.request.get('comment_success') %}
+<script>
+	Swal.fire({
+		icon: 'success',
+		title: '💬 Comment Posted!',
+		text: 'Your comment has been added successfully.',
+		confirmButtonColor: '#533C56',
+		background: '#fdf7fd',
+		color: '#533C56',
+		timer: 3000,
+		timerProgressBar: true
+	});
+</script>
+{% endif %}
+
+{% if app.request.get('comment_edited') %}
+<script>
+	Swal.fire({
+		icon: 'success',
+		title: '✏️ Comment Updated!',
+		text: 'Your comment has been updated successfully.',
+		confirmButtonColor: '#533C56',
+		background: '#fdf7fd',
+		color: '#533C56',
+		timer: 3000,
+		timerProgressBar: true
+	});
+</script>
+{% endif %}
+{% if app.request.get('comment_deleted') %}
+<script>
+    Swal.fire({
+        icon: 'success',
+        title: '🗑️ Comment Deleted!',
+        text: 'The comment has been successfully removed.',
+        confirmButtonColor: '#533C56',
+        background: '#fdf7fd',
+        color: '#533C56',
+        timer: 3000,
+        timerProgressBar: true
+    });
+</script>
+{% endif %}
+{% if app.request.get('post_deleted') %}
+<script>
+    Swal.fire({
+        icon: 'success',
+        title: '🗑️ Post Deleted!',
+        text: 'The publication has been successfully removed.',
+        confirmButtonColor: '#533C56',
+        background: '#fdf7fd',
+        color: '#533C56',
+        timer: 3000,
+        timerProgressBar: true
+    });
+</script>
+{% endif %}
+{% if app.request.get('report_success') %}
+<script>
+    Swal.fire({
+        icon: 'success',
+        title: '📢 Report Submitted!',
+        text: 'Your report has been successfully sent and will be reviewed.',
+        confirmButtonColor: '#533C56',
+        background: '#fdf7fd',
+        color: '#533C56',
+        timer: 3000,
+        timerProgressBar: true
+    });
+</script>
+{% endif %}
+
+
+
+{% endblock %}

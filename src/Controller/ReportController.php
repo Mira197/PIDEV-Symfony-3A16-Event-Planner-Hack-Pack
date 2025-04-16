@@ -43,7 +43,7 @@ class ReportController extends AbstractController
             $em->flush();
     
             $this->addFlash('success', 'Report submitted successfully.');
-            return $this->redirectToRoute('app_publication_client');
+            return $this->redirectToRoute('app_publication_client', ['report_success' => 1]);
         }
     
         return $this->render('newReport.html.twig', [
@@ -51,6 +51,7 @@ class ReportController extends AbstractController
             'publication' => $publication
         ]);
     }
+    
     
 
 }

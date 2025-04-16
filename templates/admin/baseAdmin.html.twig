@@ -21,7 +21,6 @@
 			<link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
 
 
-
 		{% endblock %}
 	</head>
 	<body>
@@ -147,8 +146,31 @@
 								</li>
 							</ul>
 						</li>
-
-
+						<!--Forum management-->
+						<!--Forum management-->
+						<li class="nav-item nav-item-has-children">
+							<a href="#0" class="collapsed" data-bs-toggle="collapse" data-bs-target="#ddmenu_forum" aria-controls="ddmenu_forum" aria-expanded="false" aria-label="Toggle navigation">
+								<span class="icon">
+									<svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" viewbox="0 0 24 24">
+										<path d="M4 6h16M4 12h16M4 18h10"/>
+									</svg>
+								</span>
+								<span class="text">Forum management</span>
+							</a>
+							<ul
+								id="ddmenu_forum" class="collapse dropdown-nav">
+								<!-- ✅ ID corrigé ici -->
+								<li>
+									<a href="{{ path('app_publication_list') }}">Publications</a>
+								</li>
+								<li>
+									<a href="{{ path('app_report_list') }}">Reports</a>
+								</li>
+								<li>
+									<a href="{{ path('app_comment_list') }}">Comments</a>
+								</li>
+							</ul>
+						</li>
 						<li class="nav-item nav-item-has-children">
 							<a href="#0" class="collapsed" data-bs-toggle="collapse" data-bs-target="#ddmenu_2" aria-controls="ddmenu_2" aria-expanded="false" aria-label="Toggle navigation">
 								<span class="icon">
@@ -374,8 +396,8 @@
 														</h6>
 														<p>
 															Lorem ipsum dolor sit amet, consect etur adipiscing
-
-																														                            elit Vivamus tortor.
+																																													
+																																																																											                            elit Vivamus tortor.
 
 														</p>
 														<span>10 mins ago</span>
@@ -396,8 +418,8 @@
 														</h6>
 														<p>
 															Lorem ipsum dolor sit amet, consect etur adipiscing
-
-																														                            elit Vivamus tortor.
+																																													
+																																																																											                            elit Vivamus tortor.
 
 														</p>
 														<span>10 mins ago</span>
@@ -1323,8 +1345,6 @@
 			<script src="{{ asset('admin/js/world-merc.js') }}"></script>
 			<script src="{{ asset('admin/js/polyfill.js') }}"></script>
 			<script src="{{ asset('admin/js/main.js') }}"></script>
-
-
 
 
 			<script>

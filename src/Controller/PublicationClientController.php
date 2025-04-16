@@ -27,81 +27,89 @@ class PublicationClientController extends AbstractController
     }
 
     #[Route('/publication/new', name: 'app_publication_new')]
-    public function new(Request $request, EntityManagerInterface $em, UserRepository $userRepository): Response
-    {
-        $publication = new Publication();
-        $form = $this->createForm(PublicationType::class, $publication);
-        $form->handleRequest($request);
+public function new(Request $request, EntityManagerInterface $em, UserRepository $userRepository): Response
+{
+    $publication = new Publication();
+    $form = $this->createForm(PublicationType::class, $publication);
+    $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            $inputUsername = $form->get('username')->getData();
+    if ($form->isSubmitted() && $form->isValid()) {
+        $inputUsername = $form->get('username')->getData();
+        $user = $userRepository->find(44);
+        //$user = $this->getUser();
 
-            // 👇 Utilisateur de test avec ID 44
-            $user = $userRepository->find(44);
-            //$user = $this->getUser();
-            if (!$user || $inputUsername !== $user->getUsername()) {
-                $form->get('username')->addError(
-                    new FormError('The username does not match your test account.')
-                );
-            } else {
-                $publication->setUser($user);
-                $publication->setPublicationDate(new \DateTimeImmutable());
+        if (!$user || $inputUsername !== $user->getUsername()) {
+            $form->get('username')->addError(
+                new FormError('The username does not match your test account.')
+            );
+        } else {
+            $publication->setUser($user);
+            $publication->setPublicationDate(new \DateTimeImmutable());
 
-                $uploadedImage = $request->files->get('image_file');
-                if ($uploadedImage) {
-                    $imageData = file_get_contents($uploadedImage->getPathname());
-                    $publication->setImage($imageData);
-                }
-
-                $em->persist($publication);
-                $em->flush();
-
-                return $this->redirectToRoute('app_publication_client');
+            $uploadedImage = $request->files->get('image_file');
+            if ($uploadedImage) {
+                $imageData = file_get_contents($uploadedImage->getPathname());
+                $publication->setImage($imageData);
             }
-        }
 
-        return $this->render('newPublication.html.twig', [
-            'form' => $form->createView(),
-        ]);
+            $em->persist($publication);
+            $em->flush();
+
+            // ✅ Redirection avec succès
+            return $this->redirectToRoute('app_publication_client', ['post_success' => 1]);
+        }
     }
 
-    #[Route('/publication/{id}/edit', name: 'app_publication_edit')]
-    public function edit(Request $request, Publication $publication, EntityManagerInterface $em,UserRepository $userRepository): Response
-    {
-        $form = $this->createForm(PublicationType::class, $publication);
-        $form->handleRequest($request);
+    return $this->render('newPublication.html.twig', [
+        'form' => $form->createView(),
+    ]);
+}
     
-        if ($form->isSubmitted() && $form->isValid()) {
-            $inputUsername = $form->get('username')->getData();
-            //$user = $this->getUser();
-            $user = $userRepository->find(44);
-    
-            if (!$user || $inputUsername !== $user->getUsername()) {
-                $form->get('username')->addError(
-                    new FormError('The username does not match your account.')
-                );
-            } else {
-                $publication->setUser($user);
-    
-                $uploadedImage = $request->files->get('image_file');
-                if ($uploadedImage) {
-                    $imageData = file_get_contents($uploadedImage->getPathname());
-                    $publication->setImage($imageData);
-                }
-    
-                $em->flush();
-    
-                $this->addFlash('success', 'Publication updated successfully.');
-                return $this->redirectToRoute('app_publication_client');
+
+
+   #[Route('/publication/{id}/edit', name: 'app_publication_edit')]
+public function edit(
+    Request $request,
+    Publication $publication,
+    EntityManagerInterface $em,
+    UserRepository $userRepository
+): Response {
+    $form = $this->createForm(PublicationType::class, $publication);
+    $form->handleRequest($request);
+
+    if ($form->isSubmitted() && $form->isValid()) {
+        $inputUsername = $form->get('username')->getData();
+        $user = $userRepository->find(44); // 🔁 utilisateur test
+
+        if (!$user || $inputUsername !== $user->getUsername()) {
+            $form->get('username')->addError(
+                new FormError('The username does not match your account.')
+            );
+        } else {
+            $publication->setUser($user);
+
+            // ✅ Récupération manuelle de l'image depuis le champ "image_file"
+            $uploadedImage = $request->files->get('image_file');
+            if ($uploadedImage instanceof \Symfony\Component\HttpFoundation\File\UploadedFile) {
+                $imageData = file_get_contents($uploadedImage->getPathname());
+                $publication->setImage($imageData);
             }
+
+            $em->flush();
+
+            $this->addFlash('success', 'Publication updated successfully.');
+            return $this->redirectToRoute('app_publication_client', [
+                'edit_success' => 1
+            ]);
         }
-    
-        return $this->render('editPublication.html.twig', [
-            'form' => $form->createView(),
-            'publication' => $publication
-        ]);
     }
-    
+
+    return $this->render('editPublication.html.twig', [
+        'form' => $form->createView(),
+        'publication' => $publication
+    ]);
+}
+
 
     #[Route('/publication/delete/{id}', name: 'app_publication_delete')]
     public function delete(EntityManagerInterface $em, PublicationRepository $publicationRepository, int $id): Response
@@ -115,6 +123,33 @@ class PublicationClientController extends AbstractController
         $em->flush();
 
         $this->addFlash('success', 'Publication supprimée avec succès.');
-        return $this->redirectToRoute('app_publication_client');
+        return $this->redirectToRoute('app_publication_client', ['post_deleted' => 1]);
     }
+    #[Route('/admin/publications', name: 'app_publication_list')]
+public function listPublications(PublicationRepository $repo): Response
+{
+    $publications = $repo->findAll();
+    return $this->render('admin/postAdmin.html.twig', [
+        'publications' => $publications,
+    ]);
+}
+
+#[Route('/admin/reports', name: 'app_report_list')]
+public function listReports(ReportRepository $repo): Response
+{
+    $reports = $repo->findAll();
+    return $this->render('admin/reports.html.twig', [
+        'reports' => $reports,
+    ]);
+}
+
+#[Route('/admin/comments', name: 'app_comment_list')]
+public function listComments(CommentRepository $repo): Response
+{
+    $comments = $repo->findAll();
+    return $this->render('admin/comments.html.twig', [
+        'comments' => $comments,
+    ]);
+}
+
 }
