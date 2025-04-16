@@ -12,6 +12,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 use Symfony\Component\Security\Csrf\CsrfToken;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 #[Route('/admin/orders')]
 class AyaAdminOrderController extends AbstractController
@@ -39,19 +40,71 @@ class AyaAdminOrderController extends AbstractController
 
         return new JsonResponse(['success' => false, 'message' => 'Invalid status']);
     }
-    #[Route('/update-field/{id}', name: 'admin_order_update_field', methods: ['POST'])]
-    public function updateField(Request $request, Order $order, OrderRepository $repo): JsonResponse
-    {
-        $field = $request->request->get('field');
-        $value = $request->request->get('value');
 
+    #[Route('/update-field/{id}', name: 'admin_order_update_field', methods: ['POST'])]
+public function updateField(Request $request, Order $order, EntityManagerInterface $em, ValidatorInterface $validator): JsonResponse
+{
+    // Accepter à la fois JSON et form-data
+    if ($request->getContentType() === 'json' || $request->headers->get('Content-Type') === 'application/json') {
+        $data = json_decode($request->getContent(), true);
+    } else {
+        $data = $request->request->all();
+    }
+
+    // Log pour débogage
+    error_log(print_r($data, true));
+
+    if (!isset($data['field']) || !isset($data['value'])) {
+        return new JsonResponse([
+            'success' => false,
+            'message' => 'Missing required fields: field or value'
+        ], 400);
+    }
+
+    $field = $data['field'];
+    $value = $data['value'];
+
+    try {
         if ($field === 'orderedAt') {
-            $order->setOrderedAt(new \DateTime($value));
+            $newDate = new \DateTime($value);
+            if ($newDate < new \DateTime()) {
+                return new JsonResponse([
+                    'success' => false,
+                    'message' => 'The order date must be in the future.'
+                ], 400);
+            }
+            $order->setOrderedAt($newDate);
         }
 
-        $repo->save($order, true);
+        // Validation via le Validator
+        $errors = $validator->validate($order);
+        if (count($errors) > 0) {
+            $errorMessages = [];
+            foreach ($errors as $error) {
+                $errorMessages[] = $error->getMessage();
+            }
+
+            return new JsonResponse([
+                'success' => false,
+                'messages' => $errorMessages // Renvoyer tous les messages de validation
+            ], 400);
+        }
+
+        $em->flush();
         return new JsonResponse(['success' => true]);
+
+    } catch (\Exception $e) {
+        return new JsonResponse([
+            'success' => false,
+            'message' => $e->getMessage()
+        ], 400);
     }
+}
+
+
+
+
+
     #[Route('/delete/{id}', name: 'admin_order_delete', methods: ['DELETE'])]
     public function deleteOrder($id, OrderRepository $orderRepository, EntityManagerInterface $em): JsonResponse
     {

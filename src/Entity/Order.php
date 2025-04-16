@@ -46,9 +46,12 @@ class Order
     private ?\DateTimeInterface $event_date = null;
 
     #[ORM\Column(type: 'datetime')]
-    #[Assert\NotNull(message: "Ordered at cannot be null.")]
+    #[Assert\GreaterThan(
+        "today",
+        message: "La date de commande doit être dans le futur"
+    )]
     private ?\DateTimeInterface $ordered_at = null;
-
+   
     #[ORM\Column(type: 'decimal', precision: 10, scale: 2)]
     #[Assert\NotNull(message: "Total price cannot be null.")]
     #[Assert\PositiveOrZero(message: "Total price must be zero or positive.")]
