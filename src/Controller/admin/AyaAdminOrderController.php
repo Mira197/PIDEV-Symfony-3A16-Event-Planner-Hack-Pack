@@ -42,64 +42,54 @@ class AyaAdminOrderController extends AbstractController
     }
 
     #[Route('/update-field/{id}', name: 'admin_order_update_field', methods: ['POST'])]
-public function updateField(Request $request, Order $order, EntityManagerInterface $em, ValidatorInterface $validator): JsonResponse
-{
-    // Accepter à la fois JSON et form-data
-    if ($request->getContentType() === 'json' || $request->headers->get('Content-Type') === 'application/json') {
-        $data = json_decode($request->getContent(), true);
-    } else {
-        $data = $request->request->all();
-    }
-
-    // Log pour débogage
-    error_log(print_r($data, true));
-
-    if (!isset($data['field']) || !isset($data['value'])) {
-        return new JsonResponse([
-            'success' => false,
-            'message' => 'Missing required fields: field or value'
-        ], 400);
-    }
-
-    $field = $data['field'];
-    $value = $data['value'];
-
-    try {
-        if ($field === 'orderedAt') {
-            $newDate = new \DateTime($value);
-            if ($newDate < new \DateTime()) {
-                return new JsonResponse([
-                    'success' => false,
-                    'message' => 'The order date must be in the future.'
-                ], 400);
-            }
-            $order->setOrderedAt($newDate);
+    public function updateField(Request $request, Order $order, EntityManagerInterface $em, ValidatorInterface $validator): JsonResponse
+    {
+        // Accepter à la fois JSON et form-data
+        if ($request->getContentType() === 'json' || $request->headers->get('Content-Type') === 'application/json') {
+            $data = json_decode($request->getContent(), true);
+        } else {
+            $data = $request->request->all();
         }
 
-        // Validation via le Validator
-        $errors = $validator->validate($order);
-        if (count($errors) > 0) {
-            $errorMessages = [];
-            foreach ($errors as $error) {
-                $errorMessages[] = $error->getMessage();
-            }
-
+        if (!isset($data['field']) || !isset($data['value'])) {
             return new JsonResponse([
                 'success' => false,
-                'messages' => $errorMessages // Renvoyer tous les messages de validation
+                'message' => 'Missing required fields: field or value'
             ], 400);
         }
 
-        $em->flush();
-        return new JsonResponse(['success' => true]);
+        $field = $data['field'];
+        $value = $data['value'];
 
-    } catch (\Exception $e) {
-        return new JsonResponse([
-            'success' => false,
-            'message' => $e->getMessage()
-        ], 400);
+        try {
+            if ($field === 'orderedAt') {
+                $newDate = new \DateTime($value);
+                $order->setOrderedAt($newDate);
+            }
+
+            // Validation via le Validator
+            $errors = $validator->validate($order);
+            if (count($errors) > 0) {
+                $errorMessages = [];
+                foreach ($errors as $error) {
+                    $errorMessages[] = $error->getMessage();
+                }
+
+                return new JsonResponse([
+                    'success' => false,
+                    'messages' => $errorMessages
+                ], 400);
+            }
+
+            $em->flush();
+            return new JsonResponse(['success' => true]);
+        } catch (\Exception $e) {
+            return new JsonResponse([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 400);
+        }
     }
-}
 
 
 
@@ -156,7 +146,7 @@ public function updateField(Request $request, Order $order, EntityManagerInterfa
         $query = strtolower($request->query->get('q', ''));
 
         $qb = $orderRepository->createQueryBuilder('o')
-            ->join('o.user', 'u') // si tu veux filtrer aussi par nom d'utilisateur
+            ->join('o.user', 'u')
             ->addSelect('u');
 
         if (!empty($query)) {
@@ -165,7 +155,7 @@ public function updateField(Request $request, Order $order, EntityManagerInterfa
                     'LOWER(o.status) LIKE :q',
                     'LOWER(u.username) LIKE :q',
                     'o.total_price LIKE :q',
-                    "CAST(o.ordered_at AS string) LIKE :q"
+                    $qb->expr()->like('o.ordered_at', ':q') // Changé ici
                 )
             )->setParameter('q', '%' . $query . '%');
         }
