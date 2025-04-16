@@ -19,7 +19,12 @@
         </div>
 
         <div class="card-style mb-30">
-            {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+            {{ form_start(form, {
+                'attr': {
+                    'enctype': 'multipart/form-data',  
+                    'novalidate': 'novalidate'
+                }
+            }) }}
             <div class="mb-3">
                     {{ form_label(form.name) }}
                     {{ form_widget(form.name, {'attr': {'class': 'form-control'}}) }}
@@ -43,12 +48,20 @@
                     {{ form_widget(form.stock, {'attr': {'class': 'form-control'}}) }}
                     {{ form_errors(form.stock) }}
                 </div>
-
-                <div class="mb-3">
-                    {{ form_label(form.imageUrl) }}
-                    {{ form_widget(form.imageUrl, {'attr': {'class': 'form-control'}}) }}
-                    {{ form_errors(form.imageUrl) }}
+                <div class="form-group">
+                    <label class="form-label">Image Selected</label>
+                    <img id="image-preview" src="#" alt="Image preview" style="display: none; max-width: 200px; margin-bottom: 1rem;">
                 </div>
+        
+                <div class="form-group">
+                    <label class="form-label">Upload an image</label>
+                    <div class="custom-file-upload">
+                        <label for="file-upload" class="custom-upload-label">📁 Select Image</label>
+                        <input type="file" id="file-upload" name="image_file" accept="image/*" class="form-file-hidden"/>
+                        <span id="file-name" class="file-name">No file selected</span>
+                    </div>
+                </div>
+                
 
                 <div class="mb-3">
                     {{ form_label(form.category) }}
@@ -57,11 +70,38 @@
                 </div>
 
                 <div>
-                    <button type="submit" class="btn btn-primary">            {{ editMode is defined and editMode ? 'Update Product' : 'Add Product' }}
+                    <button type="submit" class="main-btn primary-btn btn-hover">            {{ editMode is defined and editMode ? 'Update Product' : 'Add Product' }}
                     </button>
+                    <a href="{{ path('affiche') }}" class="main-btn primary-btn btn-hover">
+                        List of Products
+                      </a>
                 </div>
             {{ form_end(form) }}
         </div>
     </div>
 </section>
+<script>
+	document.addEventListener('DOMContentLoaded', function () {
+		const input = document.getElementById('file-upload');
+		const preview = document.getElementById('image-preview');
+		const fileName = document.getElementById('file-name');
+
+		input.addEventListener('change', function () {
+			const file = this.files[0];
+			if (file && file.type.startsWith('image/')) {
+				const reader = new FileReader();
+				reader.onload = function (e) {
+					preview.src = e.target.result;
+					preview.style.display = 'block';
+				};
+				reader.readAsDataURL(file);
+				fileName.textContent = file.name;
+			} else {
+				preview.src = '#';
+				preview.style.display = 'none';
+				fileName.textContent = 'No file selected';
+			}
+		});
+	});
+</script>
 {% endblock %}

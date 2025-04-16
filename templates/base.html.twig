@@ -151,7 +151,7 @@
 											<div class="cart-items-list">
 												{% for item in summary.cartProducts %}
 													<div class="preview-item">
-														<img src="{{ asset(item.getProduct().getImageUrl()) }}" class="product-thumb" alt="{{ item.getProduct().getName() }}">
+														<img src="data:image/jpeg;base64,{{ item.getProduct().getImage() }}" class="product-thumb" alt="{{ item.getProduct().getName() }}">
 														<div class="item-info">
 															<strong class="product-name">{{ item.getProduct().getName() }}</strong>
 															<div class="item-meta">
