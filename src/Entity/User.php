@@ -197,10 +197,12 @@ public function setBlockEndDate(?\DateTimeInterface $blockEndDate): self
 
     #[ORM\Column(name: 'numTel', type: 'string', nullable: false)]
     #[Assert\NotBlank(message: "Le numéro de téléphone ne peut pas être vide.")]
-    #[Assert\Regex(
-        pattern: '/^(\+216|216|0)([0-9]{8})$/',
-        message: "Le numéro de téléphone '{{ value }}' n'est pas valide."
+    #[Assert\Length(
+        min: 8,
+        max: 8,
+        exactMessage: "Le numéro de téléphone '{{ value }}' doit contenir exactement 8 chiffres."
     )]
+    
     private ?string $numTel = null;
 
     public function getNumTel(): ?string

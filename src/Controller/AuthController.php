@@ -48,7 +48,7 @@ class AuthController extends AbstractController
 
     
     
-    #[Route('/login', name: 'login')]
+    #[Route('/login', name: 'login')]#[Route('/login', name: 'login')]
     public function login(
         Request $request,
         SessionInterface $session,
@@ -65,41 +65,65 @@ class AuthController extends AbstractController
             $plainPassword = $submittedUser->getPassword();
     
             $user = $entityManager->getRepository(User::class)->findOneBy(['email' => $email]);
-            dump($email);
-            dump($plainPassword);
-            dump($user->getPassword()); // mot de passe hashé en BDD
-            dump($passwordHasher->isPasswordValid($user, $plainPassword));
-           
-         
-            if ($user && $passwordHasher->isPasswordValid($user, $plainPassword)) {
     
-                // Vérifie si le compte est bloqué
-                if ($user->isBlocked()) {
-                    $now = new \DateTime();
+            // Check if the email field is empty
+            if (empty($email)) {
+                $form->get('email')->addError(new FormError('L\'email ne peut pas être vide.'));
+            }
     
-                    if ($user->getBlockEndDate() !== null && $user->getBlockEndDate() > $now) {
-                        $form->get('email')->addError(new FormError('Votre compte est bloqué jusqu\'au ' . $user->getBlockEndDate()->format('d/m/Y H:i')));
-                        return $this->render('auth/login.html.twig', [
-                            'form' => $form->createView(),
-                        ]);
-                    }
+            // Additional email validation: check for '@' and '.'
+            if (!strpos($email, '@') || !strpos($email, '.')) {
+                $form->get('email')->addError(new FormError('L\'email doit etre  valide.'));
+            }
     
-                    // Déblocage si la date est expirée
-                    $user->setBlocked(false);
-                    $user->setBlockEndDate(null);
-                    $entityManager->flush();
+            // Check that the part before '@' is at least 3 characters long
+            $emailBeforeAt = substr($email, 0, strpos($email, '@'));
+            if (strlen($emailBeforeAt) < 3) {
+                $form->get('email')->addError(new FormError('L\'email doit etre  valide.'));
+            }
+    
+            // Check if the password field is empty
+            if (empty($plainPassword)) {
+                $form->get('password')->addError(new FormError('Le mot de passe ne peut pas être vide.'));
+            }
+    
+            // Check if the email is valid
+            if ($user) {
+                if (!$passwordHasher->isPasswordValid($user, $plainPassword)) {
+                    $form->get('password')->addError(new FormError('Mot de passe incorrect.'));
+                }
+            } else {
+                $form->get('email')->addError(new FormError('L\'email n\'est pas enregistré.'));
+            }
+    
+            // Check if the account is blocked
+            if ($user && $user->isBlocked()) {
+                $now = new \DateTime();
+                if ($user->getBlockEndDate() !== null && $user->getBlockEndDate() > $now) {
+                    $form->get('email')->addError(new FormError('Votre compte est bloqué jusqu\'au ' . $user->getBlockEndDate()->format('d/m/Y H:i')));
+                    return $this->render('auth/login.html.twig', [
+                        'form' => $form->createView(),
+                    ]);
                 }
     
-                // Authentification réussie
+                // Unblocking account if the block date is expired
+                $user->setBlocked(false);
+                $user->setBlockEndDate(null);
+                $entityManager->flush();
+            }
+    
+            // If the form is valid and there are no errors
+            if ($form->isValid() && !$user->isBlocked()) {
+                // Set session variables for the authenticated user
                 $session->set('user_id', $user->getIdUser());
                 $session->set('username', $user->getUsername());
                 $session->set('email', $user->getEmail());
-                
                 $session->set('first_name', $user->getFirstName());
                 $session->set('last_name', $user->getLastName());
                 $session->set('phone', $user->getNumTel());
                 $session->set('img', $user->getImgPath());
-                // Redirection selon le rôle
+    
+                // Redirect based on user role
                 switch ($user->getRole()) {
                     case 'ADMIN':
                         return $this->redirectToRoute('app_user_index');
@@ -107,22 +131,22 @@ class AuthController extends AbstractController
                         return $this->redirectToRoute('prof');
                     case 'FOURNISSEUR':
                         return $this->redirectToRoute('prof');
-                   
                     default:
                         return $this->redirectToRoute('homepage');
                 }
             }
-         
-           
             
-            // Email ou mot de passe incorrect
-            $form->get('email')->addError(new FormError('Email ou mot de passe incorrect.'));
+            // If the form is invalid, stay on the same page with error messages
+            if (!$form->isValid()) {
+                $form->get('email')->addError(new FormError('Veuillez vérifier les champs et réessayer.'));
+            }
         }
-     
+    
         return $this->render('auth/login.html.twig', [
             'form' => $form->createView(),
         ]);
     }
+    
     
     
     #[Route('/register', name: 'user_register')]
@@ -264,47 +288,70 @@ public function registerAdmin(Request $request, EntityManagerInterface $entityMa
     $form->handleRequest($request);
 
     if ($form->isSubmitted()) {
-        // Validation personnalisée
-        $existingUsername = $entityManager->getRepository(User::class)->findOneBy(['username' => $user->getUsername()]);
-        if ($existingUsername) {
-            $form->get('username')->addError(new FormError('Ce nom d\'utilisateur est déjà utilisé.'));
+        // Validate email pattern manually if you want custom validation
+        $email = $user->getEmail();
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $form->get('email')->addError(new FormError('L\'email "{{ value }}" n\'est pas valide.'));
         }
 
-        $existingEmail = $entityManager->getRepository(User::class)->findOneBy(['email' => $user->getEmail()]);
-        if ($existingEmail) {
-            $form->get('email')->addError(new FormError('Cet email est déjà utilisé.'));
+        // Validate the length of first name, last name, and username
+        if (strlen($user->getFirstName()) < 2) {
+            $form->get('firstName')->addError(new FormError('Le prénom doit contenir au moins 2 caractères.'));
+        }
+        if (strlen($user->getLastName()) < 2) {
+            $form->get('lastName')->addError(new FormError('Le nom doit contenir au moins 2 caractères.'));
+        }
+        if (strlen($user->getUsername()) < 4) {
+            $form->get('username')->addError(new FormError('Le nom d\'utilisateur doit contenir au moins 4 caractères.'));
         }
 
+        // Custom validation for email (@ and . check)
+        if (strpos($email, '@') === false || strpos($email, '.') === false) {
+            $form->get('email')->addError(new FormError('L\'email doit contenir un "@" et un "." valide.'));
+        }
+
+        // Validate password length
+        if (strlen($user->getPassword()) < 6) {
+            $form->get('password')->addError(new FormError('Le mot de passe doit contenir au moins 6 caractères.'));
+        }
+
+        // Check if passwords match
         if ($user->getPassword() !== $form->get('passwordConfirmation')->getData()) {
             $form->get('passwordConfirmation')->addError(new FormError('Les mots de passe ne correspondent pas.'));
         }
-
-        // Appeler isValid() après vérifications personnalisées
+        $numTel = $user->getNumtel();
+        if (!$numTel) {
+            $form->get('numtel')->addError(new FormError('Le numéro de téléphone ne peut pas être vide.'));
+        } elseif (strlen($numTel) != 8) {
+            $form->get('numtel')->addError(new FormError('Le numéro de téléphone doit contenir exactement 8 chiffres.'));
+        }
+        // If the form is valid, persist and redirect
         if ($form->isValid()) {
             $user->setPassword(password_hash($user->getPassword(), PASSWORD_BCRYPT));
-            $user->setRole("ADMIN"); // 💡 On force ici le rôle, pas dans le form
+            $user->setRole("ADMIN"); // Force the role here, not in the form
             $entityManager->persist($user);
             $entityManager->flush();
 
             return $this->redirectToRoute('app_user_index');
         }
-
-        // En cas d'erreurs → facultatif, pour debug
-        /*
-        foreach ($form as $child) {
-            foreach ($child->getErrors() as $error) {
-                dump('Champ : ' . $child->getName(), 'Erreur : ' . $error->getMessage());
-            }
-        }
-        dump($form->getErrors(true, false));
-        dump($user);
-        die();
-        */
     }
 
-    return $this->redirectToRoute('app_user_index');
+    // If the form is submitted but not valid, stay on the same page
+    return $this->render('admin/addAdmin.html.twig', [
+        'adminForm' => $form->createView(),
+    ]);
 }
 
+#[Route('/admin/add', name: 'admin_show_add_form', methods: ['GET'])]
+public function showAddAdminForm(Request $request): Response
+{
+    $user = new User();
+    $form = $this->createForm(AdminRegisterFormType::class, $user);
+
+    return $this->render('admin/addAdmin.html.twig', [
+        'adminForm' => $form->createView(),
+    ]);
+}
 
 
 

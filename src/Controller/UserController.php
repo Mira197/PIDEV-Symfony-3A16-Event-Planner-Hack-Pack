@@ -3,6 +3,8 @@
 namespace App\Controller;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Symfony\Component\Form\FormError;
+
 use App\Entity\User;
 use App\Form\AdminRegisterFormType;
 use App\Form\UpdateProfileType;
@@ -338,10 +340,20 @@ class UserController extends AbstractController
         $form = $this->createForm(UpdateProfileType::class, $user);
         $form->handleRequest($request);
     
-        if ($form->isSubmitted() && $form->isValid()) {
-            $em->flush();
-            $this->addFlash('success', 'Profil mis à jour avec succès.');
-            return $this->redirectToRoute('prof'); // ✅ Redirection vers la page du profil
+        if ($form->isSubmitted()) {
+            // Manually check address field validation
+            $address = $user->getAddress();
+            if (!$address) {
+                $form->get('address')->addError(new FormError('L\'adresse ne peut pas être vide.'));
+            } elseif (strlen($address) < 4) {
+                $form->get('address')->addError(new FormError('L\'adresse doit contenir au moins 4 caractères.'));
+            }
+    
+            if ($form->isValid()) {
+                $em->flush();
+                $this->addFlash('success', 'Profil mis à jour avec succès.');
+                return $this->redirectToRoute('prof'); 
+            }
         }
     
         return $this->render('admin/edit_profile.html.twig', [
@@ -349,6 +361,7 @@ class UserController extends AbstractController
             'user' => $user,
         ]);
     }
+    
     
 
 
@@ -412,21 +425,20 @@ class UserController extends AbstractController
     
         return $this->redirectToRoute('prof'); // ou une autre page
     }
-    
+    #[Route('/admin/delete/{idUser}', name: 'app_user_delete', methods: ['POST'])]
+public function deleteUser(int $idUser, EntityManagerInterface $em): Response
+{
+    $user = $em->getRepository(User::class)->find($idUser);
 
+    if (!$user) {
+        throw $this->createNotFoundException("User not found");
+    }
 
+    $em->remove($user);
+    $em->flush();
 
-
-
-
-
-
-
-
-
-
-
-
-
+    $this->addFlash('success', 'User deleted successfully.');
+    return $this->redirectToRoute('app_user_index');
+}
 
 }

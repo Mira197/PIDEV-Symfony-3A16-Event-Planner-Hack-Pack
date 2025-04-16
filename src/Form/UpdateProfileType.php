@@ -8,6 +8,7 @@ use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\Constraints as Assert;
 
 class UpdateProfileType extends AbstractType
 {
@@ -27,8 +28,13 @@ class UpdateProfileType extends AbstractType
                 'required' => false,
             ])
             ->add('address', TextType::class, [
-                'label' => 'Address',
-                'required' => false,
+                'constraints' => [
+                    new Assert\NotBlank(['message' => 'L\'adresse ne peut pas être vide.']),
+                    new Assert\Length([
+                        'min' => 4,
+                        'minMessage' => 'L\'adresse doit contenir au moins {{ limit }} caractères.',
+                    ]),
+                ],
             ])
             ->add('email', EmailType::class, [
                 'label' => 'Email',

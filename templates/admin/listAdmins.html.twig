@@ -1,213 +1,161 @@
 {% extends 'admin/base.html.twig' %}
 
 {% block head %}
-    <link rel="stylesheet" href="{{ asset('assetsdheker/css/adminUsers.css') }}">
-    {{ parent() }}
+<link rel="stylesheet" href="{{ asset('assetsdheker/css/adminUsers.css') }}">
+<style>
+	/* Boutons sans bordure */
+	.btn-outline-danger.btn-no-border,
+	.btn-outline-secondary.btn-no-border {
+		border-color: transparent !important;
+	}
+
+	/* Modal CSS pur */
+	.css-modal {
+		position: fixed;
+		top: 0;
+		left: 0;
+		width: 100vw;
+		height: 100vh;
+		background-color: rgba(0, 0, 0, 0.5);
+		display: none;
+		align-items: flex-start;
+		justify-content: center;
+		padding-top: 120px;
+		z-index: 1000;
+	}
+
+	.css-modal-box {
+		background-color: #fff;
+		border-radius: 16px;
+		padding: 2rem;
+		box-shadow: 0 5px 25px rgba(0, 0, 0, 0.3);
+		width: 90%;
+		max-width: 400px;
+		text-align: center;
+		animation: fadeIn 0.3s ease-in-out;
+		z-index: 1001;
+		font-family: 'Segoe UI', sans-serif;
+	}
+
+	.css-modal-box p {
+		font-size: 18px;
+		color: #555;
+		margin-bottom: 1.5rem;
+	}
+
+	.css-modal-box strong {
+		color: #3c2c4e;
+	}
+
+	.css-modal-box .btn {
+		padding: 0.5rem 1.2rem;
+		font-size: 14px;
+		border-radius: 6px;
+		cursor: pointer;
+		margin: 0 5px;
+	}
+
+	.css-modal-box .btn-danger {
+		background-color: #d33;
+		color: white;
+		border: none;
+	}
+
+	.css-modal-box .btn-secondary {
+		background-color: #6c757d;
+		color: white;
+		border: none;
+	}
+
+	.css-modal-overlay {
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		cursor: pointer;
+	}
+
+	input[type="checkbox"]:checked + .css-modal {
+		display: flex;
+	}
+
+	@keyframes fadeIn {
+		from {
+			opacity: 0;
+			transform: translateY(-20px);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0);
+		}
+	}
+</style>
+{{ parent() }}
 {% endblock %}
 
 {% block section %}
 <div class="admin-mui-wrapper">
-    <h2>👥 Users Management</h2>
+	<h2>👥 Users Management</h2>
 
-    <div class="admin-filters">
-        <input type="text" id="userSearchInput" class="form-control" placeholder="🔍 Search users...">
-        <a href="{{ path('app_user_export_pdf') }}" target="_blank" class="main-btn primary-btn btn-hover export-btn">
-            <i class="lni lni-printer"></i> Export PDF
-        </a>
+	<div class="admin-filters">
+		<input type="text" id="userSearchInput" class="form-control" placeholder="🔍 Search users...">
+		<a href="{{ path('app_user_export_pdf') }}" target="_blank" class="main-btn primary-btn btn-hover export-btn">
+			<i class="lni lni-printer"></i> Export PDF
+		</a>
+		<a href="{{ path('admin_show_add_form') }}" class="main-btn info-btn btn-hover export-btn">
+			<i class="lni lni-plus"></i> Add Admin
+		</a>
+		<a href="{{ path('app_user_export_excel') }}" target="_blank" class="main-btn success-btn btn-hover export-btn">
+			<i class="lni lni-exit-up"></i> Export Excel
+		</a>
+	</div>
 
-        <!-- Bouton pour ouvrir le modal -->
-        <button class="main-btn info-btn btn-hover export-btn" data-bs-toggle="modal" data-bs-target="#adminRegisterModal">
-            <i class="lni lni-plus"></i> Add Admin
-        </button>
+	<table class="admin-mui-table">
+		<thead>
+			<tr>
+				<th>Username</th>
+				<th>Email</th>
+				<th>Role</th>
+				<th>Actions</th>
+			</tr>
+		</thead>
+		<tbody id="userTable">
+			{% for user in users %}
+				<tr>
+					<td>{{ user.username }}</td>
+					<td>{{ user.email }}</td>
+					<td>{{ user.role }}</td>
+					<td>
+						<!-- ✅ Corbeille cliquable -->
+						<label for="confirm-{{ user.idUser }}" class="btn btn-outline-danger btn-sm btn-no-border">🗑️</label>
 
-        <!-- Modal avec formulaire -->
-        <div class="modal fade" id="adminRegisterModal" tabindex="-1" aria-hidden="true">
-            <div class="modal-dialog modal-lg modal-dialog-centered">
-                <div class="modal-content card-style">
-                    <div class="modal-header">
-                        <h5 class="modal-title"><i class="lni lni-user-plus"></i> Ajouter un administrateur</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
-                    </div>
-                    <div class="modal-body">
-                        {{ form_start(adminForm, { 'attr': { 'action': path('admin_register'), 'class': 'row g-3' }, 'method': 'POST' }) }}
+						<!-- ✅ Input toggle caché -->
+						<input type="checkbox" id="confirm-{{ user.idUser }}" hidden>
 
-                        <div class="col-md-6 input-style-1">
-                            <label>Nom</label>
-                            {{ form_widget(adminForm.lastName) }}
-                            {{ form_errors(adminForm.lastName) }}
-                        </div>
+						<!-- ✅ Pop-up CSS -->
+						<div class="css-modal">
+							<label for="confirm-{{ user.idUser }}" class="css-modal-overlay"></label>
+							<div class="css-modal-box">
+								<p>Are you sure you want to delete <strong>{{ user.username }}</strong>?</p>
+								<form method="POST" action="{{ path('app_user_delete', {'idUser': user.idUser}) }}">
+									<input type="hidden" name="_method" value="POST">
+									<button type="submit" class="btn btn-danger">Yes</button>
+									<label for="confirm-{{ user.idUser }}" class="btn btn-secondary">Cancel</label>
+								</form>
+							</div>
+						</div>
 
-                        <div class="col-md-6 input-style-1">
-                            <label>Prénom</label>
-                            {{ form_widget(adminForm.firstName) }}
-                            {{ form_errors(adminForm.firstName) }}
-                        </div>
-
-                        <div class="col-md-6 input-style-1">
-                            <label>Nom d'utilisateur</label>
-                            {{ form_widget(adminForm.username) }}
-                            {{ form_errors(adminForm.username) }}
-                        </div>
-
-                        <div class="col-md-6 input-style-1">
-                            <label>Email</label>
-                            {{ form_widget(adminForm.email) }}
-                            {{ form_errors(adminForm.email) }}
-                        </div>
-
-                        <div class="col-md-6 input-style-1">
-                            <label>Numéro de téléphone</label>
-                            {{ form_widget(adminForm.numtel) }}
-                            {{ form_errors(adminForm.numtel) }}
-                        </div>
-
-                        <div class="col-md-6 input-style-1">
-                            <label>Mot de passe</label>
-                            {{ form_widget(adminForm.password) }}
-                            {{ form_errors(adminForm.password) }}
-                        </div>
-
-                        <div class="col-md-6 input-style-1">
-                            <label>Confirmation mot de passe</label>
-                            {{ form_widget(adminForm.passwordConfirmation) }}
-                            {{ form_errors(adminForm.passwordConfirmation) }}
-                        </div>
-
-                        <div class="col-12">
-                            <button type="submit" class="main-btn primary-btn btn-hover w-100">
-                                <i class="lni lni-user-plus"></i> Créer l'admin
-                            </button>
-                        </div>
-
-                        {{ form_end(adminForm) }}
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <a href="{{ path('app_user_export_excel') }}" target="_blank" class="main-btn success-btn btn-hover export-btn">
-            <i class="lni lni-exit-up"></i> Export Excel
-        </a>
-    </div>
-
-    <!-- Table -->
-    <table class="admin-mui-table">
-        <thead>
-            <tr>
-                <th>Username</th>
-                <th>Email</th>
-                <th>Role</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody id="userTable">
-            {% for user in users %}
-                <tr>
-                    <td>{{ user.username }}</td>
-                    <td>{{ user.email }}</td>
-                    <td>{{ user.role }}</td>
-                    <td>
-                        <button class="btn btn-danger btn-sm delete-user" data-id="{{ user.idUser }}">🗑️</button>
-                        <button class="btn btn-warning btn-sm edit-user" data-id="{{ user.idUser }}">🖊️</button>
-                    </td>
-                </tr>
-            {% else %}
-                <tr>
-                    <td colspan="4" class="empty-row">No users found.</td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+						<!-- ❌ Autre action -->
+						<button class="btn btn-outline-secondary btn-sm btn-no-border" title="Block User" data-id="{{ user.idUser }}">🚫</button>
+					</td>
+				</tr>
+			{% else %}
+				<tr>
+					<td colspan="4" class="empty-row">No users found.</td>
+				</tr>
+			{% endfor %}
+		</tbody>
+	</table>
 </div>
-<!-- Spinner circulaire avec message -->
-<div id="mini-spinner" style="display: none;">
-  <div class="spinner-box">
-    <div class="circular-spinner"></div>
-    <p class="spinner-text">Veuillez patienter un peu lors du traitement des informations...</p>
-  </div>
-</div>
-
-<style>
-#mini-spinner {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background: rgba(255, 255, 255, 0.85);
-  z-index: 9999;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.spinner-box {
-  background: #ffffff;
-  padding: 30px;
-  border-radius: 12px;
-  text-align: center;
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
-}
-
-.circular-spinner {
-  width: 60px;
-  height: 60px;
-  border: 6px solid #e0d7e6;
-  border-top: 6px solid #513452;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-  margin: 0 auto 15px;
-}
-
-.spinner-text {
-  font-family: 'Segoe UI', sans-serif;
-  color: #2a1c2b;
-  font-size: 18px;
-  font-weight: 500;
-  animation: pulse 2s ease-in-out infinite;
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
-@keyframes pulse {
-  0% { opacity: 0.5; }
-  50% { opacity: 1; }
-  100% { opacity: 0.5; }
-}
-</style>
-
-<script>
-  document.addEventListener("DOMContentLoaded", function () {
-    document.querySelectorAll("form").forEach(form => {
-      form.addEventListener("submit", function () {
-        document.getElementById("mini-spinner").style.display = "flex";
-      });
-    });
-
-    window.addEventListener("beforeunload", function () {
-      document.getElementById("mini-spinner").style.display = "flex";
-    });
-  });
-</script>
-{% block javascripts %}
-    {{ parent() }}
-    <script>
-      document.addEventListener("DOMContentLoaded", function () {
-        const searchInput = document.getElementById("userSearchInput");
-        const tableRows = document.querySelectorAll("#userTable tr");
-
-        searchInput.addEventListener("keyup", function () {
-          const filter = this.value.toLowerCase();
-
-          tableRows.forEach(row => {
-            const cellsText = row.textContent.toLowerCase();
-            row.style.display = cellsText.includes(filter) ? "" : "none";
-          });
-        });
-      });
-    </script>
-{% endblock %}
-
 {% endblock %}

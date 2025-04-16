@@ -8,17 +8,17 @@
         <div class="form-elements-wrapper">
             <div class="row justify-content-center">
                 <div class="col-lg-8">
-                    <div class="card-style mb-30 mt-5"> 
+                    <div class="card-style mb-30 mt-5">
                         <h6 class="mb-25 text-center">
                             <i class="lni lni-user"></i> Modifier Mon Profil
                         </h6>
 
-                        {# ✅ Ajoute l'action vers la bonne route ici ! #}
-                       {{ form_start(form, {
-    'attr': {'class': 'row g-3'},
-    'method': 'POST',
-    'action': path('edit_profile') 
-}) }}
+                        {# ✅ Add novalidate attribute to the form to prevent browser validation #}
+                        {{ form_start(form, {
+                            'attr': {'class': 'row g-3', 'novalidate': 'novalidate'},
+                            'method': 'POST',
+                            'action': path('edit_profile') 
+                        }) }}
 
                         <div class="col-md-6 input-style-1">
                             <label>First Name</label>
@@ -41,7 +41,14 @@
                         <div class="col-md-6 input-style-1">
                             <label>Address</label>
                             {{ form_widget(form.address) }}
-                            {{ form_errors(form.address) }}
+                            {# Show error message for the address field if validation fails #}
+                            {% if form.address.vars.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.address.vars.errors %}
+                                        {{ error.message }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
                         </div>
 
                         <div class="col-md-12 input-style-1">
