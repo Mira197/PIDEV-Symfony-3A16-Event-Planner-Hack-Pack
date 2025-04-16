@@ -121,14 +121,13 @@
 		}
 
 		.mui-filters {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 15px;
-    margin-bottom: 20px;
-}
-
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			flex-wrap: wrap;
+			gap: 15px;
+			margin-bottom: 20px;
+		}
 	</style>
 {% endblock %}
 
@@ -136,53 +135,47 @@
 	<div class="mui-table-wrapper">
 		<h2>📋 My Orders</h2>
 
-		<div class="mui-filters d-flex align-items-center justify-content-between flex-wrap" style="gap: 10px;">
+		<div
+			class="mui-filters d-flex align-items-center justify-content-between flex-wrap" style="gap: 10px;">
 
-    <!-- Left: Search -->
-    <div class="d-flex align-items-center" style="flex: 1; max-width: 250px;">
-        <input type="text" id="orderSearch" placeholder="🔍 Search orders..." class="form-control w-100">
-    </div>
+			<!-- Left: Search -->
+			<div class="d-flex align-items-center" style="flex: 1; max-width: 250px;">
+				<input type="text" id="orderSearch" placeholder="🔍 Search orders..." class="form-control w-100">
+			</div>
 
-    <!-- Center: Status Filters -->
-    <div class="d-flex flex-wrap justify-content-center" style="gap: 8px;">
-        <a href="{{ path('client_orders') }}">
-            <button class="{{ currentFilter is empty ? 'active' : '' }}">All</button>
-        </a>
-        <a href="{{ path('client_orders', {'status': 'PENDING'}) }}">
-            <button class="{{ currentFilter == 'PENDING' ? 'active' : '' }}">Pending</button>
-        </a>
-        <a href="{{ path('client_orders', {'status': 'CONFIRMED'}) }}">
-            <button class="{{ currentFilter == 'CONFIRMED' ? 'active' : '' }}">Confirmed</button>
-        </a>
-        <a href="{{ path('client_orders', {'status': 'CANCELLED'}) }}">
-            <button class="{{ currentFilter == 'CANCELLED' ? 'active' : '' }}">Cancelled</button>
-        </a>
-        <a href="{{ path('client_orders', {'status': 'DELIVERED'}) }}">
-            <button class="{{ currentFilter == 'DELIVERED' ? 'active' : '' }}">Delivered</button>
-        </a>
-    </div>
+			<!-- Center: Status Filters -->
+			<div class="d-flex flex-wrap justify-content-center" style="gap: 8px;">
+				<a href="{{ path('client_orders') }}">
+					<button class="{{ currentFilter is empty ? 'active' : '' }}">All</button>
+				</a>
+				<a href="{{ path('client_orders', {'status': 'PENDING'}) }}">
+					<button class="{{ currentFilter == 'PENDING' ? 'active' : '' }}">Pending</button>
+				</a>
+				<a href="{{ path('client_orders', {'status': 'CONFIRMED'}) }}">
+					<button class="{{ currentFilter == 'CONFIRMED' ? 'active' : '' }}">Confirmed</button>
+				</a>
+				<a href="{{ path('client_orders', {'status': 'CANCELLED'}) }}">
+					<button class="{{ currentFilter == 'CANCELLED' ? 'active' : '' }}">Cancelled</button>
+				</a>
+				<a href="{{ path('client_orders', {'status': 'DELIVERED'}) }}">
+					<button class="{{ currentFilter == 'DELIVERED' ? 'active' : '' }}">Delivered</button>
+				</a>
+			</div>
 
-    <!-- Right: Export -->
-    <div>
-        <button id="exportCsvBtn" class="btn btn-outline-secondary">⬇️ Export as CSV</button>
-    </div>
+			<!-- Right: Export -->
+			<div>
+				<button id="exportCsvBtn" class="btn btn-outline-secondary">⬇️ Export as CSV</button>
+			</div>
 
-</div>
-
+		</div>
 
 
 		<table class="mui-table">
 			<thead>
 				<tr>
 					<th>#Order</th>
-					<th>
-						Event Date<br>
-						<input type="text" class="filter-input" data-column="1">
-					</th>
-					<th>
-						Address<br>
-						<input type="text" class="filter-input" data-column="2">
-					</th>
+					<th>Event Date</th>
+					<th>Address</th>
 					<th>Status</th>
 					<th>Ordered At</th>
 					<th>Total (TND)</th>
@@ -260,15 +253,123 @@ console.log('❌ Cancellation aborted by user.');
 });
 });
 });
-document.getElementById("orderSearch").addEventListener("keyup", function () {
-const filter = this.value.toLowerCase();
-const rows = document.querySelectorAll("table.mui-table tbody tr");
+// ✅ Recherche AJAX
+	// ✅ Recherche AJAX avec délai et gestion d'erreur améliorée
+let searchTimeout;
+document.getElementById("orderSearch").addEventListener("input", function() {
+    const query = this.value.trim();
+    
+    // Annule le timeout précédent
+    clearTimeout(searchTimeout);
+    
+    // Si la recherche est vide, recharge les commandes originales
+	if (query.length === 0) {
+    // Recharger les données d'origine sans recharger toute la page
+    fetch(`/client/orders/search`, {
+        headers: {
+            'Accept': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        updateOrdersTable(data);
+    })
+    .catch(error => {
+        console.error('Erreur AJAX lors du reset :', error);
+    });
+    return;
+}
 
-rows.forEach(row => {
-const text = row.textContent.toLowerCase();
-row.style.display = text.includes(filter) ? "" : "none";
+   
+    
+    // Délai de 300ms avant l'envoi de la requête
+    searchTimeout = setTimeout(() => {
+        fetch(`/client/orders/search?q=${encodeURIComponent(query)}`, {
+            headers: {
+                'Accept': 'application/json'
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('➡️ Résultat AJAX :', data);
+            updateOrdersTable(data);
+        })
+        .catch(error => {
+            console.error('Erreur AJAX :', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Search Error',
+                text: 'An error occurred while searching. Please try again.'
+            });
+        });
+    }, 300);
 });
-});
+
+function updateOrdersTable(data) {
+    const tbody = document.querySelector("table.mui-table tbody");
+    tbody.innerHTML = '';
+
+    if (data.length === 0) {
+        tbody.innerHTML = `<tr>
+            <td colspan="7" class="empty-row">No orders found matching your search.</td>
+        </tr>`;
+        return;
+    }
+
+    data.forEach((order, index) => {
+        const row = `
+            <tr>
+                <td>#${index + 1}</td>
+                <td>${order.eventDate || 'N/A'}</td>
+                <td>${order.exactAddress}</td>
+                <td>
+                    <span class="mui-status status-${order.status.toLowerCase()}">${order.status}</span>
+                </td>
+                <td>${order.orderedAt || 'N/A'}</td>
+                <td>${order.totalPrice}</td>
+                <td>
+                    ${order.status === 'PENDING' ?
+                        `<form action="/client/order/cancel/${order.id}" method="post" class="cancel-order-form d-inline">
+                            <button class="btn btn-sm btn-danger">Cancel</button>
+                        </form>` : '—'}
+                </td>
+            </tr>
+        `;
+        tbody.insertAdjacentHTML('beforeend', row);
+    });
+    
+    // Réattache les écouteurs d'événements aux nouveaux formulaires
+    attachCancelEventListeners();
+}
+
+function attachCancelEventListeners() {
+    document.querySelectorAll('.cancel-order-form').forEach(form => {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const actionUrl = form.getAttribute('action');
+            
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You are about to cancel this order.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#aaa',
+                confirmButtonText: 'Yes, cancel it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.submit();
+                }
+            });
+        });
+    });
+}
+
 document.getElementById("exportCsvBtn").addEventListener("click", function () {
 const rows = document.querySelectorAll("table.mui-table tr");
 let csv = [];
@@ -290,18 +391,6 @@ a.href = url;
 a.download = "my_orders.csv";
 a.click();
 URL.revokeObjectURL(url);
-});
-document.querySelectorAll('.filter-input').forEach(input => {
-input.addEventListener('input', function () {
-const column = this.dataset.column;
-const value = this.value.toLowerCase();
-
-document.querySelectorAll("table.mui-table tbody tr").forEach(row => {
-const cell = row.querySelectorAll("td")[column];
-const match = cell && cell.textContent.toLowerCase().includes(value);
-row.style.display = match ? "" : "none";
-});
-});
 });
 	</script>
 {% endblock %}
