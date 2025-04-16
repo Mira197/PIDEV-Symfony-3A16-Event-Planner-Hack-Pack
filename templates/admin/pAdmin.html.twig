@@ -1,0 +1,146 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block title %}
+    {{ 'profile.title'|trans }}
+{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-alpha1/dist/css/bootstrap.min.css">
+    <style>
+        body {
+            background: rgb(99, 39, 120);
+        }
+        .form-control:focus {
+            box-shadow: none;
+            border-color: #BA68C8;
+        }
+        .profile-button {
+            background: rgb(99, 39, 120);
+            color: white;
+            box-shadow: none;
+            border: none;
+        }
+        .profile-button:hover,
+        .profile-button:focus,
+        .profile-button:active {
+            background: #682773;
+            color: white;
+            box-shadow: none;
+        }
+        .back:hover {
+            color: #682773;
+            cursor: pointer;
+        }
+        .labels {
+            font-size: 11px;
+        }
+        .add-experience:hover {
+            background: #BA68C8;
+            color: #fff;
+            cursor: pointer;
+            border: solid 1px #BA68C8;
+        }
+        .dropdown-toggle {
+            font-weight: bold;
+            font-size: 16px;
+        }
+    </style>
+{% endblock %}
+
+{% block section %}
+<div class="container rounded bg-white mb-5">
+
+    <!-- Ligne de langue + % -->
+    <div class="d-flex justify-content-between align-items-center mb-2">
+        <!-- À gauche : langue -->
+        <div class="d-flex align-items-center gap-2">
+            <span style="font-size: 13px; color: #555;">🌍 {{ 'profile.choose_lang'|trans }} :</span>
+            <a href="/fr{{ app.request.getPathInfo()|replace({'/en': '', '/fr': ''}) }}" title="Afficher en français">
+                <img src="{{ asset('images/fr.PNG') }}" alt="FR" width="30" class="me-1">
+            </a>
+            <a href="/en{{ app.request.getPathInfo()|replace({'/en': '', '/fr': ''}) }}" title="Switch to English">
+                <img src="{{ asset('images/en.PNG') }}" alt="EN" width="30">
+            </a>
+        </div>
+
+        <!-- À droite : pourcentage -->
+        <div style="font-size: 14px; color: #333;">
+            <strong>{{ 'profile.completion'|trans }}:</strong> {{ completion }}%
+        </div>
+    </div>
+
+    <!-- Barre de progression -->
+    <div class="progress mb-4">
+        <div class="progress-bar bg-success" role="progressbar" style="width: {{ completion }}%;" aria-valuenow="{{ completion }}" aria-valuemin="0" aria-valuemax="100">
+            {{ completion }}%
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-3 border-right">
+            <div class="d-flex flex-column align-items-center text-center p-3 py-5">
+                <img class="rounded-circle mt-5" src="{{ asset('uploads/profile_images/' ~ user.getImgPath) }}" alt="Profile image" width="150px">
+                <span class="font-weight-bold">{{ user.getUsername }}</span>
+                <span class="text-black-50">{{ user.getEmail }}</span>
+                <div class="d-flex justify-content-center mt-2">
+                    <form action="{{ path('change_profile_picture') }}" method="POST" enctype="multipart/form-data">
+                        <label class="main-btn primary-btn btn-hover" style="font-weight: 300; width: 120px; cursor: pointer;">
+                            <i class="lni lni-camera me-2"></i>
+                            {{ 'upload'|trans }}
+                            <input type="file" name="profile_image" accept="image/*" style="display: none;" onchange="this.form.submit();">
+                        </label>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-5 border-right">
+            <div class="p-3 py-5">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h4 class="text-right">{{ 'profile.settings'|trans }}</h4>
+                </div>
+                <div class="row mt-2">
+                    <div class="col-md-6">
+                        <label class="labels">{{ 'profile.first_name'|trans }}</label>
+                        <input type="text" class="form-control" placeholder="{{ user.getFirstName }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="labels">{{ 'profile.last_name'|trans }}</label>
+                        <input type="text" class="form-control" placeholder="{{ user.getLastName }}">
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-md-12">
+                        <label class="labels">{{ 'profile.mobile'|trans }}</label>
+                        <input type="text" class="form-control" placeholder="{{ user.getNumTel }}">
+                    </div>
+                    <div class="col-md-12">
+                        <label class="labels">{{ 'profile.email'|trans }}</label>
+                        <input type="text" class="form-control" placeholder="{{ user.getEmail }}">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="p-3 py-5 d-flex flex-column align-items-center justify-content-center h-100 gap-2">
+                <a href="{{ path('user_change_password') }}" class="main-btn primary-btn btn-hover w-100" style="font-weight: 600;">
+                    <i class="lni lni-lock-alt me-2"></i>
+                    {{ 'profile.reset_password'|trans }}
+                </a>
+
+                <a href="{{ path('edit_profile') }}" class="main-btn primary-btn btn-hover w-100" style="font-weight: 600;">
+                    <i class="lni lni-pencil-alt me-2"></i>
+                    {{ 'profile.edit'|trans }}
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+{% endblock %}

@@ -1,0 +1,76 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block title %}Modifier Mon Profil{% endblock %}
+
+{% block section %}
+<section class="tab-components">
+    <div class="container-fluid">
+        <div class="form-elements-wrapper">
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <div class="card-style mb-30 mt-5">
+                        <h6 class="mb-25 text-center">
+                            <i class="lni lni-user"></i> Modifier Mon Profil
+                        </h6>
+
+                        {# ✅ Add novalidate attribute to the form to prevent browser validation #}
+                        {{ form_start(form, {
+                            'attr': {'class': 'row g-3', 'novalidate': 'novalidate'},
+                            'method': 'POST',
+                            'action': path('edit_profile') 
+                        }) }}
+
+                        <div class="col-md-6 input-style-1">
+                            <label>First Name</label>
+                            {{ form_widget(form.firstName) }}
+                            {{ form_errors(form.firstName) }}
+                        </div>
+
+                        <div class="col-md-6 input-style-1">
+                            <label>Last Name</label>
+                            {{ form_widget(form.lastName) }}
+                            {{ form_errors(form.lastName) }}
+                        </div>
+
+                        <div class="col-md-6 input-style-1">
+                            <label>Mobile Number</label>
+                            {{ form_widget(form.numTel) }}
+                            {{ form_errors(form.numTel) }}
+                        </div>
+
+                        <div class="col-md-6 input-style-1">
+                            <label>Address</label>
+                            {{ form_widget(form.address) }}
+                            {# Show error message for the address field if validation fails #}
+                            {% if form.address.vars.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.address.vars.errors %}
+                                        {{ error.message }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-12 input-style-1">
+                            <label>Email</label>
+                            {{ form_widget(form.email) }}
+                            {{ form_errors(form.email) }}
+                        </div>
+
+                        <div class="col-12 d-flex justify-content-between mt-3">
+                            <a href="{{ path('prof') }}" class="main-btn danger-btn btn-hover">
+                                <i class="lni lni-arrow-left"></i> Retour au profil
+                            </a>
+                            <button type="submit" class="main-btn primary-btn btn-hover">
+                                <i class="lni lni-save"></i> Enregistrer
+                            </button>
+                        </div>
+
+                        {{ form_end(form) }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
