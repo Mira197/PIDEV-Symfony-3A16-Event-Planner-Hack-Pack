@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Controller;
-
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use App\Entity\Comment;
 use App\Entity\Publication;
 use App\Form\CommentType;
@@ -19,33 +19,28 @@ class CommentController extends AbstractController
     #[Route('/comment/new/{id}', name: 'app_comment_new')]
     public function new(
         Publication $publication,
+        SessionInterface $session,
         Request $request,
         EntityManagerInterface $em,
-        Security $security,
         UserRepository $userRepository
     ): Response {
         $comment = new Comment();
         $form = $this->createForm(CommentType::class, $comment);
         $form->handleRequest($request);
     
+        // 🔐 Récupération des données de session
+        $userId = $session->get('user_id');
+        $username = $session->get('username');
+        $user = $userRepository->find($userId);
+    
+        // 🛑 Vérification : utilisateur connecté obligatoire
+        if (!$user) {
+            $this->addFlash('error', 'You must be logged in to comment.');
+            return $this->redirectToRoute('app_login');
+        }
+    
         if ($form->isSubmitted() && $form->isValid()) {
-            // Récupère le nom d'utilisateur saisi manuellement
-            $inputUsername = $form->get('username')->getData();
-           // $user = $security->getUser();
-            $user = $userRepository->find(49);
-    
-            // Vérifie si l'utilisateur est connecté et correspond
-            if (!$user || $inputUsername !== $user->getUsername()) {
-                $form->get('username')->addError(
-                    new \Symfony\Component\Form\FormError("The username does not match your connected account.")
-                );
-    
-                return $this->render('newComment.html.twig', [
-                    'form' => $form->createView(),
-                    'publication' => $publication,
-                ]);
-            }
-    
+            // Association du commentaire à l'utilisateur et à la publication
             $comment->setUser($user);
             $comment->setPublication($publication);
             $comment->setCommentDate(new \DateTimeImmutable());
@@ -57,25 +52,28 @@ class CommentController extends AbstractController
             return $this->redirectToRoute('app_publication_client', ['comment_success' => 1]);
         }
     
+        // Vue initiale du formulaire
         return $this->render('newComment.html.twig', [
             'form' => $form->createView(),
             'publication' => $publication,
+            'username' => $username, // pour affichage lecture seule dans la vue
         ]);
     }
     
-
     #[Route('/comment/edit/{id}', name: 'app_comment_edit')]
     public function edit(
         Comment $comment,
         Request $request,
         EntityManagerInterface $em,
-        Security $security,
+        SessionInterface $session,
         UserRepository $userRepository
     ): Response {
-        //$user = $security->getUser();
-        $user = $userRepository->find(49);
+        // 🔐 Récupérer l'utilisateur via la session
+        $userId = $session->get('user_id');
+        $username = $session->get('username');
+        $user = $userRepository->find($userId);
     
-        // Vérifie si l'utilisateur connecté est bien l'auteur du commentaire
+        // 🛑 Vérifie que l'utilisateur est bien l'auteur du commentaire
         if (!$user || $comment->getUser() !== $user) {
             throw $this->createAccessDeniedException("You are not allowed to edit this comment.");
         }
@@ -84,50 +82,29 @@ class CommentController extends AbstractController
         $form->handleRequest($request);
     
         if ($form->isSubmitted() && $form->isValid()) {
-            // Vérifie le champ `username`
-            $inputUsername = $form->get('username')->getData();
-            if ($inputUsername !== $user->getUsername()) {
-                $form->get('username')->addError(
-                    new \Symfony\Component\Form\FormError("The username does not match your connected account.")
-                );
-            } else {
-                // Si tout est ok, sauvegarde les modifications
-                $em->flush();
-                $this->addFlash('success', 'Comment updated successfully.');
-                return $this->redirectToRoute('app_publication_client', ['comment_edited' => 1]);
-            }
+            // 💾 Enregistre les modifications
+            $em->flush();
+            $this->addFlash('success', 'Comment updated successfully.');
+            return $this->redirectToRoute('app_publication_client', ['comment_edited' => 1]);
         }
     
         return $this->render('editComment.html.twig', [
             'form' => $form->createView(),
             'comment' => $comment,
+            'username' => $username, // 👈 à utiliser dans le champ readonly du Twig
         ]);
     }
     
 
-#[Route('/comment/delete/{id}', name: 'app_comment_delete')]
-public function delete(Comment $comment, EntityManagerInterface $em, Security $security): Response
-{
-   /* if ($comment->getUser() !== $security->getUser()) {
-        throw $this->createAccessDeniedException("You are not allowed to delete this comment.");
-    }*/
-
-    $em->remove($comment);
-    $em->flush();
-
-    $this->addFlash('success', 'Comment deleted successfully.');
-    return $this->redirectToRoute('app_forum', ['comment_deleted' => 1]);
-}
-
 #[Route('/forum', name: 'app_forum')]
-public function forum(EntityManagerInterface $em): Response
-{
-    $publications = $em->getRepository(Publication::class)->findAll();
+    public function forum(EntityManagerInterface $em): Response
+    {
+        $publications = $em->getRepository(Publication::class)->findAll();
 
-    return $this->render('publicationClient.html.twig', [
-        'publications' => $publications
-    ]);
-}
+        return $this->render('publicationClient.html.twig', [
+            'publications' => $publications
+        ]);
+    }
 
 
     

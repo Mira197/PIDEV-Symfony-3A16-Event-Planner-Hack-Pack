@@ -21,14 +21,7 @@ class PublicationType extends AbstractType
                 'required' => true,
             ])
             
-            ->add('username', TextType::class, [
-                'mapped' => false,
-                'required' => true,
-                'label' => 'username',
-                'constraints' => [
-                    new NotBlank(['message' => 'Username is required.']),
-                ],
-            ]);
+           ;
             
             
     }

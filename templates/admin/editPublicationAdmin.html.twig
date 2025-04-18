@@ -1,4 +1,5 @@
 {% extends 'admin/baseAdmin.html.twig' %}
+
 {% block section %}
 	{{ form_start(form, {
     'attr': {
@@ -7,27 +8,17 @@
         'class': 'publication-form-container'
     }
 }) }}
+
 	<div class="container publication-form">
 		<h1 class="form-title">Edit Your Post</h1>
-		{{ form_row(form._token) }}
 
 		<div class="form-group">
-			{{ form_label(form.username, null, {'label_attr': {'class': 'form-label'}}) }}
-			{{ form_widget(form.username, {'attr': {'class': 'form-input'}}) }}
-			<div class="form-error">{{ form_errors(form.username) }}</div>
+			<label class="form-label">Username</label>
+			<input type="text" class="form-input" value="{{ username }}" readonly/>
 		</div>
 
-		<div class="form-group">
-			{{ form_label(form.title, null, {'label_attr': {'class': 'form-label'}}) }}
-			{{ form_widget(form.title, {'attr': {'class': 'form-input'}}) }}
-			<div class="form-error">{{ form_errors(form.title) }}</div>
-		</div>
-
-		<div class="form-group">
-			{{ form_label(form.description, null, {'label_attr': {'class': 'form-label'}}) }}
-			{{ form_widget(form.description, {'attr': {'class': 'form-textarea'}}) }}
-			<div class="form-error">{{ form_errors(form.description) }}</div>
-		</div>
+		{{ form_row(form.title, {'attr': {'class': 'form-input'}}) }}
+		{{ form_row(form.description, {'attr': {'class': 'form-textarea'}}) }}
 
 		<div class="form-group">
 			<label class="form-label">Current Image</label>
@@ -35,7 +26,6 @@
 				<img id="image-preview" src="data:image/png;base64,{{ publication.getBase64Image() }}" alt="Image preview" style="max-width:200px; border-radius: 8px; margin-bottom: 1rem;">
 			{% else %}
 				<p style="color: grey;">No image uploaded.</p>
-				<img id="image-preview" style="display:none;"/>
 			{% endif %}
 		</div>
 
@@ -47,20 +37,17 @@
 				<span id="file-name" class="file-name">No file selected</span>
 			</div>
 		</div>
-		<div style="display: flex; justify-content: center; gap: 20px; margin-top: 2rem;">
-			<button type="button" onclick="window.location.href='{{ path('app_publication_list') }}'" class="btn-submit">
-				Cancel
-			</button>
-			<button type="submit" class="btn-submit">
-				Update
-			</button>
+
+		<div class="d-flex justify-content-between mt-4">
+			<button type="button" onclick="window.location.href='{{ path('app_publication_list') }}'" class="btn-submit flex-btn">Cancel</button>
+			<button type="submit" class="btn-submit flex-btn">Update</button>
 		</div>
 
-	</form>
-</div>
+		{{ form_end(form) }}
+	</div>
 
-<script>
-	document.addEventListener('DOMContentLoaded', function () {
+	<script>
+		document.addEventListener('DOMContentLoaded', function () {
 const input = document.getElementById('file-upload');
 const preview = document.getElementById('image-preview');
 const fileName = document.getElementById('file-name');
@@ -82,88 +69,99 @@ fileName.textContent = 'No file selected';
 }
 });
 });
-</script>
-<style>
-	.publication-form {
-		max-width: 800px;
-		margin: 2rem auto;
-		padding: 2rem;
-		background-color: #ffffff;
-		border-radius: 10px;
-		box-shadow: 0 4px 15px rgba(83, 60, 86, 0.1);
-	}
-	.form-title {
-		color: #533C56;
-		text-align: center;
-		margin-bottom: 2rem;
-		font-weight: 600;
-	}
-	.form-group {
-		margin-bottom: 1.5rem;
-	}
-	.form-label {
-		display: block;
-		margin-bottom: 0.5rem;
-		color: #533C56;
-		font-weight: 500;
-	}
-	.form-input,
-	.form-textarea {
-		width: 100%;
-		padding: 0.75rem;
-		border: 1px solid #cebec9;
-		border-radius: 5px;
-		font-size: 1rem;
-		background-color: #ffffff;
-	}
-	.form-textarea {
-		min-height: 150px;
-		resize: vertical;
-	}
-	.btn-submit {
-		background-color: #533C56;
-		color: white;
-		border: none;
-		padding: 0.75rem 1.5rem;
-		font-size: 1rem;
-		border-radius: 5px;
-		cursor: pointer;
-		display: block;
-		width: 100%;
-		font-weight: 500;
-	}
-	.btn-submit:hover {
-		background-color: #99707E;
-		transform: translateY(-2px);
-		box-shadow: 0 4px 8px rgba(83, 60, 86, 0.2);
-	}
-	.form-error {
-		color: #d9534f;
-		font-size: 0.875rem;
-		margin-top: 0.25rem;
-	}
-	.custom-file-upload {
-		display: flex;
-		align-items: center;
-		gap: 15px;
-	}
-	.custom-upload-label {
-		background-color: #533C56;
-		color: white;
-		padding: 0.5rem 1.2rem;
-		border-radius: 5px;
-		cursor: pointer;
-		font-size: 0.95rem;
-		transition: background-color 0.3s ease;
-	}
-	.custom-upload-label:hover {
-		background-color: #99707E;
-	}
-	.form-file-hidden {
-		display: none;
-	}
-	.file-name {
-		color: #533C56;
-		font-size: 0.9rem;
-	}
-</style>{% endblock %}
+	</script>
+
+	<style>
+		.publication-form {
+			max-width: 800px;
+			margin: 2rem auto;
+			padding: 2rem;
+			background-color: #ffffff;
+			border-radius: 10px;
+			box-shadow: 0 4px 15px rgba(83, 60, 86, 0.1);
+		}
+		.form-title {
+			color: #533C56;
+			text-align: center;
+			margin-bottom: 2rem;
+			font-weight: 600;
+		}
+		.form-group {
+			margin-bottom: 1.5rem;
+		}
+		.form-label {
+			display: block;
+			margin-bottom: 0.5rem;
+			color: #533C56;
+			font-weight: 500;
+		}
+		.form-input,
+		.form-textarea {
+			width: 100%;
+			padding: 0.75rem;
+			border: 1px solid #cebec9;
+			border-radius: 5px;
+			font-size: 1rem;
+			background-color: #ffffff;
+		}
+		.form-textarea {
+			min-height: 150px;
+			resize: vertical;
+		}
+		.btn-submit {
+			background-color: #533C56;
+			color: white;
+			border: none;
+			padding: 0.75rem 1.5rem;
+			font-size: 1rem;
+			border-radius: 5px;
+			cursor: pointer;
+			display: block;
+			width: 100%;
+			font-weight: 500;
+		}
+		.btn-submit:hover {
+			background-color: #99707E;
+			transform: translateY(-2px);
+			box-shadow: 0 4px 8px rgba(83, 60, 86, 0.2);
+		}
+		.form-error {
+			color: #d9534f;
+			font-size: 0.875rem;
+			margin-top: 0.25rem;
+		}
+		.custom-file-upload {
+			display: flex;
+			align-items: center;
+			gap: 15px;
+		}
+		.custom-upload-label {
+			background-color: #533C56;
+			color: white;
+			padding: 0.5rem 1.2rem;
+			border-radius: 5px;
+			cursor: pointer;
+			font-size: 0.95rem;
+			transition: background-color 0.3s ease;
+		}
+		.custom-upload-label:hover {
+			background-color: #99707E;
+		}
+		.form-file-hidden {
+			display: none;
+		}
+		.file-name {
+			color: #533C56;
+			font-size: 0.9rem;
+		}
+		.d-flex {
+			display: flex;
+			justify-content: space-between;
+			gap: 20px;
+		}
+		.flex-btn {
+			width: 48%;
+			margin-top: 0;
+		}
+	</style>
+{% endblock %}

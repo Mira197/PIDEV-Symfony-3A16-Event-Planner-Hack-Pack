@@ -224,72 +224,102 @@ class UserController extends AbstractController
         ]);
     }
 
-/**
-     * @Route("/saisir-duree/{id}", name="saisir_duree")
-     */
-    public function saisirDuree(MailerInterface $mailer,Request $request, $id,EntityManagerInterface $entityManager): Response
-    {
-        $utilisateur = $entityManager->getRepository(User::class)->find($id);
-
-        if (!$utilisateur) {
-            throw $this->createNotFoundException('Utilisateur non trouvé');
-        }
-
-        // Créer un formulaire pour saisir la durée de blocage
-        $form = $this->createFormBuilder()
-    ->add('duree', TextType::class, [
-        'label' => 'Durée en minutes',
-        'attr' => ['placeholder' => 'Entrez la durée en minutes'],
-        'constraints' => [
-            new NotBlank(['message' => 'La durée est requise']),
-            new PositiveOrZero(['message' => 'La durée doit être un nombre positif ou zéro']),
-            new Regex([
-                'pattern' => '/^\d+$/',
-                'message' => 'La durée doit être un nombre entier positif',
-            ]),
-        ],
-    ])
-    ->add('save', SubmitType::class, ['label' => 'Valider'])
-    ->getForm();
 
 
-        $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            // Si le formulaire est soumis et valide, traiter les données
-            $data = $form->getData();
-            $duree = $data['duree'];
 
-            // Mettre à jour l'utilisateur avec la durée de blocage
-            $utilisateur->setBlocked(true);
-            $dateFinBlocage = new \DateTime();
-            $dateFinBlocage->modify("+{$duree} minutes");
-            $utilisateur->setBlockEndDate($dateFinBlocage);
 
-            $entityManager->flush();
-            $transport = Transport::fromDsn('smtp://hhajer09@gmail.com:ixysoqoqqfylbgoa@smtp.gmail.com:587');
-            $mailer = new Mailer($transport);
-            $email = (new TemplatedEmail())
+
+/*
+ * @Route("/saisir-duree/{id}", name="saisir_duree")
+ *
+ * Cette méthode permet de bloquer temporairement un utilisateur.
+ * L'admin saisit une durée en minutes, et l'utilisateur est marqué comme "bloqué" jusqu'à cette échéance.
+ * Un email lui est envoyé pour l'en informer.
+ */
+/*
+public function saisirDuree(
+    MailerInterface $mailer,         // Service d'envoi d'email
+    Request $request,                // Requête HTTP entrante
+    $id,                             // ID de l'utilisateur à bloquer
+    EntityManagerInterface $entityManager // Pour accéder à la base de données
+): Response {
+    // Récupération de l'utilisateur à partir de l'ID fourni
+    $utilisateur = $entityManager->getRepository(User::class)->find($id);
+
+    if (!$utilisateur) {
+        // Si aucun utilisateur n'est trouvé, on affiche une erreur 404
+        throw $this->createNotFoundException('Utilisateur non trouvé');
+    }
+
+    // Création dynamique d’un petit formulaire pour saisir la durée
+    $form = $this->createFormBuilder()
+        ->add('duree', TextType::class, [
+            'label' => 'Durée en minutes',
+            'attr' => ['placeholder' => 'Entrez la durée en minutes'],
+            'constraints' => [
+                new NotBlank(['message' => 'La durée est requise']),
+                new PositiveOrZero(['message' => 'La durée doit être un nombre positif ou zéro']),
+                new Regex([
+                    'pattern' => '/^\d+$/',
+                    'message' => 'La durée doit être un nombre entier positif',
+                ]),
+            ],
+        ])
+        ->add('save', SubmitType::class, ['label' => 'Valider'])
+        ->getForm();
+
+    // Gestion de la soumission du formulaire
+    $form->handleRequest($request);
+
+    if ($form->isSubmitted() && $form->isValid()) {
+        // Si le formulaire est valide, on récupère la durée saisie
+        $data = $form->getData();
+        $duree = $data['duree'];
+
+        // Blocage de l'utilisateur pour la durée spécifiée
+        $utilisateur->setBlocked(true);
+        $dateFinBlocage = new \DateTime();
+        $dateFinBlocage->modify("+{$duree} minutes");
+        $utilisateur->setBlockEndDate($dateFinBlocage);
+
+        // Enregistrement en base
+        $entityManager->flush();
+
+        // Création d’un transport SMTP manuellement (⚠️ doublon inutile si MailerInterface est injecté)
+        $transport = Transport::fromDsn('smtp://hhajer09@gmail.com:ixysoqoqqfylbgoa@smtp.gmail.com:587');
+        $mailer = new Mailer($transport);
+
+        // Création de l'email à envoyer à l'utilisateur bloqué
+        $email = (new TemplatedEmail())
             ->from('hhajer09@gmail.com')
             ->to($utilisateur->getEmail())
             ->subject('votre compte est Bloqué')
             ->html('
-        <h1 style="color: red;">Compte Bloqué</h1>
-        <p>Votre compte a été bloqué pour une durée de ' . $duree . ' minutes.</p>
-    ');
+                <h1 style="color: red;">Compte Bloqué</h1>
+                <p>Votre compte a été bloqué pour une durée de ' . $duree . ' minutes.</p>
+            ');
 
-        
+        // Envoi du mail
         $mailer->send($email);
 
-            // Rediriger vers une autre page ou afficher un message de confirmation
-            return $this->redirectToRoute('app_user_index');
-        }
-
-        // Afficher le formulaire de saisie de la durée
-        return $this->render('user/bloquer.html.twig', [
-            'form' => $form->createView(),
-        ]);
+        // Redirection vers la liste des utilisateurs
+        return $this->redirectToRoute('app_user_index');
     }
+
+    // Si le formulaire n'est pas soumis ou invalide, on l'affiche
+    return $this->render('user/bloquer.html.twig', [
+        'form' => $form->createView(),
+    ]);
+}
+*/
+
+
+
+
+
+
+
    /**
      * @Route("/debloquer-utilisateur/{id}", name="debloquer_utilisateur")
      */

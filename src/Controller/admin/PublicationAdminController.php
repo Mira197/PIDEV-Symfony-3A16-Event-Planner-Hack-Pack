@@ -19,7 +19,7 @@ use App\Entity\Report;
 use App\Form\ReportTypeAdmin;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\Security\Core\Security;
-
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
 #[Route('/admin/publication')]
 class PublicationAdminController extends AbstractController
@@ -105,84 +105,89 @@ public function ajaxAdd(Request $request, EntityManagerInterface $em, UserReposi
     return new JsonResponse(['success' => true, 'message' => '✅ Post created successfully.']);
 }*/
 #[Route('/add', name: 'app_publication_new_admin')]
-public function new(Request $request, EntityManagerInterface $em, UserRepository $userRepository): Response
-{
+public function new(
+    Request $request,
+    EntityManagerInterface $em,
+    SessionInterface $session,
+    UserRepository $userRepository
+): Response {
+    // Sécurité : redirection si aucun utilisateur connecté
+    $userId = $session->get('user_id');
+    $user = $userRepository->find($userId);
+
+    if (!$user) {
+        $this->addFlash('error', 'You must be logged in.');
+        return $this->redirectToRoute('app_login');
+    }
+
     $publication = new Publication();
     $form = $this->createForm(PublicationType::class, $publication);
     $form->handleRequest($request);
 
     if ($form->isSubmitted() && $form->isValid()) {
-        $inputUsername = $form->get('username')->getData();
+        $publication->setUser($user);
+        $publication->setPublicationDate(new \DateTimeImmutable());
 
-        // 👇 Utilisateur de test avec ID 49
-       $user = $userRepository->find(49);
-         //$user = $this->security->getUser();
-        if (!$user || $inputUsername !== $user->getUsername()) {
-            $form->get('username')->addError(
-                new FormError('The username does not match your test account.')
-            );
-        } else {
-            $publication->setUser($user);
-            $publication->setPublicationDate(new \DateTimeImmutable());
-
-            $uploadedImage = $request->files->get('image_file');
-            if ($uploadedImage) {
-                $imageData = file_get_contents($uploadedImage->getPathname());
-                $publication->setImage($imageData);
-            }
-
-            $em->persist($publication);
-            $em->flush();
-
-            return $this->redirectToRoute('app_publication_list');
+        $uploadedImage = $request->files->get('image_file');
+        if ($uploadedImage) {
+            $imageData = file_get_contents($uploadedImage->getPathname());
+            $publication->setImage($imageData);
         }
+
+        $em->persist($publication);
+        $em->flush();
+
+        $this->addFlash('success', 'Post created successfully.');
+        return $this->redirectToRoute('app_publication_list');
     }
 
     return $this->render('admin/newPublicationAdmin.html.twig', [
         'form' => $form->createView(),
+        'username' => $session->get('username'), 
     ]);
 }
 
 
-    
-
 
     
-    #[Route('/edit/{id}', name: 'publication_edit_admin')]
-public function edit(Publication $publication, Request $request, EntityManagerInterface $em, Security $security, UserRepository $userRepository): Response
-{
+#[Route('/edit/{id}', name: 'publication_edit_admin')]
+public function edit(
+    Publication $publication,
+    Request $request,
+    EntityManagerInterface $em,
+    SessionInterface $session,
+    UserRepository $userRepository
+): Response {
     $form = $this->createForm(PublicationType::class, $publication);
     $form->handleRequest($request);
 
+    $userId = $session->get('user_id');
+    $username = $session->get('username');
+    $user = $userRepository->find($userId);
+
+    if (!$user) {
+        $this->addFlash('error', 'User session not found.');
+        return $this->redirectToRoute('app_publication_list');
+    }
+
     if ($form->isSubmitted() && $form->isValid()) {
-        $inputUsername = $form->get('username')->getData();
-        //$user = $security->getUser();
-        $user = $userRepository->find(49); // Utilisateur de test ou temporaire
+        $publication->setUser($user);
 
-        if (!$user || $inputUsername !== $user->getUsername()) {
-            $form->get('username')->addError(
-                new FormError('The username does not match your account.')
-            );
-        } else {
-            $publication->setUser($user);
-
-            // 📷 Gestion du changement d'image
-            $uploadedImage = $request->files->get('image_file');
-            if ($uploadedImage) {
-                $imageData = file_get_contents($uploadedImage->getPathname());
-                $publication->setImage($imageData);
-            }
-
-            $em->flush();
-
-            $this->addFlash('success', 'Publication updated successfully.');
-            return $this->redirectToRoute('app_publication_list');
+        $uploadedImage = $request->files->get('image_file');
+        if ($uploadedImage) {
+            $imageData = file_get_contents($uploadedImage->getPathname());
+            $publication->setImage($imageData);
         }
+
+        $em->flush();
+        $this->addFlash('success', 'Publication updated successfully.');
+        return $this->redirectToRoute('app_publication_list');
     }
 
     return $this->render('admin/editPublicationAdmin.html.twig', [
         'form' => $form->createView(),
         'publication' => $publication,
+        'username' => $username,
     ]);
 }
 
@@ -252,45 +257,7 @@ public function deleteReport(Report $report, EntityManagerInterface $em): Respon
     return $this->redirectToRoute('app_report_list'); // change this route if needed
 }
 
-#[Route('/comment/edit/{id}', name: 'app_comment_editAdmin')]
-    public function editcomment(
-        Comment $comment,
-        Request $request,
-        EntityManagerInterface $em,
-        Security $security,
-        UserRepository $userRepository
-    ): Response {
-        $user = $security->getUser();
-        //$user = $userRepository->find(49);
-    
-        // Vérifie si l'utilisateur connecté est bien l'auteur du commentaire
-        if (!$user || $comment->getUser() !== $user) {
-            throw $this->createAccessDeniedException("You are not allowed to edit this comment.");
-        }
-    
-        $form = $this->createForm(CommentType::class, $comment);
-        $form->handleRequest($request);
-    
-        if ($form->isSubmitted() && $form->isValid()) {
-            // Vérifie le champ `username`
-            $inputUsername = $form->get('username')->getData();
-            if ($inputUsername !== $user->getUsername()) {
-                $form->get('username')->addError(
-                    new \Symfony\Component\Form\FormError("The username does not match your connected account.")
-                );
-            } else {
-                // Si tout est ok, sauvegarde les modifications
-                $em->flush();
-                $this->addFlash('success', 'Comment updated successfully.');
-                return $this->redirectToRoute('app_comment_list', ['comment_edited' => 1]);
-            }
-        }
-    
-        return $this->render('admin/CommentEditAdmin.html.twig', [
-            'form' => $form->createView(),
-            'comment' => $comment,
-        ]);
-    }
+
     #[Route('/comment/delete/{id}', name: 'app_comment_deleteAdmin')]
 public function deleteComment(Comment $comment, EntityManagerInterface $em, Security $security): Response
 {
