@@ -27,7 +27,7 @@ class BookingController extends AbstractController
         BookingRepository $bookingRepo
     ): Response {
         //session : $user = $this->getUser();
-        $user = $this->getUser() ?? $em->getRepository(User::class)->find(3);
+        $user = $this->getUser() ?? $em->getRepository(User::class)->find(49);
 
         if ($event->getUser() !== $user) {
             throw $this->createAccessDeniedException('You are not allowed to book for this event.');
@@ -80,7 +80,7 @@ class BookingController extends AbstractController
     #[Route('/my-bookings', name: 'booking_list', methods: ['GET'])]
     public function myBookings(EntityManagerInterface $em): Response
     {
-        $user = $this->getUser() ?? $em->getRepository(User::class)->find(3);
+        $user = $this->getUser() ?? $em->getRepository(User::class)->find(49);
         $events = $em->getRepository(Event::class)->findBy(['user' => $user]);
         $bookings = $em->getRepository(Booking::class)->findBy(['event' => $events]);
 
@@ -105,7 +105,7 @@ class BookingController extends AbstractController
     public function edit(Request $request, Booking $booking, EntityManagerInterface $em): Response
     {
         //session : $user = $this->getUser();
-        $user = $this->getUser() ?? $em->getRepository(User::class)->find(3);
+        $user = $this->getUser() ?? $em->getRepository(User::class)->find(49);
 
         if ($booking->getEvent()->getUser() !== $user) {
             throw $this->createAccessDeniedException('You are not allowed to edit this booking.');
@@ -147,7 +147,7 @@ class BookingController extends AbstractController
     public function delete(Request $request, Booking $booking, EntityManagerInterface $em): Response
     {
         //session : $user = $this->getUser();
-        $user = $this->getUser() ?? $em->getRepository(User::class)->find(3);
+        $user = $this->getUser() ?? $em->getRepository(User::class)->find(49);
 
         if ($booking->getEvent()->getUser() !== $user) {
             throw $this->createAccessDeniedException('You are not allowed to delete this booking.');

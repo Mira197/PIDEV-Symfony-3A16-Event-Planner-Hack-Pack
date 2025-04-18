@@ -37,7 +37,7 @@ class AyaCartExtension extends AbstractExtension
 
     public function getCartSummary(): array
     {
-        $user = $this->security->getUser() ?? $this->em->getRepository(\App\Entity\User::class)->find(3);
+        $user = $this->security->getUser() ?? $this->em->getRepository(\App\Entity\User::class)->find(49);
         $cartProducts = [];
         $total = 0;
 

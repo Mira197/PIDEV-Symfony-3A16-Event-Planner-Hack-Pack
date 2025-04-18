@@ -25,7 +25,7 @@ class LocationController extends AbstractController
         // ✅ Récupération de l'événement
         $event = $em->getRepository(Event::class)->find($eventId);
 
-        if (!$event || ($event->getUser() !== ($this->getUser() ?? $em->getRepository(\App\Entity\User::class)->find(3)))) {
+        if (!$event || ($event->getUser() !== ($this->getUser() ?? $em->getRepository(\App\Entity\User::class)->find(49)))) {
             throw $this->createAccessDeniedException("Unauthorized");
         }
 

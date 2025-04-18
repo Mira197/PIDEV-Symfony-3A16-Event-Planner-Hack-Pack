@@ -133,7 +133,7 @@
 								</li>
 
 								<li class="{% if app.request.attributes.get('_route') == 'contact_us' %}active{% endif %}">
-									<a href="{{ path('contact_us') }}" class="btn-signin">Sign in</a>
+									<a href="{{ path('login') }}" class="btn-signin">Sign in</a>
 								</li>
 
 
@@ -183,7 +183,7 @@
 												</p>
 												<p class="empty-note">
 													Welcome back! If you had items in your cart, we saved them for you.<br>
-													<a href="{{ path('contact_us') }}">
+													<a href="{{ path('login') }}">
 														<u>SIGN IN</u>
 													</a>
 													now to see them.

@@ -24,6 +24,12 @@ use Symfony\Component\Security\Core\Security;
 #[Route('/admin/publication')]
 class PublicationAdminController extends AbstractController
 {
+    private $security;
+
+    public function __construct(Security $security)
+    {
+        $this->security = $security;
+    }
     #[Route('/dashboard', name: 'admin_publication_dashboard')]
     public function forumDashboard(
         PublicationRepository $publicationRepository,
@@ -76,8 +82,8 @@ public function ajaxAdd(Request $request, EntityManagerInterface $em, UserReposi
     $title = $request->request->get('title');
     $description = $request->request->get('description');
     $imageFile = $request->files->get('image_file');
-    //$user = $this->getUser();
-    $user = $userRepository->find(44); // utilisateur simulé
+    // $user = $this->security->getUser();
+    $user = $userRepository->find(49); // utilisateur simulé
     if (!$user || $username !== $user->getUsername()) {
         return new JsonResponse(['success' => false, 'message' => '❌ Username does not match test account.'], 400);
     }
@@ -108,9 +114,9 @@ public function new(Request $request, EntityManagerInterface $em, UserRepository
     if ($form->isSubmitted() && $form->isValid()) {
         $inputUsername = $form->get('username')->getData();
 
-        // 👇 Utilisateur de test avec ID 44
-       $user = $userRepository->find(44);
-        //$user = $this->getUser();
+        // 👇 Utilisateur de test avec ID 49
+       $user = $userRepository->find(49);
+         //$user = $this->security->getUser();
         if (!$user || $inputUsername !== $user->getUsername()) {
             $form->get('username')->addError(
                 new FormError('The username does not match your test account.')
@@ -151,7 +157,7 @@ public function edit(Publication $publication, Request $request, EntityManagerIn
     if ($form->isSubmitted() && $form->isValid()) {
         $inputUsername = $form->get('username')->getData();
         //$user = $security->getUser();
-        $user = $userRepository->find(44); // Utilisateur de test ou temporaire
+        $user = $userRepository->find(49); // Utilisateur de test ou temporaire
 
         if (!$user || $inputUsername !== $user->getUsername()) {
             $form->get('username')->addError(
@@ -254,8 +260,8 @@ public function deleteReport(Report $report, EntityManagerInterface $em): Respon
         Security $security,
         UserRepository $userRepository
     ): Response {
-        //$user = $security->getUser();
-        $user = $userRepository->find(44);
+        $user = $security->getUser();
+        //$user = $userRepository->find(49);
     
         // Vérifie si l'utilisateur connecté est bien l'auteur du commentaire
         if (!$user || $comment->getUser() !== $user) {

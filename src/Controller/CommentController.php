@@ -32,7 +32,7 @@ class CommentController extends AbstractController
             // Récupère le nom d'utilisateur saisi manuellement
             $inputUsername = $form->get('username')->getData();
            // $user = $security->getUser();
-            $user = $userRepository->find(44);
+            $user = $userRepository->find(49);
     
             // Vérifie si l'utilisateur est connecté et correspond
             if (!$user || $inputUsername !== $user->getUsername()) {
@@ -73,7 +73,7 @@ class CommentController extends AbstractController
         UserRepository $userRepository
     ): Response {
         //$user = $security->getUser();
-        $user = $userRepository->find(44);
+        $user = $userRepository->find(49);
     
         // Vérifie si l'utilisateur connecté est bien l'auteur du commentaire
         if (!$user || $comment->getUser() !== $user) {

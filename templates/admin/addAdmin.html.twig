@@ -1,4 +1,4 @@
-{% extends 'admin/base.html.twig' %}
+{% extends 'admin/baseAdmin.html.twig' %}
 
 {% block title %}Ajouter un administrateur{% endblock %}
 
@@ -123,7 +123,7 @@
               {% endif %}
             </div>
 
-            <!-- Email -->
+               <!-- Email -->
             <div class="col-md-6 input-style-1">
               <label>Email</label>
               {{ form_widget(adminForm.email, {
@@ -138,7 +138,7 @@
                   {% endfor %}
                 </div>
               {% endif %}
-            </div>
+              </div>
 
             <!-- Numéro de téléphone -->
             <div class="col-md-6 input-style-1">

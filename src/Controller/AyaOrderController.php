@@ -24,7 +24,7 @@ class AyaOrderController extends AbstractController
         CartProductRepository $cartProductRepository,
         EntityManagerInterface $em
     ): Response {
-        $user = $this->getUser() ?? $em->getRepository(User::class)->find(3);
+        $user = $this->getUser() ?? $em->getRepository(User::class)->find(49);
         $cart = $cartRepository->findOneBy(['user' => $user]);
 
         if (!$cart) {
@@ -116,7 +116,7 @@ class AyaOrderController extends AbstractController
     ): JsonResponse {
         $data = json_decode($request->getContent(), true);
 
-        $user = $this->getUser() ?? $em->getRepository(User::class)->find(3);
+        $user = $this->getUser() ?? $em->getRepository(User::class)->find(49);
 
         $cart = $cartRepository->findOneBy(['user' => $user]);
 

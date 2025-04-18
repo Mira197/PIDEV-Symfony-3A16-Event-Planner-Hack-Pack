@@ -25,7 +25,7 @@ final class EventController extends AbstractController
     {
         //sans session :$events = $eventRepository->findAll(); and remove $em and $user. $events devient:$events = $eventRepository->findAll();
         //avec session: $user = $this->getUser();
-        $user = $this->getUser() ?? $em->getRepository(User::class)->find(3);
+        $user = $this->getUser() ?? $em->getRepository(User::class)->find(49);
         $events = $eventRepository->findBy(['user' => $user]);
         foreach ($events as $event) {
             if ($event->getImageData()) {
@@ -67,7 +67,7 @@ final class EventController extends AbstractController
             }
 
             // 👤 Lier l'utilisateur connecté (provisoire)
-            $user = $this->getUser() ?? $em->getRepository(User::class)->find(3); // à remplacer plus tard
+            $user = $this->getUser() ?? $em->getRepository(User::class)->find(49); // à remplacer plus tard
             $event->setUser($user);
 
             $em->persist($event);
@@ -88,7 +88,7 @@ final class EventController extends AbstractController
     public function show(Event $event, LocationRepository $locationRepo, BookingRepository $bookingRepo, EntityManagerInterface $em): Response
     {
         //session : $user = $this->getUser();
-        $user = $this->getUser() ?? $em->getRepository(User::class)->find(3);
+        $user = $this->getUser() ?? $em->getRepository(User::class)->find(49);
 
         if ($event->getUser() !== $user) {
             throw $this->createAccessDeniedException('You are not allowed to access this event.');
@@ -131,7 +131,7 @@ final class EventController extends AbstractController
     public function edit(Request $request, Event $event, EntityManagerInterface $em): Response
     {
         //session : $user = $this->getUser();
-        $user = $this->getUser() ?? $em->getRepository(User::class)->find(3);
+        $user = $this->getUser() ?? $em->getRepository(User::class)->find(49);
 
         if ($event->getUser() !== $user) {
             throw $this->createAccessDeniedException('You are not allowed to edit this event.');
@@ -182,7 +182,7 @@ final class EventController extends AbstractController
     public function delete(Request $request, Event $event, EntityManagerInterface $em): Response
     {
         //session : $user = $this->getUser();
-        $user = $this->getUser() ?? $em->getRepository(User::class)->find(3);
+        $user = $this->getUser() ?? $em->getRepository(User::class)->find(49);
 
         if ($event->getUser() !== $user) {
             throw $this->createAccessDeniedException('You are not allowed to delete this event.');

@@ -411,7 +411,7 @@ class UserController extends AbstractController
     
         if ($imageFile && in_array($imageFile->getMimeType(), ['image/jpeg', 'image/png', 'image/webp'])) {
             $fileName = uniqid() . '.' . $imageFile->guessExtension();
-            $imageFile->move($this->getParameter('upload_directory'), $fileName);
+            $imageFile->move($this->getParameter('uploads_directory'), $fileName);
     
             $user->setImgPath($fileName);
             $em->flush();

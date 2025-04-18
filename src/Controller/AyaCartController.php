@@ -35,7 +35,7 @@ class AyaCartController extends AbstractController
         EntityManagerInterface $em // 👈 injecte ici
     ): Response {
         //$user = $this->getUser();
-        $user = $this->getUser() ?? $em->getRepository(User::class)->find(3);
+        $user = $this->getUser() ?? $em->getRepository(User::class)->find(49);
         $cartProducts = [];
         $total = 0;
 
@@ -89,7 +89,7 @@ public function addToCart(
     CartRepository $cartRepository,
     CartProductRepository $cartProductRepository
 ): Response {
-    $user = $this->getUser() ?? $em->getRepository(User::class)->find(3);
+    $user = $this->getUser() ?? $em->getRepository(User::class)->find(49);
     $product = $productRepository->find($id);
 
     if (!$product) {
@@ -135,7 +135,7 @@ public function addToCart(
         CartRepository $cartRepository,
         CartProductRepository $cartProductRepository
     ): JsonResponse {
-        $user = $this->getUser() ?? $em->getRepository(User::class)->find(3);
+        $user = $this->getUser() ?? $em->getRepository(User::class)->find(49);
         $cart = $cartRepository->findOneBy(['user' => $user]);
         $items = [];
         $total = 0;
@@ -169,7 +169,7 @@ public function addToCart(
         CartProductRepository $cartProductRepository,
         ValidatorInterface $validator
     ): JsonResponse {
-        $user = $this->getUser() ?? $em->getRepository(User::class)->find(3);
+        $user = $this->getUser() ?? $em->getRepository(User::class)->find(49);
         $cart = $cartRepository->findOneBy(['user' => $user]);
         $data = json_decode($request->getContent(), true);
         $quantity = $data['quantity'] ?? null;
@@ -226,7 +226,7 @@ public function addToCart(
         CartRepository $cartRepository,
         CartProductRepository $cartProductRepository
     ): JsonResponse {
-        $user = $this->getUser() ?? $em->getRepository(User::class)->find(3);
+        $user = $this->getUser() ?? $em->getRepository(User::class)->find(49);
         $cart = $cartRepository->findOneBy(['user' => $user]);
 
         if (!$cart) {
@@ -251,7 +251,7 @@ public function addToCart(
         CartRepository $cartRepository,
         CartProductRepository $cartProductRepository
     ): JsonResponse {
-        $user = $this->getUser() ?? $em->getRepository(User::class)->find(3);
+        $user = $this->getUser() ?? $em->getRepository(User::class)->find(49);
         $cart = $cartRepository->findOneBy(['user' => $user]);
 
         if (!$cart) {
@@ -274,7 +274,7 @@ public function addToCart(
         CartRepository $cartRepository,
         CartProductRepository $cartProductRepository
     ): JsonResponse {
-        $user = $this->getUser() ?? $em->getRepository(User::class)->find(3);
+        $user = $this->getUser() ?? $em->getRepository(User::class)->find(49);
         $cart = $cartRepository->findOneBy(['user' => $user]);
         $cartProduct = $cartProductRepository->findOneBy(['cart' => $cart, 'product' => $id]);
 
@@ -313,7 +313,7 @@ public function addToCart(
         CartRepository $cartRepository,
         CartProductRepository $cartProductRepository
     ): JsonResponse {
-        $user = $this->getUser() ?? $em->getRepository(User::class)->find(3);
+        $user = $this->getUser() ?? $em->getRepository(User::class)->find(49);
         $cart = $cartRepository->findOneBy(['user' => $user]);
         $cartProduct = $cartProductRepository->findOneBy(['cart' => $cart, 'product' => $id]);
 

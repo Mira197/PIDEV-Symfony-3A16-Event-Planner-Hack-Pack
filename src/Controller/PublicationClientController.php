@@ -35,7 +35,7 @@ public function new(Request $request, EntityManagerInterface $em, UserRepository
 
     if ($form->isSubmitted() && $form->isValid()) {
         $inputUsername = $form->get('username')->getData();
-        $user = $userRepository->find(44);
+        $user = $userRepository->find(49);
         //$user = $this->getUser();
 
         if (!$user || $inputUsername !== $user->getUsername()) {
@@ -79,7 +79,7 @@ public function edit(
 
     if ($form->isSubmitted() && $form->isValid()) {
         $inputUsername = $form->get('username')->getData();
-        $user = $userRepository->find(44); // 🔁 utilisateur test
+        $user = $userRepository->find(49); // 🔁 utilisateur test
 
         if (!$user || $inputUsername !== $user->getUsername()) {
             $form->get('username')->addError(

@@ -17,7 +17,7 @@ class AyaOrderClientController extends AbstractController
     #[Route('/client/orders', name: 'client_orders', methods: ['GET'])]
     public function index(OrderRepository $orderRepository, EntityManagerInterface $em, Request $request): Response
     {
-        $user = $em->getRepository(User::class)->find(3); // simulate user
+        $user = $em->getRepository(User::class)->find(49); // simulate user
 
         $filter = $request->query->get('status');
         $orders = $filter
@@ -51,7 +51,7 @@ class AyaOrderClientController extends AbstractController
     #[Route('/client/orders/table', name: 'client_orders_table', methods: ['GET'])]
     public function ordersTable(OrderRepository $orderRepository, EntityManagerInterface $em, Request $request): Response
     {
-        $user = $em->getRepository(User::class)->find(3); // Test user
+        $user = $em->getRepository(User::class)->find(49); // Test user
         $filter = $request->query->get('status');
         $orders = $filter
             ? $orderRepository->findBy(['user' => $user, 'status' => $filter])
@@ -66,7 +66,7 @@ class AyaOrderClientController extends AbstractController
     public function cancelOrder(int $id, EntityManagerInterface $em): Response
     {
         $order = $em->getRepository(Order::class)->find($id);
-        $user = $em->getRepository(User::class)->find(3); // simulate user
+        $user = $em->getRepository(User::class)->find(49); // simulate user
 
         if (!$order || $order->getUser()?->getIdUser() !== $user->getIdUser()) {
             throw $this->createNotFoundException('Order not found or access denied');
@@ -86,7 +86,7 @@ class AyaOrderClientController extends AbstractController
     #[Route('/client/orders/search', name: 'client_orders_search', methods: ['GET'])]
     public function search(Request $request, OrderRepository $orderRepository, EntityManagerInterface $em): JsonResponse
     {
-        $user = $this->getUser() ?? $em->getRepository(User::class)->find(3);
+        $user = $this->getUser() ?? $em->getRepository(User::class)->find(49);
         $query = strtolower($request->query->get('q', ''));
 
         $qb = $orderRepository->createQueryBuilder('o')
