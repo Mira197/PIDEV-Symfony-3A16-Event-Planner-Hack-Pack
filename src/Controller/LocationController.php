@@ -5,11 +5,13 @@ namespace App\Controller;
 use App\Entity\Event;
 use App\Repository\LocationRepository;
 use App\Repository\BookingRepository;
+use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
 #[Route('/locations')]
 class LocationController extends AbstractController
@@ -20,14 +22,24 @@ class LocationController extends AbstractController
         Request $request,
         LocationRepository $locationRepo,
         BookingRepository $bookingRepo,
-        EntityManagerInterface $em
+        EntityManagerInterface $em,
+        SessionInterface $session,
+        UserRepository $userRepository
+
     ): Response {
+        //session
+        $userId = $session->get('user_id');
+        $user = $userRepository->find($userId);
+        
         // ✅ Récupération de l'événement
         $event = $em->getRepository(Event::class)->find($eventId);
-
-        if (!$event || ($event->getUser() !== ($this->getUser() ?? $em->getRepository(\App\Entity\User::class)->find(49)))) {
+        if (!$event || $event->getUser() !== $user) {
             throw $this->createAccessDeniedException("Unauthorized");
         }
+
+        /*if (!$event || ($event->getUser() !== ($this->getUser() ?? $em->getRepository(\App\Entity\User::class)->find(49)))) {
+            throw $this->createAccessDeniedException("Unauthorized");
+        }*/
 
         // ✅ Récupération des filtres GET
         $queryCity = $request->query->get('city');
@@ -92,12 +104,21 @@ class LocationController extends AbstractController
         Request $request,
         LocationRepository $locationRepo,
         BookingRepository $bookingRepo,
-        EntityManagerInterface $em
+        EntityManagerInterface $em,
+        SessionInterface $session,
+        UserRepository $userRepository
     ): Response {
+        //session
+        $userId = $session->get('user_id');
+        $user = $userRepository->find($userId);
+        
         $event = $em->getRepository(Event::class)->find($eventId);
-        if (!$event) {
-            return new Response("Event not found", 404);
+        if (!$event || $event->getUser() !== $user) {
+            return new Response("Unauthorized or event not found", 403);
         }
+        /*if (!$event) {
+            return new Response("Event not found", 404);
+        }*/
 
         $queryCity = $request->query->get('city');
         $queryCapacity = $request->query->get('capacity');

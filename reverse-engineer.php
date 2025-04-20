@@ -4,7 +4,7 @@ require_once 'vendor/autoload.php';
 
 // Database configuration - MODIFY THESE VALUES
 $dbHost = 'localhost';
-$dbName = 'hackpack6';
+$dbName = 'hackpack5';
 $dbUser = 'root';
 $dbPass = '';
 $dbPort = 3306;
