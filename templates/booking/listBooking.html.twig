@@ -82,13 +82,18 @@
 								</button>
 								<!-- Delete -->
 								{{ include('booking/delete_formBooking.html.twig', { 'booking': booking }) }}
-							<!-- Details -->
-								{#<button
-																																                                    class="action-btn details"
-																																                                    title="Details"
-																																                                    onclick="window.location.href='{{ path('event_show', {'id': event.idEvent}) }}'">
-																																                                    ℹ️
-																																                                </button>#}
+								<!-- PDF -->
+								
+								<!-- PDF :new window -->
+								<button class="action-btn edit" title="Download PDF" onclick="window.open('{{ path('booking_download', {'id': booking.idBooking}) }}', '_blank')">
+									<i class="fa-solid fa-download" style="font-size: 14px;color: #cebec9;"></i>
+								</button>
+
+								<!-- PDF :same window -->
+								{#<button class="action-btn edit" title="Download PDF" onclick="window.location.href='{{ path('booking_download', {'id': booking.idBooking}) }}'">
+									<i class="fa-solid fa-download" style="font-size: 14px;color: #cebec9;"></i>
+								</button>#}
+
 							</div>
 						</div>
 					</div>

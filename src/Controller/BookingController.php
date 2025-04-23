@@ -16,6 +16,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Knp\Snappy\Pdf;
 
 #[Route('/bookings')]
 class BookingController extends AbstractController
@@ -208,6 +209,33 @@ class BookingController extends AbstractController
         }
 
         return $this->redirectToRoute('booking_list', [], Response::HTTP_SEE_OTHER);
+    }
+
+    #[Route('/{id}/download', name: 'booking_download', methods: ['GET'])]
+    public function downloadPdf(Booking $booking, Pdf $knpSnappyPdf): Response
+    {
+        $eventImage = null;
+        $locationImage = null;
+
+        if ($booking->getEvent()->getImageData()) {
+            $eventImage = base64_encode(stream_get_contents($booking->getEvent()->getImageData()));
+        }
+
+        if ($booking->getLocation()->getImageData()) {
+            $locationImage = base64_encode(stream_get_contents($booking->getLocation()->getImageData()));
+        }
+        $html = $this->renderView('booking/pdfBooking.html.twig', [
+            'booking' => $booking,
+            'eventImage' => $eventImage,
+            'locationImage' => $locationImage,
+        ]);
+
+        $pdfContent = $knpSnappyPdf->getOutputFromHtml($html);
+
+        return new Response($pdfContent, 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="booking-details.pdf"'
+        ]);
     }
 
 
