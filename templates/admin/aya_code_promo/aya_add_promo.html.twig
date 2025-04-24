@@ -1,32 +1,107 @@
 {% extends 'admin/baseAdmin.html.twig' %}
 
-{% block title %}Add Promo Code{% endblock %}
+{% block title %}➕ Add Promo Code{% endblock %}
+
+{% block head %}
+    {{ parent() }}
+    <style>
+        .form-container {
+            background-color: #fff;
+            padding: 40px;
+            border-radius: 16px;
+            max-width: 600px;
+            margin: 80px auto;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
+        }
+
+        .form-container h2 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-weight: bold;
+            color: #533C56;
+        }
+
+        label {
+            font-weight: 500;
+            color: #444;
+            margin-bottom: 5px;
+        }
+
+        .form-control {
+            border-radius: 8px;
+            padding: 10px;
+            box-shadow: none;
+            border: 1px solid #ccc;
+            transition: border-color 0.3s;
+        }
+
+        .form-control:focus {
+            border-color: #6b336e;
+            box-shadow: 0 0 5px rgba(107, 51, 110, 0.3);
+        }
+
+        .btn-primary {
+            background-color: #6b336e;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 24px;
+            font-weight: bold;
+        }
+
+        .btn-primary:hover {
+            background-color: #5a2c5c;
+        }
+
+        .invalid-feedback {
+            color: #e74c3c;
+            font-size: 0.875rem;
+            margin-top: 5px;
+        }
+
+        .alert-success {
+            text-align: center;
+            font-weight: bold;
+            color: #2e7d32;
+        }
+    </style>
+{% endblock %}
 
 {% block section %}
-    <div class="admin-mui-wrapper">
+    <div class="form-container">
+        <h2>➕ Add Promo Code</h2>
 
         {% for message in app.flashes('success') %}
             <div class="alert alert-success">{{ message }}</div>
         {% endfor %}
 
         {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
-    <div class="mb-3">
-        {{ form_label(form.codePromo) }}
-        {{ form_widget(form.codePromo, {'attr': {'class': 'form-control'}}) }}
-        {{ form_errors(form.codePromo) }}
-    </div>
-    <div class="mb-3">
-        {{ form_label(form.pourcentage) }}
-        {{ form_widget(form.pourcentage, {'attr': {'class': 'form-control'}}) }}
-        {{ form_errors(form.pourcentage) }}
-    </div>
-    <div class="mb-3">
-        {{ form_label(form.dateExpiration) }}
-        {{ form_widget(form.dateExpiration, {'attr': {'class': 'form-control'}}) }}
-        {{ form_errors(form.dateExpiration) }}
-    </div>
-    <button class="btn btn-primary">Save</button>
-{{ form_end(form) }}
+            <div class="mb-3">
+                {{ form_label(form.codePromo) }}
+                {{ form_widget(form.codePromo, {'attr': {'class': 'form-control'}}) }}
+                {% for error in form.codePromo.vars.errors %}
+                    <div class="invalid-feedback d-block">{{ error.message }}</div>
+                {% endfor %}
+            </div>
 
+            <div class="mb-3">
+                {{ form_label(form.pourcentage) }}
+                {{ form_widget(form.pourcentage, {'attr': {'class': 'form-control'}}) }}
+                {% for error in form.pourcentage.vars.errors %}
+                    <div class="invalid-feedback d-block">{{ error.message }}</div>
+                {% endfor %}
+            </div>
+
+            <div class="mb-3">
+                {{ form_label(form.dateExpiration) }}
+                {{ form_widget(form.dateExpiration, {'attr': {'class': 'form-control'}}) }}
+                {% for error in form.dateExpiration.vars.errors %}
+                    <div class="invalid-feedback d-block">{{ error.message }}</div>
+                {% endfor %}
+            </div>
+
+            <div class="text-center">
+                <button type="submit" class="btn btn-primary">💾 Save</button>
+            </div>
+        {{ form_end(form) }}
     </div>
 {% endblock %}
