@@ -1,3 +1,29 @@
+.table-hover tbody tr:hover {
+    background-color: #f9f2f9;
+}
+
+.table thead.table-dark {
+    background-color: #5e2a75 !important;
+    color: #fff;
+}
+
+.table td, .table th {
+    text-align: center;
+    vertical-align: middle;
+    padding: 12px;
+}
+
+.table .badge {
+    font-size: 0.85rem;
+    padding: 6px 12px;
+    border-radius: 20px;
+}
+
+.table .btn {
+    padding: 5px 10px;
+    font-size: 0.85rem;
+}
+
 .admin-mui-wrapper {
     margin: 100px auto;
     max-width: 1100px;
@@ -105,3 +131,12 @@ table.admin-mui-table th {
   .hidden-column {
     display: none;
 }
+.btn-delete {
+    background: transparent;
+    border: 1px solid #dc3545;
+    color: #dc3545;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 14px;
+    cursor: pointer;
+  }

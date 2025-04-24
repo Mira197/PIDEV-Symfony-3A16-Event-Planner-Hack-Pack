@@ -1,0 +1,34 @@
+{% extends 'admin/baseAdmin.html.twig' %}
+
+{% block title %}Edit Promo Code{% endblock %}
+
+{% block section %}
+    <div class="admin-mui-wrapper">
+        <h2>✏️ Edit Promo Code</h2>
+
+        {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+
+        <div class="mb-3">
+            {{ form_label(form.codePromo) }}
+            {{ form_widget(form.codePromo, {'attr': {'class': 'form-control'}}) }}
+            {{ form_errors(form.codePromo) }}
+        </div>
+
+        <div class="mb-3">
+            {{ form_label(form.pourcentage) }}
+            {{ form_widget(form.pourcentage, {'attr': {'class': 'form-control'}}) }}
+            {{ form_errors(form.pourcentage) }}
+        </div>
+
+        <div class="mb-3">
+            {{ form_label(form.dateExpiration) }}
+            {{ form_widget(form.dateExpiration, {'attr': {'class': 'form-control'}}) }}
+            {{ form_errors(form.dateExpiration) }}
+        </div>
+
+        <button class="btn btn-success">Update</button>
+        <a href="{{ path('aya_admin_code_promo_index') }}" class="btn btn-secondary">Cancel</a>
+
+        {{ form_end(form) }}
+    </div>
+{% endblock %}

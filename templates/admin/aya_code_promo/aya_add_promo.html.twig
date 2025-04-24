@@ -4,29 +4,29 @@
 
 {% block section %}
     <div class="admin-mui-wrapper">
-        <a href="{{ path('aya_admin_code_promo_create') }}" class="btn btn-outline-success">➕ Add Promo Code (Classic Form)</a>
 
         {% for message in app.flashes('success') %}
             <div class="alert alert-success">{{ message }}</div>
         {% endfor %}
 
         {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
-            <div class="mb-3">
-                {{ form_label(form.code_promo) }}
-                {{ form_widge(form.code_promo, {'attr': {'class': 'form-control'}}) }}
-                {{ form_errors(form.code_promo) }}
-            </div>
-            <div class="mb-3">
-                {{ form_label(form.pourcentage) }}
-                {{ form_widget(form.pourcentage, {'attr': {'class': 'form-control'}}) }}
-                {{ form_errors(form.pourcentage) }}
-            </div>
-            <div class="mb-3">
-                {{ form_label(form.dateExpiration) }}
-                {{ form_widget(form.dateExpiration, {'attr': {'class': 'form-control'}}) }}
-                {{ form_errors(form.dateExpiration) }}
-            </div>
-            <button class="btn btn-primary">Save</button>
-        {{ form_end(form) }}
+    <div class="mb-3">
+        {{ form_label(form.codePromo) }}
+        {{ form_widget(form.codePromo, {'attr': {'class': 'form-control'}}) }}
+        {{ form_errors(form.codePromo) }}
+    </div>
+    <div class="mb-3">
+        {{ form_label(form.pourcentage) }}
+        {{ form_widget(form.pourcentage, {'attr': {'class': 'form-control'}}) }}
+        {{ form_errors(form.pourcentage) }}
+    </div>
+    <div class="mb-3">
+        {{ form_label(form.dateExpiration) }}
+        {{ form_widget(form.dateExpiration, {'attr': {'class': 'form-control'}}) }}
+        {{ form_errors(form.dateExpiration) }}
+    </div>
+    <button class="btn btn-primary">Save</button>
+{{ form_end(form) }}
+
     </div>
 {% endblock %}

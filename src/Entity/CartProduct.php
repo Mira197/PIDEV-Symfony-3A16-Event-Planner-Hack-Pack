@@ -9,7 +9,7 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 
 #[ORM\Entity(repositoryClass: CartProductRepository::class)]
-#[ORM\Table(name: "cart_product", schema: "hackpack5")]
+#[ORM\Table(name: "cart_product", schema: "hackpack6")]
 #[ORM\HasLifecycleCallbacks]
 #[Assert\Callback('validateStock')]
 class CartProduct

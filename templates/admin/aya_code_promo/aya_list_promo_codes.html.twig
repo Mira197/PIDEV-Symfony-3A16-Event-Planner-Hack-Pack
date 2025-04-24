@@ -1,332 +1,340 @@
 {% extends 'admin/baseAdmin.html.twig' %}
 
-	{% block head %}
-		<link rel="stylesheet" href="{{ asset('assetsAya/css/ayaPromo.css') }}">
-		<link rel="stylesheet" href="{{ asset('assetsAya/css/adminOrder.css') }}">
-		{{ parent() }}
-		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+{% block head %}
+	<link rel="stylesheet" href="{{ asset('assetsAya/css/ayaPromo.css') }}">
+	<link rel="stylesheet" href="{{ asset('assetsAya/css/adminOrder.css') }}">
+	{{ parent() }}
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
-	{% endblock %}
-
-
-	{% block section %}
-		<div class="admin-mui-wrapper">
-			<h2>🎟️ Promo Codes Management</h2>
-
-			<div class="admin-filters">
-				<div class="left-search">
-					<input type="text" id="promoSearch" placeholder="🔍 Search promo codes..." class="form-control">
-				</div>
-
-				<div class="center-filters">
-					<button class="status-filter active" data-filter="">All</button>
-					<button class="status-filter" data-filter="active">Active</button>
-					<button class="status-filter" data-filter="expired">Expired</button>
-				</div>
-
-				<div class="right-actions">
-					<button class="btn btn-outline-secondary" id="exportPromoCsv">⬇️ Export CSV</button>
-
-					<button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#addPromoModal">
-						➕ Add Promo Code
-					</button>
-
-					{# ✅ MODAL contenant le vrai formulaire AyaCodePromoType #}
-					<div class="modal fade" id="addPromoModal" tabindex="-1" aria-labelledby="addPromoModalLabel" aria-hidden="true">
-						<div class="modal-dialog">
-							<div class="modal-content">
-
-								<div class="modal-header">
-									<h5 class="modal-title" id="addPromoModalLabel">➕ Add Promo Code</h5>
-									<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-								</div>
-
-								<div class="modal-body">
-									{{ form_start(form, {
-		'attr': {'novalidate': 'novalidate'},
-		'action': path('aya_admin_code_promo_new')
-	}) }}
-
-									<div class="mb-3">
-										{{ form_label(form.codePromo) }}
-										{{ form_widget(form.codePromo, {
-			'attr': {
-				'class': 'form-control' ~ (form.codePromo.vars.errors|length > 0 ? ' is-invalid' : '')
-			}
-		}) }}
-										{% for error in form.codePromo.vars.errors %}
-											<div class="invalid-feedback d-block">{{ error.message }}</div>
-										{% endfor %}
-									</div>
-
-									<div class="mb-3">
-										{{ form_label(form.pourcentage) }}
-										{{ form_widget(form.pourcentage, {
-			'attr': {
-				'class': 'form-control' ~ (form.pourcentage.vars.errors|length > 0 ? ' is-invalid' : '')
-			}
-		}) }}
-										{% for error in form.pourcentage.vars.errors %}
-											<div class="invalid-feedback d-block">{{ error.message }}</div>
-										{% endfor %}
-									</div>
-
-									<div class="mb-3">
-										{{ form_label(form.dateExpiration) }}
-										{{ form_widget(form.dateExpiration, {
-			'attr': {
-				'class': 'form-control' ~ (form.dateExpiration.vars.errors|length > 0 ? ' is-invalid' : '')
-			}
-		}) }}
-										{% for error in form.dateExpiration.vars.errors %}
-											<div class="invalid-feedback d-block">{{ error.message }}</div>
-										{% endfor %}
-									</div>
-
-									<div class="modal-footer">
-										<button type="submit" class="btn btn-primary">Save</button>
-										<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-									</div>
-
-									{{ form_end(form) }}
-
-									{% if not form.vars.valid %}
-										<script>
-											document.addEventListener('DOMContentLoaded', () => {
-	const promoModal = new bootstrap.Modal(document.getElementById('addPromoModal'));
-	promoModal.show();
-	});
-										</script>
-									{% endif %}
+{% endblock %}
 
 
-								</div>
+{% block section %}
+	<div class="admin-mui-wrapper">
+		<h2>🎟️ Promo Codes Management</h2>
 
-							</div>
-						</div>
-					</div>
-				</div>
-
+		<div class="admin-filters">
+			<div class="left-search">
+				<input type="text" id="promoSearch" placeholder="🔍 Search promo codes..." class="form-control">
 			</div>
 
-			<table class="admin-mui-table" id="promoCodeTable">
-				<thead>
-					<tr>
-						<th class="hidden-column">#</th>
-						<th>Code</th>
-						<th>Discount (%)</th>
-						<th>Expiration Date</th>
-						<th>Status</th>
-						<th>Actions</th>
-					</tr>
-				</thead>
-				<tbody>
-					{% for code in codes %}
-						{% set status = (code.dateExpiration and code.dateExpiration < date()) ? 'expired' : 'active' %}
+			<div class="center-filters">
+				<button class="status-filter active" data-filter="">All</button>
+				<button class="status-filter" data-filter="active">Active</button>
+				<button class="status-filter" data-filter="expired">Expired</button>
+			</div>
 
-						<tr data-status="{{ status }}">
-							<td class="hidden-column">{{ loop.index }}</td>
-							<td>
-								<strong>{{ code.codePromo }}</strong>
-							</td>
-							<td>{{ code.pourcentage }}</td>
-							<td>{{ code.dateExpiration ? code.dateExpiration|date('Y-m-d') : '-' }}</td>
-							<td>
-								{% if status == 'expired' %}
-									<span class="badge bg-danger">Expired</span>
-								{% else %}
-									<span class="badge bg-success">Active</span>
-								{% endif %}
-							</td>
-							<td>
-								<button type="button" class="btn-delete edit-btn" data-id="{{ code.id }}" data-code="{{ code.codePromo }}" data-pourcentage="{{ code.pourcentage }}" data-date="{{ code.dateExpiration ? code.dateExpiration|date('Y-m-d') : '' }}" onclick="openEditModal(this)">
-									✏️
-								</button>
+			<div class="right-actions">
+				<button class="btn btn-outline-secondary" id="exportPromoCsv">⬇️ Export CSV</button>
 
-								<button type="button" class="btn-delete delete-btn" onclick="confirmDelete({{ code.id }}, '{{ csrf_token('delete' ~ code.id) }}')">
+				<a href="{{ path('aya_admin_code_promo_create') }}" class="btn btn-outline-primary">
+					➕ Add Promo Code
+				</a>
+
+
+				{# ✅ MODAL contenant le vrai formulaire AyaCodePromoType #}
+				{#	 <div class="modal fade" id="addPromoModal" tabindex="-1" aria-labelledby="addPromoModalLabel" aria-hidden="true">
+													<div class="modal-dialog">
+														<div class="modal-content">
+								
+															<div class="modal-header">
+																<h5 class="modal-title" id="addPromoModalLabel">➕ Add Promo Code</h5>
+																<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+															</div>
+								
+															<div class="modal-body">
+																{{ form_start(form, {
+										'attr': {'novalidate': 'novalidate'},
+										'action': path('aya_admin_code_promo_new')
+									}) }}
+								
+																<div class="mb-3">
+																	{{ form_label(form.codePromo) }}
+																	{{ form_widget(form.codePromo, {
+											'attr': {
+												'class': 'form-control' ~ (form.codePromo.vars.errors|length > 0 ? ' is-invalid' : '')
+											}
+										}) }}
+																	{% for error in form.codePromo.vars.errors %}
+																		<div class="invalid-feedback d-block">{{ error.message }}</div>
+																	{% endfor %}
+																</div>
+								
+																<div class="mb-3">
+																	{{ form_label(form.pourcentage) }}
+																	{{ form_widget(form.pourcentage, {
+											'attr': {
+												'class': 'form-control' ~ (form.pourcentage.vars.errors|length > 0 ? ' is-invalid' : '')
+											}
+										}) }}
+																	{% for error in form.pourcentage.vars.errors %}
+																		<div class="invalid-feedback d-block">{{ error.message }}</div>
+																	{% endfor %}
+																</div>
+								
+																<div class="mb-3">
+																	{{ form_label(form.dateExpiration) }}
+																	{{ form_widget(form.dateExpiration, {
+											'attr': {
+												'class': 'form-control' ~ (form.dateExpiration.vars.errors|length > 0 ? ' is-invalid' : '')
+											}
+										}) }}
+																	{% for error in form.dateExpiration.vars.errors %}
+																		<div class="invalid-feedback d-block">{{ error.message }}</div>
+																	{% endfor %}
+																</div>
+								
+																<div class="modal-footer">
+																	<button type="submit" class="btn btn-primary">Save</button>
+																	<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+																</div>
+								
+																{{ form_end(form) }}
+								
+																{% if not form.vars.valid %}
+																	<script>
+																		document.addEventListener('DOMContentLoaded', () => {
+								const promoModal = new bootstrap.Modal(document.getElementById('addPromoModal'));
+								promoModal.show();
+								});
+																	</script>
+																{% endif %}
+								
+								
+															</div>
+								
+														</div>
+													</div>
+												</div>
+										 #}
+			</div>
+		</div>
+		<table class="admin-mui-table" id="promoCodeTable">
+			<thead>
+				<tr>
+					<th class="hidden-column">#</th>
+					<th>Code</th>
+					<th>Discount (%)</th>
+					<th>Expiration Date</th>
+					<th>Status</th>
+					<th>Actions</th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for code in codes %}
+					{% set status = (code.dateExpiration and code.dateExpiration < date()) ? 'expired' : 'active' %}
+
+					<tr data-status="{{ status }}">
+						<td class="hidden-column">{{ loop.index }}</td>
+						<td>
+							<strong>{{ code.codePromo }}</strong>
+						</td>
+						<td>{{ code.pourcentage }}</td>
+						<td>{{ code.dateExpiration ? code.dateExpiration|date('Y-m-d') : '-' }}</td>
+						<td>
+							{% if status == 'expired' %}
+								<span class="badge bg-danger">Expired</span>
+							{% else %}
+								<span class="badge bg-success">Active</span>
+							{% endif %}
+						</td>
+						<td>
+							{# <button type="button" class="btn-delete edit-btn" data-id="{{ code.id }}" data-code="{{ code.codePromo }}" data-pourcentage="{{ code.pourcentage }}" data-date="{{ code.dateExpiration ? code.dateExpiration|date('Y-m-d') : '' }}" onclick="openEditModal(this)">
+																																											✏️
+																																										</button>  #}
+							<a href="{{ path('aya_admin_code_promo_edit_form', { id: code.id }) }}" class="btn-delete edit-btn">
+								✏️
+							</a>
+
+
+							<form method="post" action="{{ path('aya_admin_code_promo_delete', { id: code.id }) }}" onsubmit="return confirm('Are you sure?');" style="display:inline;">
+								<input type="hidden" name="_token" value="{{ csrf_token('delete' ~ code.id) }}">
+								<button type="submit" class="btn-delete edit-btn">
 									🗑️
 								</button>
-							</td>
+							</form>
+						</td>
 
-						</tr>
-					{% else %}
-						<tr>
-							<td colspan="6" class="empty-row">No promo codes found.</td>
-						</tr>
-					{% endfor %}
-				</tbody>
-			</table>
-		</div>
-	{% endblock %}
+					</tr>
+				{% else %}
+					<tr>
+						<td colspan="6" class="empty-row">No promo codes found.</td>
+					</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+	</div>
+{% endblock %}
 
-	{% block javascripts %}
-		{{ parent() }}
-		<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-		<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+{% block javascripts %}
+	{{ parent() }}
+	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+	<script src="{{ asset('assetsAya/js/aya_list_promo.js') }}"></script>
 
-		<script>
-			document.addEventListener('DOMContentLoaded', () => {
-	const searchInput = document.getElementById('promoSearch');
-	function getPromoRows() {
-	return document.querySelectorAll('#promoCodeTable tbody tr');
-	}
+	<script>
+		document.addEventListener('DOMContentLoaded', () => {
+const searchInput = document.getElementById('promoSearch');
+function getPromoRows() {
+return document.querySelectorAll('#promoCodeTable tbody tr');
+}
 
 
-	let searchTimeout;
-	searchInput.addEventListener("input", function () {
-	const query = this.value.trim();
-	clearTimeout(searchTimeout);
+let searchTimeout;
+searchInput.addEventListener("input", function () {
+const query = this.value.trim();
+clearTimeout(searchTimeout);
 
-	if (query.length === 0) {
-	fetch('{{ path("aya_admin_code_promo_search") }}', {
-	headers: {
-	'Accept': 'application/json'
-	}
-	}).then(res => res.json()).then(updatePromoTable).catch(err => console.error('Reset search error:', err));
-	return;
-	}
+if (query.length === 0) {
+fetch('{{ path("aya_admin_code_promo_search") }}', {
+headers: {
+'Accept': 'application/json'
+}
+}).then(res => res.json()).then(updatePromoTable).catch(err => console.error('Reset search error:', err));
+return;
+}
 
-	searchTimeout = setTimeout(() => {
-	fetch (`{{ path("aya_admin_code_promo_search") }}?q=${
-	encodeURIComponent(query)
-	}`, {
-	headers: {
-	'Accept': 'application/json'
-	}
-	}).then(res => res.json()).then(updatePromoTable).catch(err => {
-	console.error('AJAX promo search error:', err);
-	Swal.fire('Search error', 'Unable to fetch promo codes.', 'error');
-	});
-	}, 300);
-	});
+searchTimeout = setTimeout(() => {
+fetch (`{{ path("aya_admin_code_promo_search") }}?q=${
+encodeURIComponent(query)
+}`, {
+headers: {
+'Accept': 'application/json'
+}
+}).then(res => res.json()).then(updatePromoTable).catch(err => {
+console.error('AJAX promo search error:', err);
+Swal.fire('Search error', 'Unable to fetch promo codes.', 'error');
+});
+}, 300);
+});
 
-	function updatePromoTable(data) {
-	const tbody = document.querySelector('#promoCodeTable tbody');
-	tbody.innerHTML = '';
+function updatePromoTable(data) {
+const tbody = document.querySelector('#promoCodeTable tbody');
+tbody.innerHTML = '';
 
-	if (data.length === 0) {
-	tbody.innerHTML = `<tr><td colspan="6" class="empty-row">No promo codes found.</td></tr>`;
-	return;
-	}
+if (data.length === 0) {
+tbody.innerHTML = `<tr><td colspan="6" class="empty-row">No promo codes found.</td></tr>`;
+return;
+}
 
-	data.forEach((code, index) => {
-	const row = document.createElement('tr');
+data.forEach((code, index) => {
+const row = document.createElement('tr');
 
-	// 🔍 Calcul automatique du statut par JavaScript
-	const today = new Date().toISOString().split('T')[0];
-	const expDate = new Date(code.dateExpiration);
-	const now = new Date();
-	const isExpired = expDate < now;
+// 🔍 Calcul automatique du statut par JavaScript
+const today = new Date().toISOString().split('T')[0];
+const expDate = new Date(code.dateExpiration);
+const now = new Date();
+const isExpired = expDate < now;
 
-	const status = isExpired ? 'expired' : 'active';
+const status = isExpired ? 'expired' : 'active';
 
-	row.dataset.status = status;
+row.dataset.status = status;
 
-	row.innerHTML = `
+row.innerHTML = `
 			<td class="hidden-column">${
-	index + 1
-	}</td>
+index + 1
+}</td>
 			<td><strong>${
-	code.codePromo
-	}</strong></td>
+code.codePromo
+}</strong></td>
 			<td>${
-	code.pourcentage
-	}</td>
+code.pourcentage
+}</td>
 			<td>${
-	code.dateExpiration || '-'
-	}</td>
+code.dateExpiration || '-'
+}</td>
 			<td><span class="badge ${
-	status === 'expired' ? 'bg-danger' : 'bg-success'
-	}">
+status === 'expired' ? 'bg-danger' : 'bg-success'
+}">
 				${
-	status.charAt(0).toUpperCase() + status.slice(1)
-	}
+status.charAt(0).toUpperCase() + status.slice(1)
+}
 			</span></td>
 			<td>
 				<button class="btn btn-sm btn-warning me-1 edit-btn"
 					data-id="${
-	code.id
-	}"
+code.id
+}"
 					data-code="${
-	code.codePromo
-	}"
+code.codePromo
+}"
 					data-pourcentage="${
-	code.pourcentage
-	}"
+code.pourcentage
+}"
 					data-date="${
-	code.dateExpiration || ''
-	}"
+code.dateExpiration || ''
+}"
 					onclick="openEditModal(this)">✏️</button>
 				<button class="btn btn-sm btn-danger"
 					onclick="confirmDelete(${
-	code.id
-	}, '{{ csrf_token('delete' ~ 'replace') }}')">🗑️</button>
+code.id
+}, '{{ csrf_token('delete' ~ 'replace') }}')">🗑️</button>
 			</td>
 		`;
 
-	tbody.appendChild(row);
-	});
+tbody.appendChild(row);
+});
 
-	}
+}
 
-	document.querySelectorAll('.edit-btn').forEach(btn => {
-	btn.addEventListener('click', () => {
-	const id = btn.dataset.id;
-	const code = btn.dataset.code;
-	const pourcentage = btn.dataset.pourcentage;
-	const dateExpiration = btn.dataset.date;
+document.querySelectorAll('.edit-btn').forEach(btn => {
+btn.addEventListener('click', () => {
+const id = btn.dataset.id;
+const code = btn.dataset.code;
+const pourcentage = btn.dataset.pourcentage;
+const dateExpiration = btn.dataset.date;
 
-	openEditModal(id, code, pourcentage, dateExpiration);
-	});
-	});
+openEditModal(id, code, pourcentage, dateExpiration);
+});
+});
 
-	document.querySelectorAll('.status-filter').forEach(btn => {
-	btn.addEventListener('click', () => {
-	const filter = btn.dataset.filter;
-	document.querySelectorAll('.status-filter').forEach(b => b.classList.remove('active'));
-	btn.classList.add('active');
+document.querySelectorAll('.status-filter').forEach(btn => {
+btn.addEventListener('click', () => {
+const filter = btn.dataset.filter;
+document.querySelectorAll('.status-filter').forEach(b => b.classList.remove('active'));
+btn.classList.add('active');
 
-	getPromoRows().forEach(row => {
-	const status = row.dataset.status;
-	row.style.display = (filter === '' || status === filter) ? '' : 'none';
-	});
+getPromoRows().forEach(row => {
+const status = row.dataset.status;
+row.style.display = (filter === '' || status === filter) ? '' : 'none';
+});
 
-	});
-	});
+});
+});
 
-	document.getElementById('exportPromoCsv').addEventListener('click', () => {
-	let csv = 'Code,Discount,Expiration Date,Status\n';
-	document.querySelectorAll('#promoCodeTable tbody tr').forEach(row => {
-	if (row.style.display !== 'none') {
-	const cells = row.querySelectorAll('td');
-	csv += `${
-	cells[1].innerText
-	},${
-	cells[2].innerText
-	},${
-	cells[3].innerText
-	},${
-	cells[4].innerText
-	}\n`;
-	}
-	});
-	const blob = new Blob([csv], {type: 'text/csv'});
-	const a = document.createElement('a');
-	a.href = URL.createObjectURL(blob);
-	a.download = 'promo_codes.csv';
-	a.click();
-	});
-	});
+document.getElementById('exportPromoCsv').addEventListener('click', () => {
+let csv = 'Code,Discount,Expiration Date,Status\n';
+document.querySelectorAll('#promoCodeTable tbody tr').forEach(row => {
+if (row.style.display !== 'none') {
+const cells = row.querySelectorAll('td');
+csv += `${
+cells[1].innerText
+},${
+cells[2].innerText
+},${
+cells[3].innerText
+},${
+cells[4].innerText
+}\n`;
+}
+});
+const blob = new Blob([csv], {type: 'text/csv'});
+const a = document.createElement('a');
+a.href = URL.createObjectURL(blob);
+a.download = 'promo_codes.csv';
+a.click();
+});
+});
 
-	function openEditModal(button) {
-		const id = button.dataset.id;
-		const code = button.dataset.code;
-		const pourcentage = button.dataset.pourcentage;
-		const dateExpiration = button.dataset.date;
+function openEditModal(button) {
+const id = button.dataset.id;
+const code = button.dataset.code;
+const pourcentage = button.dataset.pourcentage;
+const dateExpiration = button.dataset.date;
 
-		Swal.fire({
-			title: 'Edit Promo Code',
-			html: `
+Swal.fire({
+title: 'Edit Promo Code',
+html: `
 				<div class="form-group text-start">
 					<label for="edit_code">Promo Code</label>
 					<input id="edit_code" class="swal2-input" value="${code}">
@@ -343,127 +351,133 @@
 					<div class="invalid-feedback" id="error_dateExpiration"></div>
 				</div>
 			`,
-			showCancelButton: true,
-			confirmButtonText: 'Update',
-			focusConfirm: false,
-			preConfirm: () => {
-	const updatedCode = document.getElementById('edit_code').value.trim();
-	const updatedDiscount = document.getElementById('edit_discount').value;
-	const updatedExpiration = document.getElementById('edit_expiration').value;
+showCancelButton: true,
+confirmButtonText: 'Update',
+focusConfirm: false,
+preConfirm: () => {
+const updatedCode = document.getElementById('edit_code').value.trim();
+const updatedDiscount = document.getElementById('edit_discount').value;
+const updatedExpiration = document.getElementById('edit_expiration').value;
 
-	return fetch(`/admin/promo-codes/edit/${id}`, {
-		method: 'POST',
-		headers: {
-			'Content-Type': 'application/json',
-		},
-		body: JSON.stringify({
-			codePromo: updatedCode,
-			pourcentage: updatedDiscount,
-			dateExpiration: updatedExpiration
-		})
-	})
-	.then(res => res.json())
-	.then(data => {
-		if (data.success) {
-			return true;
-		} else {
-			['codePromo', 'pourcentage', 'dateExpiration'].forEach(field => {
-    let inputId;
-    switch (field) {
-        case 'codePromo': inputId = 'edit_code'; break;
-        case 'pourcentage': inputId = 'edit_discount'; break;
-        case 'dateExpiration': inputId = 'edit_expiration'; break;
-        default: inputId = `edit_${field}`;
-    }
+return fetch (`/admin/promo-codes/edit/${id}`, {
+method: 'POST',
+headers: {
+'Content-Type': 'application/json'
+},
+body: JSON.stringify(
+{codePromo: updatedCode, pourcentage: updatedDiscount, dateExpiration: updatedExpiration}
+)
+}).then(res => res.json()).then(data => {
+if (data.success) {
+return true;
+} else {
+['codePromo', 'pourcentage', 'dateExpiration'].forEach(field => {
+let inputId;
+switch (field) {
+case 'codePromo': inputId = 'edit_code';
+break;
+case 'pourcentage': inputId = 'edit_discount';
+break;
+case 'dateExpiration': inputId = 'edit_expiration';
+break;
+default: inputId = `edit_${field}`;
+}
 
-    const input = document.getElementById(inputId);
-    let errorDiv = document.getElementById(`error_${field}`);
+const input = document.getElementById(inputId);
+let errorDiv = document.getElementById (`error_${field}`);
 
-    if (input) {
-        if (!errorDiv) {
-            errorDiv = document.createElement('div');
-            errorDiv.id = `error_${field}`;
-            errorDiv.className = 'invalid-feedback d-block mt-1';
-            input.parentNode.appendChild(errorDiv);
-        }
+if (input) {
+if (! errorDiv) {
+errorDiv = document.createElement('div');
+errorDiv.id = `error_${field}`;
+errorDiv.className = 'invalid-feedback d-block mt-1';
+input.parentNode.appendChild(errorDiv);
+}
 
-        if (data.errors[field]) {
-            input.classList.add('is-invalid');
-            errorDiv.innerHTML = data.errors[field].join('<br>');
-            errorDiv.style.display = 'block';
-        } else {
-            input.classList.remove('is-invalid');
-            errorDiv.innerHTML = '';
-            errorDiv.style.display = 'none';
-        }
-    }
+if (data.errors[field]) {
+input.classList.add('is-invalid');
+errorDiv.innerHTML = data.errors[field].join('<br>');
+errorDiv.style.display = 'block';
+} else {
+input.classList.remove('is-invalid');
+errorDiv.innerHTML = '';
+errorDiv.style.display = 'none';
+}
+}
 });
 
 
+// ✅ Active à nouveau le bouton Update
+Swal.enableButtons();
+setTimeout(() => {
+const confirmBtn = Swal.getConfirmButton();
+const cancelBtn = Swal.getCancelButton();
+if (confirmBtn) 
+confirmBtn.disabled = false;
 
 
-			// ✅ Active à nouveau le bouton Update
-			Swal.enableButtons();
-			setTimeout(() => {
-    const confirmBtn = Swal.getConfirmButton();
-    const cancelBtn = Swal.getCancelButton();
-    if (confirmBtn) confirmBtn.disabled = false;
-    if (cancelBtn) cancelBtn.disabled = false;
-}, 100); // on attend un peu pour que le DOM soit prêt
 
-			// ❌ Ne ferme pas la modale
-			return Promise.reject('Validation failed');
-		}
-	});
+if (cancelBtn) 
+cancelBtn.disabled = false;
+
+
+
+}, 100);
+// on attend un peu pour que le DOM soit prêt
+
+// ❌ Ne ferme pas la modale
+return Promise.reject('Validation failed');
+}
+});
 }
 
-		}).then(result => {
-			if (result.isConfirmed) {
-				Swal.fire('✅ Updated!', 'Promo code updated successfully.', 'success').then(() => {
-					location.reload(); // pour recharger la table
-				});
-			}
-		});
-	}
+}).then(result => {
+if (result.isConfirmed) {
+Swal.fire('✅ Updated!', 'Promo code updated successfully.', 'success').then(() => {
+location.reload(); // pour recharger la table
+});
+}
+});
+}
 
 
-	function confirmDelete(id, csrfToken) {
-	Swal.fire({
-	title: 'Are you sure?',
-	text: 'This action cannot be undone.',
-	icon: 'warning',
-	showCancelButton: true,
-	confirmButtonColor: '#d33',
-	cancelButtonColor: '#3085d6',
-	confirmButtonText: 'Yes, delete it!'
-	}).then((result) => {
-	if (result.isConfirmed) {
-	fetch (`/admin/promo-codes/delete/${id}`, {
-	method: 'POST',
-	headers: {
-	'Content-Type': 'application/x-www-form-urlencoded',
-	'X-Requested-With': 'XMLHttpRequest'
-	},
-	body: new URLSearchParams(
-	{_token: csrfToken}
-	)
-	}).then(res => res.json()).then(data => {
-	if (data.success) {
-	Swal.fire('Deleted!', 'Promo code deleted.', 'success');
-	const row = document.querySelector (`button[onclick*="confirmDelete(${id}"]`).closest('tr');
-	if (row) 
-	row.remove();
+function confirmDelete(id, csrfToken) {
+Swal.fire({
+title: 'Are you sure?',
+text: 'This action cannot be undone.',
+icon: 'warning',
+showCancelButton: true,
+confirmButtonColor: '#d33',
+cancelButtonColor: '#3085d6',
+confirmButtonText: 'Yes, delete it!'
+}).then((result) => {
+if (result.isConfirmed) {
+fetch (`/admin/promo-codes/delete/${id}`, {
+method: 'POST',
+headers: {
+'Content-Type': 'application/x-www-form-urlencoded',
+'X-Requested-With': 'XMLHttpRequest'
+},
+body: new URLSearchParams(
+{_token: csrfToken}
+)
+}).then(res => res.json()).then(data => {
+if (data.success) {
+Swal.fire('Deleted!', 'Promo code deleted.', 'success');
+const row = document.querySelector (`button[onclick*="confirmDelete(${id}"]`).closest('tr');
+if (row) 
+row.remove();
 
 
 
-	} else {
-	Swal.fire('Error', data.message || 'Delete failed.', 'error');
-	}
-	}).catch(() => {
-	Swal.fire('Error', 'Unexpected server error.', 'error');
-	});
-	}
-	});
-	}
-		</script>
-	{% endblock %}
+} else {
+Swal.fire('Error', data.message || 'Delete failed.', 'error');
+}
+}).catch(() => {
+Swal.fire('Error', 'Unexpected server error.', 'error');
+});
+}
+});
+}
+	</script>
+{% endblock %}

@@ -11,13 +11,19 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use App\Repository\UserRepository;
 
 class AyaOrderClientController extends AbstractController
 {
     #[Route('/client/orders', name: 'client_orders', methods: ['GET'])]
-    public function index(OrderRepository $orderRepository, EntityManagerInterface $em, Request $request): Response
+    public function index(OrderRepository $orderRepository, EntityManagerInterface $em, Request $request,SessionInterface $session,
+    UserRepository $userRepository): Response
     {
-        $user = $em->getRepository(User::class)->find(49); // simulate user
+        //$user = $em->getRepository(User::class)->find(x100); // simulate user
+        $userId = $session->get('user_id');
+        $user = $userRepository->find($userId);
+        if (!$user) return $this->redirectToRoute('app_login');
 
         $filter = $request->query->get('status');
         $orders = $filter
@@ -49,9 +55,14 @@ class AyaOrderClientController extends AbstractController
     }
 
     #[Route('/client/orders/table', name: 'client_orders_table', methods: ['GET'])]
-    public function ordersTable(OrderRepository $orderRepository, EntityManagerInterface $em, Request $request): Response
+    public function ordersTable(OrderRepository $orderRepository, EntityManagerInterface $em, Request $request,SessionInterface $session,
+    UserRepository $userRepository): Response
     {
-        $user = $em->getRepository(User::class)->find(49); // Test user
+        //$user = $em->getRepository(User::class)->find(x100); // Test user
+        $userId = $session->get('user_id');
+        $user = $userRepository->find($userId);
+        if (!$user) return $this->redirectToRoute('app_login');
+
         $filter = $request->query->get('status');
         $orders = $filter
             ? $orderRepository->findBy(['user' => $user, 'status' => $filter])
@@ -63,10 +74,15 @@ class AyaOrderClientController extends AbstractController
         ]);
     }
     #[Route('/client/order/cancel/{id}', name: 'cancel_order', methods: ['POST'])]
-    public function cancelOrder(int $id, EntityManagerInterface $em): Response
+    public function cancelOrder(int $id, EntityManagerInterface $em,SessionInterface $session,
+    UserRepository $userRepository): Response
     {
+        //$user = $em->getRepository(User::class)->find(x100); // simulate user
+        $userId = $session->get('user_id');
+        $user = $userRepository->find($userId);
+        if (!$user) return $this->redirectToRoute('app_login');
         $order = $em->getRepository(Order::class)->find($id);
-        $user = $em->getRepository(User::class)->find(49); // simulate user
+        
 
         if (!$order || $order->getUser()?->getIdUser() !== $user->getIdUser()) {
             throw $this->createNotFoundException('Order not found or access denied');
@@ -84,9 +100,13 @@ class AyaOrderClientController extends AbstractController
         return $this->redirectToRoute('client_orders');
     }
     #[Route('/client/orders/search', name: 'client_orders_search', methods: ['GET'])]
-    public function search(Request $request, OrderRepository $orderRepository, EntityManagerInterface $em): JsonResponse
+    public function search(Request $request, OrderRepository $orderRepository, EntityManagerInterface $em,SessionInterface $session,
+    UserRepository $userRepository): JsonResponse
     {
-        $user = $this->getUser() ?? $em->getRepository(User::class)->find(49);
+        //$user = $this->getUser() ?? $em->getRepository(User::class)->find(x100);
+        $userId = $session->get('user_id');
+        $user = $userRepository->find($userId);
+        if (!$user) return new JsonResponse([], 401);
         $query = strtolower($request->query->get('q', ''));
 
         $qb = $orderRepository->createQueryBuilder('o')
