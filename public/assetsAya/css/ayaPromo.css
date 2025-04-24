@@ -140,3 +140,37 @@ table.admin-mui-table th {
     font-size: 14px;
     cursor: pointer;
   }
+
+  .pagination {
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.pagination .page-link {
+    color: #6b336e; /* couleur violet foncé */
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    padding: 6px 12px;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.pagination .page-link:hover {
+    background-color: #f2e6f4; /* mauve clair au survol */
+    color: #6b336e;
+    border-color: #6b336e;
+}
+
+.pagination .page-item.active .page-link {
+    background-color: #6b336e; /* violet foncé pour l'actif */
+    color: #fff;
+    border-color: #6b336e;
+    font-weight: bold;
+}
+
+.pagination .page-item.disabled .page-link {
+    color: #999;
+    background-color: #f7f7f7;
+    border-color: #ddd;
+    cursor: not-allowed;
+}

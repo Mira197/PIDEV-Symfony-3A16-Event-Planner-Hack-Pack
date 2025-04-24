@@ -163,6 +163,9 @@
 				{% endfor %}
 			</tbody>
 		</table>
+		<div class="pagination d-flex justify-content-center mt-4">
+    {{ knp_pagination_render(codes, '@KnpPaginator/Pagination/bootstrap_v5_pagination.html.twig') }}
+</div>
 	</div>
 {% endblock %}
 
@@ -173,40 +176,31 @@
 	<script src="{{ asset('assetsAya/js/aya_list_promo.js') }}"></script>
 
 	<script>
-		document.addEventListener('DOMContentLoaded', () => {
-const searchInput = document.getElementById('promoSearch');
-function getPromoRows() {
-return document.querySelectorAll('#promoCodeTable tbody tr');
-}
+document.addEventListener('DOMContentLoaded', () => {
+    const searchInput = document.getElementById('promoSearch');
 
+    // 🟢 Injecte l'URL AJAX correcte une seule fois au chargement
+    const searchUrl = '{{ path("aya_admin_code_promo_search") }}';
+    let searchTimeout;
 
-let searchTimeout;
-searchInput.addEventListener("input", function () {
-const query = this.value.trim();
-clearTimeout(searchTimeout);
+    searchInput.addEventListener("input", function () {
+        const query = this.value.trim();
+        clearTimeout(searchTimeout);
 
-if (query.length === 0) {
-fetch('{{ path("aya_admin_code_promo_search") }}', {
-headers: {
-'Accept': 'application/json'
-}
-}).then(res => res.json()).then(updatePromoTable).catch(err => console.error('Reset search error:', err));
-return;
-}
-
-searchTimeout = setTimeout(() => {
-fetch (`{{ path("aya_admin_code_promo_search") }}?q=${
-encodeURIComponent(query)
-}`, {
-headers: {
-'Accept': 'application/json'
-}
-}).then(res => res.json()).then(updatePromoTable).catch(err => {
-console.error('AJAX promo search error:', err);
-Swal.fire('Search error', 'Unable to fetch promo codes.', 'error');
-});
-}, 300);
-});
+        searchTimeout = setTimeout(() => {
+            fetch(`${searchUrl}?q=${encodeURIComponent(query)}`, {
+                headers: {
+                    'Accept': 'application/json'
+                }
+            })
+            .then(res => res.json())
+            .then(updatePromoTable)
+            .catch(err => {
+                console.error('AJAX promo search error:', err);
+                Swal.fire('Search error', 'Unable to fetch promo codes.', 'error');
+            });
+        }, 300);
+    });
 
 function updatePromoTable(data) {
 const tbody = document.querySelector('#promoCodeTable tbody');

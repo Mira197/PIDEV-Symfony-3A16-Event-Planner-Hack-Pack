@@ -16,20 +16,29 @@ use Twilio\Rest\Client;
 use Symfony\Component\Notifier\Message\SmsMessage;
 use Symfony\Component\Notifier\TexterInterface;
 use App\Service\SmsSender;
+use Knp\Component\Pager\PaginatorInterface; 
 #[Route('/admin/promo-codes', name: 'aya_admin_code_promo_')]
 class AyaCodePromoAdminController extends AbstractController
 {
-
+    
     #[Route('/', name: 'index', methods: ['GET'])]
-    public function index(CodePromoRepository $repo): Response
+    public function index(Request $request, CodePromoRepository $repo, PaginatorInterface $paginator): Response
     {
-        $form = $this->createForm(AyaCodePromoType::class);
+        $query = $repo->createQueryBuilder('p')
+            ->orderBy('p.date_expiration', 'ASC')
+            ->getQuery();
+
+        $pagination = $paginator->paginate(
+            $query,
+            $request->query->getInt('page', 1), // numéro de page
+            5 // nombre d'éléments par page
+        );
 
         return $this->render('admin/aya_code_promo/aya_list_promo_codes.html.twig', [
-            'codes' => $repo->findAll(),
-            'form' => $form->createView(), // 👈 Ajouté ici !
+            'codes' => $pagination,
         ]);
     }
+
 
 
 

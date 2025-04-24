@@ -79,6 +79,10 @@
 				{% endfor %}
 			</tbody>
 		</table>
+		<div class="pagination d-flex justify-content-center mt-4">
+	{{ knp_pagination_render(orders, '@KnpPaginator/Pagination/bootstrap_v5_pagination.html.twig') }}
+</div>
+
 	</div>
 {% endblock %}
 
