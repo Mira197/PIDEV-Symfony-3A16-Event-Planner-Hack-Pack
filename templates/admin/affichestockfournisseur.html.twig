@@ -1,4 +1,4 @@
-{% extends 'admin/baseAdmin.html.twig' %}
+{% extends 'admin/baseFournisseur.html.twig' %}
 
 {% block title %}Stocks{% endblock %}
 
@@ -20,13 +20,9 @@
                 <div class="card-style mb-30">
                   <h6 class="mb-10">Stock Table</h6>
                   
-                  <a href="{{ path('stock_add') }}" class="main-btn primary-btn btn-hover">
+                  <a href="{{ path('stock_add_four') }}" class="main-btn primary-btn btn-hover">
                     ajouter stock
                   </a>
-                  <a href="{{ path('check_stocks') }}" class="main-btn primary-btn btn-hover">
-                    Vérifier les stocks
-                </a>
-                
       
                   <div class="table-wrapper table-responsive">
                     <table class="table">

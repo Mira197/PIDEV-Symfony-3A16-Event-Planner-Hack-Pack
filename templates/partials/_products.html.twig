@@ -1,9 +1,9 @@
-{% for category, products in groupedProducts %}
+{% for group in groupedProducts %}
     <div class="col-12 mt-5 mb-3">
-        <h2 class="text-center">{{ category }}</h2>
+        <h2 class="text-center">{{ group.category }}</h2>
     </div>
     <div class="row">
-        {% for product in products %}
+        {% for product in group.pagination %}
             <div class="col-xl-4 col-lg-4 col-md-6 col-sm-6">
                 <div class="card-style-2 mb-30">
                     <div class="card-image">
@@ -22,9 +22,35 @@
                 </div>
             </div>
         {% endfor %}
+        {# Ajouter la pagination pour chaque catégorie #}
+        {{ knp_pagination_render(group.pagination, null, {
+            'pageParameterName': group.hash
+        }) }}
+        
+        
     </div>
 {% endfor %}
 
 {% if groupedProducts is empty %}
     <p class="text-center">No products available.</p>
 {% endif %}
+<style>
+    .pagination .page-item.active .page-link {
+        background-color: #6c5ce7;
+        border-color: #6c5ce7;
+        color: white;
+    }
+
+    .pagination .page-link {
+        color: #6c5ce7;
+    }
+
+    .pagination {
+        margin-top: 30px;
+        margin-bottom: 50px;
+    }
+    .row + .row {
+        margin-top: 60px;
+    }
+</style>
+

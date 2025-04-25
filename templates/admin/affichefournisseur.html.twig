@@ -1,4 +1,4 @@
-{% extends 'admin/baseAdmin.html.twig' %}
+{% extends 'admin/baseFournisseur.html.twig' %}
 
 {% block title %}Products{% endblock %}
 
@@ -21,12 +21,11 @@
             <div class="col-12">
                 <div class="title mt-30 mb-30">
             
-                    <a href="{{ path('product_add') }}" class="main-btn primary-btn btn-hover">
+                    <a href="{{ path('product_add_four') }}" class="main-btn primary-btn btn-hover">
                         ajouter product
                       </a>
-                      <a href="{{ path('affichestock') }}" class="main-btn primary-btn btn-hover">
-                        afficher stock
-                      </a>
+                      
+                      
                 </div>
                 
             <div class="table-responsive">

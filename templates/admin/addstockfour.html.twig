@@ -1,0 +1,49 @@
+{% extends 'admin/baseFournisseur.html.twig' %}
+
+{% block title %}  {{ editMode is defined and editMode ? 'Edit Stock' : 'Add Stock' }}
+{% endblock %}
+
+{% block section %}
+<section class="section">
+    <div class="container-fluid">
+        <div class="title-wrapper pt-30">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <div class="title">
+                        <h2>{{ editMode is defined and editMode ? 'Edit Stock' : 'Add New Stock' }}</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card-style mb-30">
+            {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+                
+
+                <div class="mb-3">
+                    {{ form_label(form.available_quantity) }}
+                    {{ form_widget(form.available_quantity, {'attr': {'class': 'form-control'}}) }}
+                    {{ form_errors(form.available_quantity) }}
+                </div>
+                <div class="mb-3">
+                    {{ form_label(form.minimum_quantity) }}
+                    {{ form_widget(form.minimum_quantity, {'attr': {'class': 'form-control'}}) }}
+                    {{ form_errors(form.minimum_quantity) }}
+                </div>
+
+              
+
+                <div>
+                    <button type="submit" class="main-btn primary-btn btn-hover">            {{ editMode is defined and editMode ? 'Update Stock' : 'Add Stock' }}
+                    </button>
+                    
+                    <a href="{{ path('affichestock') }}" class="main-btn primary-btn btn-hover">
+                        List of stocks
+                      </a>
+                    
+                </div>
+            {{ form_end(form) }}
+        </div>
+    </div>
+</section>
+{% endblock %}

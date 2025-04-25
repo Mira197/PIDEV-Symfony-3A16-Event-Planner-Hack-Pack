@@ -396,7 +396,11 @@ public function saisirDuree(
 
 
 
-
+    #[Route('/baseFournisseur', name: 'baseFournisseur')]
+    public function afficheFournisseur(): Response
+    {
+        return $this->render('admin/baseFournisseur.html.twig');
+    }
 
 
 
