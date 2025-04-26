@@ -22,7 +22,7 @@ use Symfony\Component\Mailer\Mailer;
 use Symfony\Component\Notifier\Notification\Notification;
 use Symfony\Component\Notifier\NotifierInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
-
+use App\Service\LogSnagService;
 
 
 class MahdiStockController extends AbstractController
@@ -184,6 +184,24 @@ class MahdiStockController extends AbstractController
             'editMode' => true,
         ]);
     }
+    #[Route('/admin/stock/editfour/{id}', name: 'stock_edit_four')]
+    public function edit1(Request $request, Stock $stock, EntityManagerInterface $em, LogSnagService $logSnagService): Response
+    {
+        $form1 = $this->createForm(MahdiStockType::class, $stock);
+
+        $form1->handleRequest($request);
+        if ($form1->isSubmitted() && $form1->isValid()) {
+            $em->flush();
+            // 🔥 Ajouter l'envoi du log
+        $logSnagService->sendStockUpdate('Stock Updated', $stock->getStock_id(), $stock->getAvailable_quantity());
+            return $this->redirectToRoute('app_product_list');
+        }
+
+        return $this->render('admin/addstockfour.html.twig', [
+            'form' => $form1->createView(),
+            'editMode' => true,
+        ]);
+    }
     #[Route('/admin/stock/delete/{id}', name: 'stock_delete', methods: ['POST'])]
     public function delete(Request $request, Stock $stock, EntityManagerInterface $em): Response
     {
@@ -193,6 +211,16 @@ class MahdiStockController extends AbstractController
         }
 
         return $this->redirectToRoute('affichestock');
+    }
+    #[Route('/admin/stock/deletefour/{id}', name: 'stock_delete_four', methods: ['POST'])]
+    public function delete1(Request $request, Stock $stock, EntityManagerInterface $em): Response
+    {
+        if ($this->isCsrfTokenValid('delete' . $stock->getStock_id(), $request->request->get('_token'))) {
+            $em->remove($stock);
+            $em->flush();
+        }
+
+        return $this->redirectToRoute('mes_stocks');
     }
     #[Route('/admin/stock', name: 'app_stock_list')]
 public function listStocks(StockRepository $repo): Response

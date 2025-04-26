@@ -47,10 +47,10 @@
                           <td>{{ stock.last_update ? stock.last_update|date('Y-m-d H:i') : '—' }}</td>
                           <td>
                             
-                              <a href="{{ path('stock_edit', {id: stock.stock_id}) }}" class="btn btn-warning btn-sm me-2">
+                              <a href="{{ path('stock_edit_four', {id: stock.stock_id}) }}" class="btn btn-warning btn-sm me-2">
                                 <i class="lni lni-pencil"></i>
                               </a></td>
-                              <td> <form method="post" action="{{ path('stock_delete', {id: stock.stock_id}) }}"
+                              <td> <form method="post" action="{{ path('stock_delete_four', {id: stock.stock_id}) }}"
                                     onsubmit="return confirm('Are you sure you want to delete this stock?');">
                                 <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ stock.stock_id) }}">
                                 <button class="btn btn-danger btn-sm">
