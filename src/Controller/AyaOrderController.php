@@ -14,6 +14,8 @@ use App\Repository\UserRepository;
 use App\Repository\WalletTransactionRepository;
 use App\Repository\GiftCardRepository;
 use App\Repository\FidelityPointRepository;
+use App\Repository\OrderRepository;
+use App\Service\QRCodeService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -21,6 +23,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 class AyaOrderController extends AbstractController
 {
@@ -152,17 +155,32 @@ class AyaOrderController extends AbstractController
 
 
 
-    #[Route('/aya/order/confirm/{id}', name: 'aya_order_confirm')]
-    public function confirm(Order $order = null): Response
-    {
-        if (!$order) {
-            throw $this->createNotFoundException("Order not found.");
-        }
+    // #[Route('/aya/order/confirm/{id}', name: 'aya_order_confirm')]
+    // public function confirm(Order $order = null): Response
+    // {
+    //     if (!$order) {
+    //         throw $this->createNotFoundException("Order not found.");
+    //     }
 
-        return $this->render('aya_order/ayaconfirmation.html.twig', [
-            'order' => $order,
-        ]);
+    //     return $this->render('aya_order/ayaconfirmation.html.twig', [
+    //         'order' => $order,
+    //     ]);
+    // }
+    
+    #[Route('/aya/order/confirm/{id}', name: 'aya_order_confirm')]
+public function confirm(int $id, OrderRepository $orderRepository): Response
+{
+    $order = $orderRepository->find($id);
+
+    if (!$order) {
+        throw $this->createNotFoundException('Order not found.');
     }
+
+    return $this->render('aya_order/ayaconfirmation.html.twig', [
+        'order' => $order, // <-- ✅ On envoie l'objet complet
+    ]);
+}
+
 
     
 
