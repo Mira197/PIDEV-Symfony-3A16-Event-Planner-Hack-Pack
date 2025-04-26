@@ -17,6 +17,8 @@ use Symfony\Component\Security\Core\Security;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use App\Repository\UserRepository;
 use Knp\Component\Pager\PaginatorInterface;
+use App\Service\CurrencyConverter;
+use Symfony\Contracts\HttpClient\HttpClientInterface; // 🔥 pour appeler l'API de conversion
 
 
 
@@ -228,9 +230,19 @@ class MahdiProductController extends AbstractController
     
 
 #[Route('/afficheclient', name: 'afficheclient')]
-public function index(Request $request, ProductRepository $productRepository, PaginatorInterface $paginator): Response
+public function index(Request $request, ProductRepository $productRepository, PaginatorInterface $paginator,
+CurrencyConverter $currencyConverter,
+HttpClientInterface $httpClient): Response
 {
     $products = $productRepository->findAll();
+    $selectedCurrency = $request->query->get('currency', 'TND');
+    $conversionRate = 1.0; // Valeur par défaut
+    if ($selectedCurrency !== 'TND') {
+        $conversionRate = $currencyConverter->getConversionRate('TND', $selectedCurrency);
+    }
+
+
+
     $groupedProducts = [];
 
     foreach ($products as $product) {
@@ -245,21 +257,33 @@ public function index(Request $request, ProductRepository $productRepository, Pa
     $paginatedGroups = [];
     foreach ($groupedProducts as $category => $productsInCategory) {
         $paramName = 'page_' . md5($category); // ← On fait le md5 ici
+        $currentPage = $request->query->getInt($paramName, 1);
         $pagination = $paginator->paginate(
             $productsInCategory,
-            $request->query->getInt($paramName, 1),
-            3
+            $currentPage,
+            3,
+            [
+                'pageParameterName' => $paramName // Important !!
+            ]
         );
         $paginatedGroups[] = [
             'category' => $category,
             'hash' => $paramName, // ← on envoie le nom du paramètre
             'pagination' => $pagination
         ];
+
+        
+
+
+
     }
 
     return $this->render('afficheProduct.html.twig', [
-        'groupedProducts' => $paginatedGroups
+        'groupedProducts' => $paginatedGroups,
+        'selectedCurrency' => $selectedCurrency,
+        'conversionRate' => $conversionRate, // AJOUTE CETTE LIGNE
     ]);
+    
 }
 
 
