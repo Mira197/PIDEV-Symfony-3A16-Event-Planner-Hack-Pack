@@ -92,6 +92,16 @@ final class EventController extends AbstractController
         }
 
         $event = new Event();
+        // ✅ Pré-remplir la date si transmise via /events/new?date=YYYY-MM-DD (calendar)
+        $initialDate = $request->query->get('date');
+        if ($initialDate) {
+            try {
+                $event->setStartDate(new \DateTime($initialDate . ' 10:00')); // Heure par défaut 10h
+                $event->setEndDate(new \DateTime($initialDate . ' 12:00'));   // Heure par défaut 12h
+            } catch (\Exception $e) {
+                // Optionnel : ignorer ou loguer
+            }
+        }
         $form = $this->createForm(EventType::class, $event);
         $form->handleRequest($request);
 

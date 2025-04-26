@@ -183,7 +183,11 @@ if (info.event.url) {
 window.open(info.event.url, '_blank');
 info.jsEvent.preventDefault();
 }
-}
+},
+// 👇 Ajoute ici le handler de clic sur une date vide :
+	dateClick: function(info) {
+		window.location.href = '/events/new?date=' + info.dateStr;
+	}
 });
 
 calendar.render();

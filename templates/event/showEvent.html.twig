@@ -73,9 +73,9 @@
 						<a href="{{ path('app_events') }}" class="main-btn dark-btn-outline btn-hover px-4 py-2 me-2">Back to List</a>
 						<a href="{{ path('booking_list') }}" class="main-btn dark-btn-outline btn-hover px-4 py-2 me-2">Booking List</a>
 						{# Uncomment if needed:
-												                    <a href="{{ path('event_edit', {'id': event.idEvent}) }}" class="main-btn warning-btn-outline btn-hover px-4 py-2 me-2">Edit</a>
-												                    {{ include('event/_delete_form.html.twig') }}
-												                    #}
+																														                    <a href="{{ path('event_edit', {'id': event.idEvent}) }}" class="main-btn warning-btn-outline btn-hover px-4 py-2 me-2">Edit</a>
+																														                    {{ include('event/_delete_form.html.twig') }}
+																														                    #}
 					</div>
 				</div>
 			</div>
@@ -122,13 +122,20 @@
 									{{ location.price }}
 									DT</li>
 							</ul>
-							<div
-								class="event-card-actions">
+							<div class="event-card-actions d-flex justify-content-between align-items-center mt-2">
 
 								{#<a href="{{ path('booking_new', {'id': event.idEvent}) }}" class="btn btn-primary action-btn details">Book this venue</a>#}
-								<a href="{{ path('booking_new', { id: event.idEvent }) ~ '?location_id=' ~ location.idLocation }}" class="btn btn-primary action-btn details">
-									Book this venue
+								<!-- Book button -->
+									<a href="{{ path('booking_new', { id: event.idEvent }) ~ '?location_id=' ~ location.idLocation }}" class="btn btn-primary action-btn details"> Book this venue
 								</a>
+
+								<!-- Weather button and result -->
+								<div>
+									<button type="button" class="btn btn-sm btn-outline-info btn-weather" data-bs-toggle="modal" data-bs-target="#weatherModal" data-city="{{ location.city.value }}" data-start="{{ event.startDate|date('Y-m-d') }}" data-end="{{ event.endDate|date('Y-m-d') }}">
+										🌤
+									</button>
+									{#<div class="weather-result mt-1" style="font-size: 14px;"></div>#}
+								</div>
 							</div>
 						</div>
 					</div>
@@ -147,4 +154,77 @@
 			</a>
 		</div>
 
+		<!-- Weather Modal -->
+		<!-- Custom Weather Modal -->
+		<div id="weatherModal" class="custom-modal">
+			<div class="custom-modal-content">
+				<span class="custom-close">&times;</span>
+				<h4 class="mb-3">🌤 Weather Forecast</h4>
+				<div id="weatherModalBody">Loading...</div>
+			</div>
+		</div>
+
+
 	{% endblock %}
+
+	{% block javascripts %}
+    {{ parent() }}
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const modal = document.getElementById('weatherModal');
+            const modalBody = document.getElementById('weatherModalBody');
+            const closeBtn = modal.querySelector('.custom-close');
+
+            // Ouverture modale + fetch météo
+            document.querySelectorAll('.btn-weather').forEach(button => {
+                button.addEventListener('click', function () {
+                    const city = this.dataset.city;
+                    const start = this.dataset.start;
+                    const end = this.dataset.end;
+
+                    modalBody.innerHTML = "Loading...";
+                    modal.style.display = 'block';
+
+                    fetch(`/weather?city=${city}&start=${start}&end=${end}`)
+                        .then(res => res.json())
+                        .then(data => {
+                            if (data.error) {
+                                modalBody.innerHTML = `<p class="text-danger">Error: ${data.error}</p>`;
+                                return;
+                            }
+
+                            let html = '<div class="d-flex justify-content-center gap-3 flex-wrap">';
+                            data.forEach(day => {
+                                html += `
+                                    <div class="text-center">
+                                        <small>${day.date}</small><br>
+                                        <img src="${day.icon}" alt="icon"><br>
+                                        ${day.condition}<br>
+                                        ${day.temp}°C
+                                    </div>`;
+                            });
+                            html += '</div>';
+
+                            modalBody.innerHTML = html;
+                        })
+                        .catch(() => {
+                            modalBody.innerHTML = `<p class="text-danger">Error loading weather.</p>`;
+                        });
+                });
+            });
+
+            // Fermeture modale avec croix
+            closeBtn.onclick = () => {
+                modal.style.display = 'none';
+            };
+
+            // Fermeture modale si on clique à l’extérieur du contenu
+            window.onclick = (e) => {
+                if (e.target === modal) {
+                    modal.style.display = 'none';
+                }
+            };
+        });
+    </script>
+{% endblock %}
+

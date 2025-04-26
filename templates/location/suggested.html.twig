@@ -5,6 +5,7 @@
 {% block stylesheets %}
 	{{ parent() }}
 	<link rel="stylesheet" href="{{ asset('css/suggested_venues.css') }}">
+	<link rel="stylesheet" href="https://api.tomtom.com/maps-sdk-for-web/cdn/6.x/6.17.0/maps/maps.css" />
 	<style>
 		nav.fh5co-nav {
 			background-color: #cebec9 !important;
@@ -102,10 +103,16 @@
 					<button class="filter-button w-100">Filter</button>
 				</div>
 			</form>
-
-
+	
+			<!-- 🎯 Venue Cards -->
 			<div class="row" id="suggested-results">
 				{% include 'location/_suggested_venues_cards.html.twig' %}
+			</div>
+			<!-- 🗺️ Map Section -->
+			<div class="row mb-5">
+    			<div class="col-12">
+        			<div id="map" style="width: 100%; height: 500px; border-radius: 12px; box-shadow: 0 0 10px rgba(0,0,0,0.1); margin-bottom: 2rem;"></div>
+    			</div>
 			</div>
 
 		</div>
@@ -113,6 +120,70 @@
 {% endblock %}
 {% block javascripts %}
 	{{ parent() }}
+	{#PARTIE MAPS#}
+	<script src="https://api.tomtom.com/maps-sdk-for-web/cdn/6.x/6.17.0/maps/maps-web.min.js"></script>
+
+	<script>
+function initMap() {
+    tt.setProductInfo('3alaKifi', '1.0');
+    const map = tt.map({
+        key: '{{ tomtomApiKey }}', // <-- Mets ta clé TomTom ici
+        container: 'map',
+        center: [10.1815, 36.8065], // [longitude, latitude]
+        zoom: 8,
+		language: 'fr-FR' // langue de la carte
+    });
+
+    fetch("/locations/suggested/mapdata/{{ event.idEvent }}")
+        .then(response => response.json())
+        .then(locations => {
+            const existingCoords = new Map();
+
+locations.forEach(loc => {
+    if (loc.lat && loc.lng) {
+        let lat = loc.lat;
+        let lng = loc.lng;
+        const key = `${lat.toFixed(5)},${lng.toFixed(5)}`;
+
+        // Si les coords existent déjà, on les décale légèrement
+        if (existingCoords.has(key)) {
+            const count = existingCoords.get(key) + 1;
+            existingCoords.set(key, count);
+            const offset = 0.001 * count; // petit décalage
+            lat += offset;
+            lng += offset;
+        } else {
+            existingCoords.set(key, 0);
+        }
+
+        const marker = new tt.Marker()
+            .setLngLat([lng, lat])
+            .addTo(map);
+
+        const popup = new tt.Popup({ offset: 35 }).setHTML(`
+            <div style="text-align:center">
+                <h6>${loc.name}</h6>
+                <img src="${loc.image}" style="width:100px;height:auto;border-radius:8px;">
+                <br/>
+                <a href="/locations/${loc.id}">View details</a>
+            </div>
+        `);
+
+        marker.setPopup(popup);
+    }
+});
+
+        });
+}
+
+</script>
+<script>
+    window.onload = function () {
+        initMap();
+    };
+</script>
+
+
 	<script>
 		const toggleDropdown = () => {
 		const toggleBtn = document.getElementById('capacityDropdown');
