@@ -25,7 +25,10 @@
 			</div>
 
 			<div class="right-actions">
-				<button class="btn btn-outline-secondary" id="exportPromoCsv">⬇️ Export CSV</button>
+				<a href="{{ path('admin_promo_export_csv') }}" class="btn btn-outline-secondary">
+					⬇️ Export CSV
+				</a>
+
 
 				<a href="{{ path('aya_admin_code_promo_create') }}" class="btn btn-outline-primary">
 					➕ Add Promo Code
@@ -34,79 +37,79 @@
 
 				{# ✅ MODAL contenant le vrai formulaire AyaCodePromoType #}
 				{#	 <div class="modal fade" id="addPromoModal" tabindex="-1" aria-labelledby="addPromoModalLabel" aria-hidden="true">
-													<div class="modal-dialog">
-														<div class="modal-content">
-								
-															<div class="modal-header">
-																<h5 class="modal-title" id="addPromoModalLabel">➕ Add Promo Code</h5>
-																<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-															</div>
-								
-															<div class="modal-body">
-																{{ form_start(form, {
-										'attr': {'novalidate': 'novalidate'},
-										'action': path('aya_admin_code_promo_new')
-									}) }}
-								
-																<div class="mb-3">
-																	{{ form_label(form.codePromo) }}
-																	{{ form_widget(form.codePromo, {
-											'attr': {
-												'class': 'form-control' ~ (form.codePromo.vars.errors|length > 0 ? ' is-invalid' : '')
-											}
-										}) }}
-																	{% for error in form.codePromo.vars.errors %}
-																		<div class="invalid-feedback d-block">{{ error.message }}</div>
-																	{% endfor %}
+																	<div class="modal-dialog">
+																		<div class="modal-content">
+												
+																			<div class="modal-header">
+																				<h5 class="modal-title" id="addPromoModalLabel">➕ Add Promo Code</h5>
+																				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+																			</div>
+												
+																			<div class="modal-body">
+																				{{ form_start(form, {
+														'attr': {'novalidate': 'novalidate'},
+														'action': path('aya_admin_code_promo_new')
+													}) }}
+												
+																				<div class="mb-3">
+																					{{ form_label(form.codePromo) }}
+																					{{ form_widget(form.codePromo, {
+															'attr': {
+																'class': 'form-control' ~ (form.codePromo.vars.errors|length > 0 ? ' is-invalid' : '')
+															}
+														}) }}
+																					{% for error in form.codePromo.vars.errors %}
+																						<div class="invalid-feedback d-block">{{ error.message }}</div>
+																					{% endfor %}
+																				</div>
+												
+																				<div class="mb-3">
+																					{{ form_label(form.pourcentage) }}
+																					{{ form_widget(form.pourcentage, {
+															'attr': {
+																'class': 'form-control' ~ (form.pourcentage.vars.errors|length > 0 ? ' is-invalid' : '')
+															}
+														}) }}
+																					{% for error in form.pourcentage.vars.errors %}
+																						<div class="invalid-feedback d-block">{{ error.message }}</div>
+																					{% endfor %}
+																				</div>
+												
+																				<div class="mb-3">
+																					{{ form_label(form.dateExpiration) }}
+																					{{ form_widget(form.dateExpiration, {
+															'attr': {
+																'class': 'form-control' ~ (form.dateExpiration.vars.errors|length > 0 ? ' is-invalid' : '')
+															}
+														}) }}
+																					{% for error in form.dateExpiration.vars.errors %}
+																						<div class="invalid-feedback d-block">{{ error.message }}</div>
+																					{% endfor %}
+																				</div>
+												
+																				<div class="modal-footer">
+																					<button type="submit" class="btn btn-primary">Save</button>
+																					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+																				</div>
+												
+																				{{ form_end(form) }}
+												
+																				{% if not form.vars.valid %}
+																					<script>
+																						document.addEventListener('DOMContentLoaded', () => {
+												const promoModal = new bootstrap.Modal(document.getElementById('addPromoModal'));
+												promoModal.show();
+												});
+																					</script>
+																				{% endif %}
+												
+												
+																			</div>
+												
+																		</div>
+																	</div>
 																</div>
-								
-																<div class="mb-3">
-																	{{ form_label(form.pourcentage) }}
-																	{{ form_widget(form.pourcentage, {
-											'attr': {
-												'class': 'form-control' ~ (form.pourcentage.vars.errors|length > 0 ? ' is-invalid' : '')
-											}
-										}) }}
-																	{% for error in form.pourcentage.vars.errors %}
-																		<div class="invalid-feedback d-block">{{ error.message }}</div>
-																	{% endfor %}
-																</div>
-								
-																<div class="mb-3">
-																	{{ form_label(form.dateExpiration) }}
-																	{{ form_widget(form.dateExpiration, {
-											'attr': {
-												'class': 'form-control' ~ (form.dateExpiration.vars.errors|length > 0 ? ' is-invalid' : '')
-											}
-										}) }}
-																	{% for error in form.dateExpiration.vars.errors %}
-																		<div class="invalid-feedback d-block">{{ error.message }}</div>
-																	{% endfor %}
-																</div>
-								
-																<div class="modal-footer">
-																	<button type="submit" class="btn btn-primary">Save</button>
-																	<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-																</div>
-								
-																{{ form_end(form) }}
-								
-																{% if not form.vars.valid %}
-																	<script>
-																		document.addEventListener('DOMContentLoaded', () => {
-								const promoModal = new bootstrap.Modal(document.getElementById('addPromoModal'));
-								promoModal.show();
-								});
-																	</script>
-																{% endif %}
-								
-								
-															</div>
-								
-														</div>
-													</div>
-												</div>
-										 #}
+														 #}
 			</div>
 		</div>
 		<table class="admin-mui-table" id="promoCodeTable">
@@ -140,8 +143,8 @@
 						</td>
 						<td>
 							{# <button type="button" class="btn-delete edit-btn" data-id="{{ code.id }}" data-code="{{ code.codePromo }}" data-pourcentage="{{ code.pourcentage }}" data-date="{{ code.dateExpiration ? code.dateExpiration|date('Y-m-d') : '' }}" onclick="openEditModal(this)">
-																																											✏️
-																																										</button>  #}
+																																																		✏️
+																																																	</button>  #}
 							<a href="{{ path('aya_admin_code_promo_edit_form', { id: code.id }) }}" class="btn-delete edit-btn">
 								✏️
 							</a>
@@ -164,8 +167,8 @@
 			</tbody>
 		</table>
 		<div class="pagination d-flex justify-content-center mt-4">
-    {{ knp_pagination_render(codes, '@KnpPaginator/Pagination/bootstrap_v5_pagination.html.twig') }}
-</div>
+			{{ knp_pagination_render(codes, '@KnpPaginator/Pagination/bootstrap_v5_pagination.html.twig') }}
+		</div>
 	</div>
 {% endblock %}
 
@@ -176,31 +179,30 @@
 	<script src="{{ asset('assetsAya/js/aya_list_promo.js') }}"></script>
 
 	<script>
-document.addEventListener('DOMContentLoaded', () => {
-    const searchInput = document.getElementById('promoSearch');
+		document.addEventListener('DOMContentLoaded', () => {
+const searchInput = document.getElementById('promoSearch');
 
-    // 🟢 Injecte l'URL AJAX correcte une seule fois au chargement
-    const searchUrl = '{{ path("aya_admin_code_promo_search") }}';
-    let searchTimeout;
+// 🟢 Injecte l'URL AJAX correcte une seule fois au chargement
+const searchUrl = '{{ path("aya_admin_code_promo_search") }}';
+let searchTimeout;
 
-    searchInput.addEventListener("input", function () {
-        const query = this.value.trim();
-        clearTimeout(searchTimeout);
+searchInput.addEventListener("input", function () {
+const query = this.value.trim();
+clearTimeout(searchTimeout);
 
-        searchTimeout = setTimeout(() => {
-            fetch(`${searchUrl}?q=${encodeURIComponent(query)}`, {
-                headers: {
-                    'Accept': 'application/json'
-                }
-            })
-            .then(res => res.json())
-            .then(updatePromoTable)
-            .catch(err => {
-                console.error('AJAX promo search error:', err);
-                Swal.fire('Search error', 'Unable to fetch promo codes.', 'error');
-            });
-        }, 300);
-    });
+searchTimeout = setTimeout(() => {
+fetch(`${searchUrl}?q=${
+encodeURIComponent(query)
+}`, {
+headers: {
+'Accept': 'application/json'
+}
+}).then(res => res.json()).then(updatePromoTable).catch(err => {
+console.error('AJAX promo search error:', err);
+Swal.fire('Search error', 'Unable to fetch promo codes.', 'error');
+});
+}, 300);
+});
 
 function updatePromoTable(data) {
 const tbody = document.querySelector('#promoCodeTable tbody');
@@ -294,29 +296,6 @@ row.style.display = (filter === '' || status === filter) ? '' : 'none';
 });
 
 });
-});
-
-document.getElementById('exportPromoCsv').addEventListener('click', () => {
-let csv = 'Code,Discount,Expiration Date,Status\n';
-document.querySelectorAll('#promoCodeTable tbody tr').forEach(row => {
-if (row.style.display !== 'none') {
-const cells = row.querySelectorAll('td');
-csv += `${
-cells[1].innerText
-},${
-cells[2].innerText
-},${
-cells[3].innerText
-},${
-cells[4].innerText
-}\n`;
-}
-});
-const blob = new Blob([csv], {type: 'text/csv'});
-const a = document.createElement('a');
-a.href = URL.createObjectURL(blob);
-a.download = 'promo_codes.csv';
-a.click();
 });
 });
 
