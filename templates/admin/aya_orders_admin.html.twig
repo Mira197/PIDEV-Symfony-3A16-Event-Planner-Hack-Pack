@@ -4,10 +4,10 @@
 	<link rel="stylesheet" href="{{ asset('assetsAya/css/adminOrder.css') }}">
 	{{ parent() }}
 	<style>
-        .hidden-column {
-            display: none;
-        }
-    </style>
+		.hidden-column {
+			display: none;
+		}
+	</style>
 {% endblock %}
 
 {% block section %}
@@ -29,7 +29,11 @@
 			</div>
 
 			<div class="right-actions">
-				<button class="btn btn-outline-secondary" id="exportAdminCsvBtn">⬇️ Export CSV</button>
+				<a href="{{ path('admin_orders_export_csv') }}" class="btn btn-outline-secondary">
+					⬇️ Export CSV
+				</a>
+
+
 				<button class="btn btn-outline-danger" id="deleteAllOrdersBtn">🗑️ Delete All</button>
 			</div>
 		</div>
@@ -80,15 +84,15 @@
 			</tbody>
 		</table>
 		<div class="pagination d-flex justify-content-center mt-4">
-	{{ knp_pagination_render(orders, '@KnpPaginator/Pagination/bootstrap_v5_pagination.html.twig') }}
-</div>
+			{{ knp_pagination_render(orders, '@KnpPaginator/Pagination/bootstrap_v5_pagination.html.twig') }}
+		</div>
 
 	</div>
 {% endblock %}
 
 {% block javascripts %}
 	{{ parent() }}
-    
+
 	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 	<script src="{{ asset('assetsAya/js/ayaAdminOrders.js') }}"></script>
 {% endblock %}

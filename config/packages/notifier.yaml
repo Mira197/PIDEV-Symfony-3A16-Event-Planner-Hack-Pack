@@ -1,19 +1,16 @@
 framework:
     notifier:
-        # 👇 Ce bloc est vide ici, mais valide si tu veux des services comme Slack plus tard
-        chatter_transports: ~
-
-        # ✅ Twilio SMS via DSN
         texter_transports:
             twilio: '%env(TWILIO_DSN)%'
 
-        # ✅ Politique des canaux de notification
+        chatter_transports:
+            slack: 'null://null'
+
         channel_policy:
             urgent: ['sms']
             high: ['sms']
             medium: ['email']
             low: ['email']
 
-        # ✅ Administrateurs notifiés (pour certaines alertes)
         admin_recipients:
             - { email: admin@example.com }

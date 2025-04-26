@@ -127,22 +127,6 @@ document.addEventListener('DOMContentLoaded', () => {
       });
   });
 
-  // 📥 Export CSV
-  document.getElementById("exportAdminCsvBtn").addEventListener("click", () => {
-      const rows = document.querySelectorAll(".admin-mui-table tr");
-      const csv = Array.from(rows).map(row =>
-          Array.from(row.querySelectorAll("th, td"))
-              .map(col => `"${col.innerText}"`).join(",")
-      ).join("\n");
-
-      const blob = new Blob([csv], { type: "text/csv" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "admin_orders.csv";
-      a.click();
-      URL.revokeObjectURL(url);
-  });
 
   // ✏️ Inline edit for date
   document.querySelectorAll('.editable').forEach(cell => {

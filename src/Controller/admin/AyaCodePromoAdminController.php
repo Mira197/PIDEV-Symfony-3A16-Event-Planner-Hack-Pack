@@ -16,11 +16,22 @@ use Twilio\Rest\Client;
 use Symfony\Component\Notifier\Message\SmsMessage;
 use Symfony\Component\Notifier\TexterInterface;
 use App\Service\SmsSender;
-use Knp\Component\Pager\PaginatorInterface; 
+use Knp\Component\Pager\PaginatorInterface;
+use Symfony\Component\Notifier\Bridge\Twilio\TwilioOptions;
+use Psr\Log\LoggerInterface;
+
 #[Route('/admin/promo-codes', name: 'aya_admin_code_promo_')]
+
+
 class AyaCodePromoAdminController extends AbstractController
 {
-    
+    private LoggerInterface $logger;
+
+    public function __construct(LoggerInterface $logger)
+    {
+        $this->logger = $logger;
+    }
+
     #[Route('/', name: 'index', methods: ['GET'])]
     public function index(Request $request, CodePromoRepository $repo, PaginatorInterface $paginator): Response
     {
@@ -106,27 +117,79 @@ class AyaCodePromoAdminController extends AbstractController
     //     ]);
     // }
 
-    #[Route('/add', name: 'create', methods: ['GET', 'POST'])]
-    public function create(Request $request, EntityManagerInterface $em): Response
-    {
-        $promo = new CodePromo();
-        $form = $this->createForm(AyaCodePromoType::class, $promo);
+    
+    #[Route('/add', name: 'create', methods: ['POST'])]
+public function create(Request $request, EntityManagerInterface $em, TexterInterface $texter): JsonResponse
+{
+    $promo = new CodePromo();
+    $form = $this->createForm(AyaCodePromoType::class, $promo);
+
+    if (str_contains($request->headers->get('Content-Type'), 'application/json')) {
+        $data = json_decode($request->getContent(), true);
+        $form->submit($data);
+    } else {
         $form->handleRequest($request);
+    }
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            $promo->setDateCreation(new \DateTime());
-            $em->persist($promo);
-            $em->flush();
+    if ($form->isSubmitted() && $form->isValid()) {
+        $promo->setDateCreation(new \DateTime());
+        $em->persist($promo);
+        $em->flush();
 
-            $this->addFlash('success', '✅ Promo code added successfully.');
-            return $this->redirectToRoute('aya_admin_code_promo_index');
-        }
+        // ✅ Message texte
+        $messageText = sprintf(
+            "🎁 Nouveau code promo 3alaKifi : %s\n💸 %d%% de réduction\n📅 Valable jusqu'au %s",
+            $promo->getCodePromo(),
+            $promo->getPourcentage(),
+            $promo->getDateExpiration()?->format('d/m/Y') ?? 'non définie'
+        );
 
-        return $this->render('admin/aya_code_promo/aya_add_promo.html.twig', [
-            'form' => $form->createView(),
+        // ✅ Création du message
+        $sms = new SmsMessage($_ENV['TWILIO_TO_NUMBER'], $messageText);
+
+        // ✅ Ajout des options Twilio (MessagingServiceSid requis)
+        $sms->options(new TwilioOptions([
+            'MessagingServiceSid' => $_ENV['TWILIO_SERVICE_SID'] // ⚠️ Ne pas utiliser $sms->messagingServiceSid() — n'existe pas
+        ]));
+
+        // ✅ Envoi
+        $texter->send($sms);
+
+        return new JsonResponse([
+            'success' => true,
+            'message' => 'Code promo ajouté et SMS envoyé.'
         ]);
     }
-    
+
+    // ❌ Gestion des erreurs
+    $errors = [];
+    foreach ($form->getErrors(true) as $error) {
+        $errors[$error->getOrigin()->getName()] = $error->getMessage();
+    }
+
+    return new JsonResponse([
+        'success' => false,
+        'errors' => $errors
+    ], 400);
+}
+
+
+    #[Route('/test-sms', name: 'test_sms')]
+public function testSMS(TexterInterface $texter): JsonResponse
+{
+    $message = new SmsMessage('+21695513380', 'Test SMS via Symfony Notifier');
+    $message->options(new TwilioOptions([
+        'MessagingServiceSid' => $_ENV['TWILIO_SERVICE_SID']
+    ]));
+
+    $texter->send($message);
+
+    return new JsonResponse(['status' => 'SMS sent']);
+}
+
+
+
+
 
 
 
