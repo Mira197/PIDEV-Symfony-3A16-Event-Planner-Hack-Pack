@@ -40,57 +40,59 @@ class AyaReductionController extends AbstractController
         ]);
     }
 
-    #[Route('/aya/order/apply-wallet', name: 'apply_wallet', methods: ['POST'])]
-    public function applyWallet(Request $request, WalletTransactionRepository $walletRepo, SessionInterface $session, UserRepository $userRepo): JsonResponse
-    {
-        $userId = $session->get('user_id');
-        $user = $userRepo->find($userId);
-        if (!$user) return new JsonResponse(['success' => false, 'message' => 'Not logged in'], 401);
+    #[Route('/aya/order/apply-wallet', name: 'aya_apply_wallet', methods: ['POST'])]
+public function applyWallet(Request $request, WalletTransactionRepository $walletRepo, SessionInterface $session, UserRepository $userRepo): JsonResponse
+{
+    $userId = $session->get('user_id');
+    $user = $userRepo->find($userId);
+    if (!$user) return new JsonResponse(['success' => false, 'message' => 'Not logged in'], 401);
 
-        $amount = (float) $request->request->get('amount');
-        $available = $walletRepo->getAvailableCredit($user);
+    $amount = (float) $request->request->get('amount');
+    $available = $walletRepo->getAvailableCredit($user);
 
-        if ($amount > $available) {
-            return new JsonResponse(['success' => false, 'message' => "Only $available TND available"]);
-        }
-
-        $session->set('wallet_used', $amount);
-        return new JsonResponse(['success' => true, 'applied' => $amount]);
+    if ($amount > $available) {
+        return new JsonResponse(['success' => false, 'message' => "Insufficient wallet balance. You only have $available TND"]);
     }
-    #[Route('/aya/order/apply-giftcard', name: 'apply_giftcard', methods: ['POST'])]
-    public function applyGiftCard(Request $request, GiftCardRepository $giftCardRepo, SessionInterface $session, EntityManagerInterface $entityManager): JsonResponse
-    {
-        // Récupérer les données du formulaire
-        $code = $request->request->get('code');
-        $pin = $request->request->get('pin');
 
-        // Vérifier si les données de la carte sont présentes
-        if (!$code || !$pin) {
-            return new JsonResponse(['success' => false, 'message' => 'Please provide both card code and PIN.']);
-        }
+    $session->set('wallet_used', $amount);
+    return new JsonResponse(['success' => true, 'applied' => $amount]);
+}
 
-        // Chercher la carte cadeau dans la base de données
-        $card = $giftCardRepo->findOneBy(['code' => $code, 'pin' => $pin, 'isUsed' => false]);
 
-        // Si la carte n'est pas trouvée ou est déjà utilisée
-        if (!$card) {
-            return new JsonResponse(['success' => false, 'message' => 'Invalid card or already used']);
-        }
+    // #[Route('/aya/order/apply-giftcard', name: 'apply_giftcard', methods: ['POST'])]
+    // public function applyGiftCard(Request $request, GiftCardRepository $giftCardRepo, SessionInterface $session, EntityManagerInterface $entityManager): JsonResponse
+    // {
+    //     // Récupérer les données du formulaire
+    //     $code = $request->request->get('code');
+    //     $pin = $request->request->get('pin');
 
-        // Mark the gift card as used and set the usedAt timestamp
-        $card->setIsUsed(true);
-        $card->setUsedAt(new \DateTime()); // Set the current timestamp when used
+    //     // Vérifier si les données de la carte sont présentes
+    //     if (!$code || !$pin) {
+    //         return new JsonResponse(['success' => false, 'message' => 'Please provide both card code and PIN.']);
+    //     }
 
-        // Save the changes to the database using the injected EntityManagerInterface
-        $entityManager->flush(); // Commit changes to the database
+    //     // Chercher la carte cadeau dans la base de données
+    //     $card = $giftCardRepo->findOneBy(['code' => $code, 'pin' => $pin, 'isUsed' => false]);
 
-        // Enregistrer le montant de la carte et son ID dans la session
-        $session->set('gift_card_amount', $card->getBalance());
-        $session->set('gift_card_id', $card->getId());
+    //     // Si la carte n'est pas trouvée ou est déjà utilisée
+    //     if (!$card) {
+    //         return new JsonResponse(['success' => false, 'message' => 'Invalid card or already used']);
+    //     }
 
-        // Retourner la réponse avec le montant de la carte
-        return new JsonResponse(['success' => true, 'amount' => $card->getBalance()]);
-    }
+    //     // Mark the gift card as used and set the usedAt timestamp
+    //     $card->setIsUsed(true);
+    //     $card->setUsedAt(new \DateTime()); // Set the current timestamp when used
+
+    //     // Save the changes to the database using the injected EntityManagerInterface
+    //     $entityManager->flush(); // Commit changes to the database
+
+    //     // Enregistrer le montant de la carte et son ID dans la session
+    //     $session->set('gift_card_amount', $card->getBalance());
+    //     $session->set('gift_card_id', $card->getId());
+
+    //     // Retourner la réponse avec le montant de la carte
+    //     return new JsonResponse(['success' => true, 'amount' => $card->getBalance()]);
+    // }
 
 
     // Apply points
@@ -99,17 +101,30 @@ class AyaReductionController extends AbstractController
     {
         $userId = $session->get('user_id');
         $user = $userRepo->find($userId);
-        if (!$user) return new JsonResponse(['success' => false, 'message' => 'Not logged in'], 401);
+        if (!$user) return new JsonResponse(['success' => false, 'message' => 'Please login first'], 401);
 
-        $points = (int) $request->request->get('points');
-        $earned = $pointRepo->getUserPoints($user);
+        $requestedPoints = (int) $request->request->get('points');
+        $availablePoints = $pointRepo->getUserPoints($user);
 
-        if ($points > $earned) {
-            return new JsonResponse(['success' => false, 'message' => "You only have $earned points"]);
+        if ($requestedPoints <= 0) {
+            return new JsonResponse(['success' => false, 'message' => 'Invalid points amount']);
         }
 
-        $amount = $points * 0.5; // 1 point = 0.5 TND
-        $session->set('points_used', $amount);
-        return new JsonResponse(['success' => true, 'applied' => $amount]);
+        if ($availablePoints <= 0) {
+            return new JsonResponse(['success' => false, 'message' => 'You have no points']);
+        }
+
+        if ($requestedPoints > $availablePoints) {
+            return new JsonResponse(['success' => false, 'message' => "Insufficient points: You only have {$availablePoints} points"]);
+        }
+
+        // Convertir : 1 point = 0.1 dinar (ou la valeur que tu choisis)
+        $walletEquivalent = $requestedPoints * 0.1;
+        $session->set('points_used', $walletEquivalent);
+
+        return new JsonResponse([
+            'success' => true,
+            'wallet_from_points' => $walletEquivalent
+        ]);
     }
 }

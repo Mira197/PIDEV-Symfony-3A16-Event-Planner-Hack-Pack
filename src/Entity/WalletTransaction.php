@@ -23,8 +23,9 @@ class WalletTransaction
     #[ORM\Column(length: 10)]
     private string $type; // 'deposit' | 'payment'
 
-    #[ORM\Column(type: 'datetime')]
-    private \DateTimeInterface $createdAt;
+    #[ORM\Column(name: "created_at", type: 'datetime')]
+    private ?\DateTimeInterface $createdAt = null;
+
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $description = null;

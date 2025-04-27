@@ -93,7 +93,7 @@
 
 					</div>
 
-
+{# 
 					<div class="form-group mt-4">
 						<label>Gift Card</label>
 						<div class="d-flex giftcard-row align-items-center">
@@ -101,7 +101,7 @@
 							<input type="text" class="form-control pin-input me-2" placeholder="PIN">
 							<button class="btn btn-secondary apply-btn" id="apply-giftcard">Apply</button>
 						</div>
-					</div>
+					</div> #}
 
 
 					<div class="form-group mt-4">
@@ -161,166 +161,153 @@
 	</div>
 {% endblock %}
 {% block javascripts %}
-{{ parent() }}
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-    const totalElement = document.getElementById('cart-total'); // L'élément où tu veux afficher le total
+    {{ parent() }}
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script> {# SweetAlert2 CDN #}
 
-    function updateTotal() {
-        const couponCode = document.querySelector('[name="coupon_code"]').value;
-        const giftCardCode = document.querySelector('[name="gift_card_code"]').value;
-        const giftCardPin = document.querySelector('[name="gift_card_pin"]').value;
-        const walletCredit = document.querySelector('[name="wallet_credit"]').value;
-        const points = document.querySelector('[name="points"]').value;
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+		const initialTotal = parseFloat('{{ total|default(0)|replace({",": "."}) }}') || 0;
+sessionStorage.setItem('initial_total', initialTotal);
+console.log('Initial Total Loaded:', initialTotal);
+sessionStorage.setItem('initial_total', initialTotal);
 
-        // Envoie les données au serveur pour obtenir le total recalculé
-        fetch('/aya/order/apply-coupon', {
-            method: 'POST',
-            body: JSON.stringify({ coupon_code: couponCode }),
-            headers: {
-                'Content-Type': 'application/json'
+        // Fonction générale pour afficher SweetAlert TOAST ou Popup
+function showAlert(icon, title, text, useToast = false) {
+    if (useToast) {
+        Swal.fire({
+            toast: true,
+            position: 'top-end',
+            icon: icon,
+            title: title,
+            showConfirmButton: false,
+            timer: 2500,
+            timerProgressBar: true,
+            background: '#fff',
+            color: '#333',
+            didOpen: (toast) => {
+                toast.addEventListener('mouseenter', Swal.stopTimer)
+                toast.addEventListener('mouseleave', Swal.resumeTimer)
             }
-        })
-        .then(response => response.json())
-        .then(data => {
-            let total = 0;
-            total -= data.discount; // Exemple de réduction de coupon
-
-            // Similaire pour les autres champs comme la carte-cadeau, le crédit, etc.
-            totalElement.innerHTML = `${total} TND`; // Met à jour l'affichage
+        });
+    } else {
+        Swal.fire({
+            icon: icon,
+            title: title,
+            text: text,
+            confirmButtonColor: '#6b336e',
+            backdrop: `rgba(107, 51, 110, 0.2)`,
         });
     }
+}
 
-    // Écoute les événements sur les boutons spécifiques avec leurs IDs
-    document.getElementById('apply-coupon').addEventListener('click', updateTotal);
-    document.getElementById('apply-giftcard').addEventListener('click', updateTotal);
-    document.getElementById('apply-wallet').addEventListener('click', updateTotal);
-    document.getElementById('apply-points').addEventListener('click', updateTotal);
-});
+        // 🔥 Fonction pour mettre à jour le total
+        function updateTotal() {
+    let initialTotal = parseFloat(sessionStorage.getItem('initial_total') || 0);
 
-// Assurez-vous que tout est bien chargé avant de manipuler les éléments
-$(document).ready(function () {
-    // Fonction pour recalculer le total en temps réel
-    function updateTotal() {
-        let total = parseFloat($('#cart-total').text().replace(' TND', '')); // Récupère le total actuel
-
-        // Récupère les valeurs stockées dans sessionStorage pour les réductions
-        const couponDiscount = parseFloat(sessionStorage.getItem('coupon_discount') || 0); // Réduction coupon
-        const walletUsed = parseFloat(sessionStorage.getItem('wallet_used') || 0); // Crédit utilisé du portefeuille
-        const giftCardAmount = parseFloat(sessionStorage.getItem('gift_card_amount') || 0); // Montant de la carte cadeau
-        const pointsUsed = parseFloat(sessionStorage.getItem('points_used') || 0); // Montant des points utilisés
-
-        // Calcul du nouveau total
-        let newTotal = total - couponDiscount - walletUsed - giftCardAmount - pointsUsed;
-
-        // Mettre à jour l'affichage des totaux
-        $('#cart-total').text(newTotal.toFixed(2) + ' TND');
-        $('#final-total').text(newTotal.toFixed(2) + ' TND');
-    }
-
-    // Appliquer le coupon
-    $('#apply-coupon').click(function (e) {
-        e.preventDefault();
-        var btn = $(this); // The clicked button
-        btn.prop('disabled', true); // Disable the button to prevent multiple submissions
-        let couponCode = $(this).closest('.form-group').find('input').val(); // Get coupon code
-
-        if (couponCode) {
-            $.post('/aya/order/apply-coupon', { coupon_code: couponCode }, function (response) {
-                if (response.success) {
-                    sessionStorage.setItem('coupon_discount', response.discount); // Store the discount value in sessionStorage
-                    updateTotal(); // Update the total value dynamically
-                } else {
-                    alert('Invalid coupon code');
-                }
-                btn.prop('disabled', false); // Enable the button again after the request
-            });
-        }
-    });
-
-    // Handle apply wallet credit logic
-    $('#apply-wallet').click(function (e) {
-        e.preventDefault();
-        var btn = $(this);
-        btn.prop('disabled', true);
-        let amount = $(this).closest('.form-group').find('.wallet-input').val(); // Get wallet credit amount
-
-        if (amount) {
-            $.post('/aya/order/apply-wallet', { amount: amount }, function (response) {
-                if (response.success) {
-                    sessionStorage.setItem('wallet_used', response.applied); // Store the wallet used in sessionStorage
-                    updateTotal();
-                } else {
-                    alert('Not enough wallet balance');
-                }
-                btn.prop('disabled', false);
-            });
-        }
-    });
-
-    // Handle apply gift card logic
-    $('#apply-giftcard').click(function (e) {
-        e.preventDefault();
-        var btn = $(this);
-        btn.prop('disabled', true);
-        let cardCode = $(this).closest('.form-group').find('.card-input').val(); // Get card code
-        let cardPin = $(this).closest('.form-group').find('.pin-input').val(); // Get card pin
-
-        if (cardCode && cardPin) {
-            $.post('/aya/order/apply-giftcard', { code: cardCode, pin: cardPin }, function (response) {
-                if (response.success) {
-                    sessionStorage.setItem('gift_card_amount', response.amount); // Store the gift card amount in sessionStorage
-                    updateTotal();
-                } else {
-                    alert(response.message || 'Failed to apply gift card');
-                }
-                btn.prop('disabled', false);
-            });
-        } else {
-            alert('Please provide both card code and PIN.');
-            btn.prop('disabled', false);
-        }
-    });
-
-
-    // Handle apply points logic
-    $('#apply-points').click(function (e) {
-        e.preventDefault();
-        var btn = $(this);
-        btn.prop('disabled', true);
-        let points = $(this).closest('.form-group').find('.alakifi-input').val(); // Get points value
-
-        if (points) {
-            $.post('/aya/order/apply-points', { points: points }, function (response) {
-                if (response.success) {
-                    sessionStorage.setItem('points_used', response.applied); // Store the points used in sessionStorage
-                    updateTotal();
-                } else {
-                    alert('Not enough points');
-                }
-                btn.prop('disabled', false);
-            });
-        }
-    });
-});
-// Function to update total dynamically
-function updateTotal() {
-    let total = parseFloat($('#cart-total').text().replace(' TND', ''));
-
-    // Retrieve values stored in sessionStorage
     const couponDiscount = parseFloat(sessionStorage.getItem('coupon_discount') || 0);
     const walletUsed = parseFloat(sessionStorage.getItem('wallet_used') || 0);
     const giftCardAmount = parseFloat(sessionStorage.getItem('gift_card_amount') || 0);
     const pointsUsed = parseFloat(sessionStorage.getItem('points_used') || 0);
 
-    // Calculate the new total
-    let newTotal = total - couponDiscount - walletUsed - giftCardAmount - pointsUsed;
+    let newTotal = initialTotal - couponDiscount - walletUsed - giftCardAmount - pointsUsed;
 
-    // Update the total values in the UI
+    if (newTotal < 0) newTotal = 0; // jamais négatif !
+
+    // Mise à jour visuelle
     $('#cart-total').text(newTotal.toFixed(2) + ' TND');
     $('#final-total').text(newTotal.toFixed(2) + ' TND');
 }
 
-</script>
+
+        // 🔥 Apply Coupon
+        document.getElementById('apply-coupon').addEventListener('click', function () {
+            const coupon = document.querySelector('.coupon-input').value;
+            if (coupon.trim() === '') return showAlert('error', 'Error', 'Please enter a coupon code.');
+
+            fetch('/aya/order/apply-coupon', {
+                method: 'POST',
+                body: new URLSearchParams({ coupon_code: coupon }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    sessionStorage.setItem('coupon_discount', data.discount);
+                    updateTotal();
+                    showAlert('success', 'Coupon Applied!', 'Your discount has been applied.');
+                } else {
+                    showAlert('error', 'Invalid Coupon', data.message);
+                }
+            });
+        });
+
+        // 🔥 Apply Wallet
+        document.getElementById('apply-wallet').addEventListener('click', function () {
+            const amount = document.querySelector('.wallet-input').value;
+            if (amount.trim() === '') return showAlert('error', 'Error', 'Please enter wallet amount.');
+
+            fetch('/aya/order/apply-wallet', {
+                method: 'POST',
+                body: new URLSearchParams({ amount: amount }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    sessionStorage.setItem('wallet_used', data.applied);
+                    updateTotal();
+                    showAlert('success', 'Wallet Credit Applied!', 'You used ' + data.applied + ' TND.');
+                } else {
+                    showAlert('error', 'Wallet Error', data.message);
+                }
+            });
+        });
+
+        // 🔥 Apply Points
+        document.getElementById('apply-points').addEventListener('click', function () {
+            const points = document.querySelector('.alakifi-input').value;
+            if (points.trim() === '') return showAlert('error', 'Error', 'Please enter points.');
+
+            fetch('/aya/order/apply-points', {
+                method: 'POST',
+                body: new URLSearchParams({ points: points }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    sessionStorage.setItem('points_used', data.applied);
+                    updateTotal();
+                    showAlert('success', 'Points Applied!', 'You used ' + points + ' points.');
+                } else {
+                    showAlert('error', 'Points Error', data.message);
+                }
+            });
+        });
+
+        // 🔥 Apply GiftCard
+        {% if false %}
+        // Désactivé pour l’instant car le champ giftcard n’est pas encore visible dans ton code
+        document.getElementById('apply-giftcard').addEventListener('click', function () {
+            const code = document.querySelector('.card-input').value;
+            const pin = document.querySelector('.pin-input').value;
+            if (code.trim() === '' || pin.trim() === '') return showAlert('error', 'Error', 'Please fill both Card Code and PIN.');
+
+            fetch('/aya/order/apply-giftcard', {
+                method: 'POST',
+                body: new URLSearchParams({ code: code, pin: pin }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    sessionStorage.setItem('gift_card_amount', data.amount);
+                    updateTotal();
+                    showAlert('success', 'Gift Card Applied!', 'You used a Gift Card of ' + data.amount + ' TND.');
+                } else {
+                    showAlert('error', 'Gift Card Error', data.message);
+                }
+            });
+        });
+        {% endif %}
+
+    });
+    </script>
 {% endblock %}
 

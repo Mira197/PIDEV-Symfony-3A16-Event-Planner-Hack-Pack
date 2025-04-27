@@ -47,6 +47,7 @@
         "symfony/twig-bridge": "6.4.*",
         "symfony/twig-bundle": "6.4.*",
         "symfony/twilio-notifier": "6.4.*",
+        "symfony/ux-chartjs": "*",
         "symfony/ux-turbo": "^2.23",
         "symfony/validator": "6.4.*",
         "symfony/web-link": "6.4.*",

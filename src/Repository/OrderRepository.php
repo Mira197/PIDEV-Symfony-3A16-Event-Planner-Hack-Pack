@@ -40,4 +40,26 @@ class OrderRepository extends ServiceEntityRepository
 //            ->getOneOrNullResult()
 //        ;
 //    }
+
+public function countOrdersPerMonth(): array
+{
+    $conn = $this->getEntityManager()->getConnection();
+
+    $sql = "
+        SELECT DATE_FORMAT(ordered_at, '%b') AS month, COUNT(*) AS order_count
+        FROM `order`
+        GROUP BY month
+        ORDER BY FIELD(month, 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec')
+    ";
+
+    $stmt = $conn->executeQuery($sql);
+
+    $results = [];
+    foreach ($stmt->fetchAllAssociative() as $row) {
+        $results[$row['month']] = (int) $row['order_count'];
+    }
+
+    return $results;
+}
+
 }

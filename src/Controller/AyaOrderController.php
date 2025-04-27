@@ -39,7 +39,7 @@ class AyaOrderController extends AbstractController
         SessionInterface $session,
         UserRepository $userRepository
     ): Response {
-        // Récupérer l'utilisateur connecté
+        // ✅ 1. Récupérer l'utilisateur connecté
         $userId = $session->get('user_id');
         $user = $userRepository->find($userId);
 
@@ -47,110 +47,229 @@ class AyaOrderController extends AbstractController
             return $this->redirectToRoute('app_login');
         }
 
-        // Récupérer le panier de l'utilisateur
+        // ✅ 2. Récupérer le panier
         $cart = $cartRepository->findOneBy(['user' => $user]);
-
         if (!$cart) {
             $this->addFlash('warning', 'No cart found.');
             return $this->redirectToRoute('aya_cart');
         }
 
-        // Récupérer les produits du panier
+        // ✅ 3. Récupérer les produits du panier
         $cartProducts = $cartProductRepository->findBy(['cart' => $cart]);
 
-        // Calcul du total du panier
+        // ✅ 4. Calcul du total
         $total = 0;
         foreach ($cartProducts as $item) {
             $total += $item->getTotalPrice();
         }
 
-        // Initialiser l'entité de commande
+        $total = number_format($total, 2, '.', '');
+
+        // ✅ 5. Initialiser la commande
         $order = new Order();
         $order->setUser($user);
         $order->setOrderedAt(new \DateTime());
 
-        // Initialiser le prix final
+        // ✅ 6. Appliquer les réductions
         $finalPrice = $total;
 
-        // Appliquer le coupon si nécessaire
+        // Coupon
         $couponCode = $request->get('coupon_code');
         if ($couponCode) {
             if ($couponCode == 'PROMO10') {
-                $couponDiscount = 0.10 * $total;  // Réduction de 10%
-                $finalPrice -= $couponDiscount;  // Appliquer la réduction
+                $couponDiscount = 0.10 * $total;
+                $finalPrice -= $couponDiscount;
             }
         }
 
-        // Appliquer la carte cadeau si présente
+        // Gift Card
         $giftCardCode = $request->get('gift_card_code');
         $giftCardPin = $request->get('gift_card_pin');
         if ($giftCardCode && $giftCardPin) {
             $giftCard = $giftCardRepository->findOneBy(['code' => $giftCardCode, 'pin' => $giftCardPin]);
             if ($giftCard && !$giftCard->isUsed()) {
-                $finalPrice -= $giftCard->getBalance(); // Appliquer le solde de la carte cadeau
-                $giftCard->setIsUsed(true); // Marquer la carte cadeau comme utilisée
+                $finalPrice -= $giftCard->getBalance();
+                $giftCard->setIsUsed(true);
                 $em->flush();
             }
         }
 
-        // Appliquer le crédit du portefeuille si présent
+        // Wallet Credit
         $walletAmount = $request->get('wallet_credit');
         if ($walletAmount) {
-            $finalPrice -= $walletAmount;  // Appliquer le crédit du portefeuille
+            $finalPrice -= $walletAmount;
         }
 
-        // Appliquer les points de fidélité 3alakifi si présents
-        $points = $request->get('points');
-        if ($points) {
+        // Points de fidélité utilisés
+        // Points de fidélité utilisés
+        $pointsUsed = $request->get('points');
+        $pointsMinimum = 100; // 📌 Seuil minimum de points
+
+        if ($pointsUsed) {
             $fidelityPoints = $fidelityPointRepository->findOneBy(['user' => $user]);
-            if ($fidelityPoints && $fidelityPoints->getPoints() >= $points) {
-                $fidelityPoints->setPoints($fidelityPoints->getPoints() - $points);
-                $finalPrice -= $points; // Déduire la valeur des points du total
-                $em->flush();
+            if ($fidelityPoints && $fidelityPoints->getPoints() >= $pointsMinimum) {
+                if ($fidelityPoints->getPoints() >= $pointsUsed) {
+                    $discountAmount = $pointsUsed * 0.1;
+                    $finalPrice -= $discountAmount;
+                    $fidelityPoints->setPoints($fidelityPoints->getPoints() - $pointsUsed);
+                    $em->persist($fidelityPoints);
+                    $em->flush();
+                }
             }
         }
 
-        // Enregistrer le montant final dans la commande
+
+
+        // ✅ 7. Enregistrer le montant final
         $order->setTotalPrice($finalPrice);
 
-        // Gérer la soumission du formulaire de commande
+        // ✅ 8. Formulaire de commande
         $form = $this->createForm(AyaOrderType::class, $order);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $order->setStatus('PENDING'); // Statut initial de la commande
+            $order->setStatus('PENDING');
 
-            // Créer un nouveau panier vide pour l'utilisateur
+            // ✅ 9. Nouveau panier vide
             $newCart = new Cart();
             $newCart->setUser($user);
             $em->persist($newCart);
 
-            // Associer la commande au nouveau panier
             $order->setCart($newCart);
             $em->persist($order);
 
-            // Supprimer les produits du panier actuel
+            // ✅ 10. Supprimer les produits et panier actuel
             foreach ($cartProducts as $item) {
                 $em->remove($item);
             }
-            $em->remove($cart);  // Supprimer l'ancien panier
+            $em->remove($cart);
 
-            $em->flush();  // Sauvegarder toutes les modifications
+            // ✅ 11. Ajouter les POINTS FIDÉLITÉ pour la commande
+            $earnedPoints = floor($finalPrice / 10); // Exemple : 1 point pour chaque 10 Dinars
+            if ($earnedPoints > 0) {
+                $fidelityPoint = new FidelityPoint();
+                $fidelityPoint->setUser($user);
+                $fidelityPoint->setPoints($earnedPoints);
+                $fidelityPoint->setType('earned');
+                $fidelityPoint->setDate(new \DateTimeImmutable());
+                $fidelityPoint->setReason('Commande validée');
+                $em->persist($fidelityPoint);
+            }
 
-            // Ajouter un message de succès et rediriger vers la confirmation de la commande
-            $this->addFlash('success', 'Order placed successfully!');
+            // ✅ 12. Tout sauvegarder
+            $em->flush();
+
+            // ✅ 13. Message succès
+            $this->addFlash('success', "Order placed successfully! You earned {$earnedPoints} points!");
+
             return $this->redirectToRoute('aya_order_confirm', [
                 'id' => $order->getOrderId()
             ]);
         }
 
-        // Retourner la vue avec le formulaire de commande et le total calculé
         return $this->render('aya_order/aya_order.html.twig', [
             'form' => $form->createView(),
             'cart' => $cart,
-            'total' => $finalPrice
+            'total' => $total, 
         ]);
     }
+    #[Route('/api/order/new', name: 'api_aya_order_new', methods: ['POST'])]
+    public function apiNew(
+        Request $request,
+        CartRepository $cartRepository,
+        CartProductRepository $cartProductRepository,
+        WalletTransactionRepository $walletTransactionRepository,
+        GiftCardRepository $giftCardRepository,
+        FidelityPointRepository $fidelityPointRepository,
+        EntityManagerInterface $em,
+        SessionInterface $session,
+        UserRepository $userRepository
+    ): JsonResponse {
+        $data = json_decode($request->getContent(), true);
+
+        // ✅ Récupérer user
+        $userId = $session->get('user_id') ?? ($data['user_id'] ?? null);
+        $user = $userRepository->find($userId);
+        if (!$user) {
+            return new JsonResponse(['error' => 'Unauthorized'], 401);
+        }
+
+        // ✅ Récupérer panier
+        $cart = $cartRepository->findOneBy(['user' => $user]);
+        if (!$cart) {
+            return new JsonResponse(['error' => 'No cart found'], 404);
+        }
+
+        $cartProducts = $cartProductRepository->findBy(['cart' => $cart]);
+
+        $total = 0;
+        foreach ($cartProducts as $item) {
+            $total += $item->getTotalPrice();
+        }
+
+        $finalPrice = $total;
+
+        // ✅ Appliquer la réduction des points fidélité
+        $pointsUsed = $data['points'] ?? 0; // Points envoyés depuis Postman
+        if ($pointsUsed) {
+            $fidelityPoints = $fidelityPointRepository->findOneBy(['user' => $user]);
+            if ($fidelityPoints && $fidelityPoints->getPoints() >= $pointsUsed) {
+                $discountAmount = $pointsUsed * 0.1; // ✅ 1 point = 0.1 dinar
+                $finalPrice -= $discountAmount;
+                $fidelityPoints->setPoints($fidelityPoints->getPoints() - $pointsUsed);
+                $em->persist($fidelityPoints);
+                $em->flush();
+            }
+        }
+
+        // ✅ Créer la commande
+        $order = new Order();
+        $order->setUser($user);
+        $order->setExactAddress($data['exact_address']);
+        $order->setEventDate(new \DateTime($data['event_date']));
+        $order->setPaymentMethod($data['payment_method']);
+        $order->setOrderedAt(new \DateTime());
+        $order->setTotalPrice($finalPrice);
+        $order->setStatus('PENDING');
+
+        // ✅ Nouveau panier vide
+        $newCart = new Cart();
+        $newCart->setUser($user);
+        $em->persist($newCart);
+
+        $order->setCart($newCart);
+        $em->persist($order);
+
+        // ✅ Supprimer ancien panier
+        foreach ($cartProducts as $item) {
+            $em->remove($item);
+        }
+        $em->remove($cart);
+
+        // ✅ Ajouter points fidélité EARNED
+        $earnedPoints = floor($finalPrice / 10);
+        if ($earnedPoints > 0) {
+            $fidelityPoint = new FidelityPoint();
+            $fidelityPoint->setUser($user);
+            $fidelityPoint->setPoints($earnedPoints);
+            $fidelityPoint->setType('earned');
+            $fidelityPoint->setDate(new \DateTimeImmutable());
+            $fidelityPoint->setReason('Commande API');
+            $em->persist($fidelityPoint);
+        }
+
+        $em->flush();
+
+        return new JsonResponse([
+            'message' => 'Order created successfully via API',
+            'order_id' => $order->getOrderId(),
+            'total_price' => $order->getTotalPrice(),
+            'points_used' => $pointsUsed,
+            'earned_points' => $earnedPoints,
+        ], 201);
+    }
+
+
 
 
 
@@ -166,23 +285,23 @@ class AyaOrderController extends AbstractController
     //         'order' => $order,
     //     ]);
     // }
-    
-    #[Route('/aya/order/confirm/{id}', name: 'aya_order_confirm')]
-public function confirm(int $id, OrderRepository $orderRepository): Response
-{
-    $order = $orderRepository->find($id);
 
-    if (!$order) {
-        throw $this->createNotFoundException('Order not found.');
+    #[Route('/aya/order/confirm/{id}', name: 'aya_order_confirm')]
+    public function confirm(int $id, OrderRepository $orderRepository): Response
+    {
+        $order = $orderRepository->find($id);
+
+        if (!$order) {
+            throw $this->createNotFoundException('Order not found.');
+        }
+
+        return $this->render('aya_order/ayaconfirmation.html.twig', [
+            'order' => $order, // <-- ✅ On envoie l'objet complet
+        ]);
     }
 
-    return $this->render('aya_order/ayaconfirmation.html.twig', [
-        'order' => $order, // <-- ✅ On envoie l'objet complet
-    ]);
-}
 
 
-    
 
     #[Route('/api/order/new', name: 'api_order_new', methods: ['POST'])]
     public function apiNewOrder(
@@ -191,140 +310,98 @@ public function confirm(int $id, OrderRepository $orderRepository): Response
         CartRepository $cartRepository,
         CartProductRepository $cartProductRepository,
         SessionInterface $session,
+        WalletTransactionRepository $walletTransactionRepository,
+        GiftCardRepository $giftCardRepository,
+        FidelityPointRepository $fidelityPointRepository,
         UserRepository $userRepository
     ): JsonResponse {
         $data = json_decode($request->getContent(), true);
 
-        //$user = $this->getUser() ?? $em->getRepository(User::class)->find(x100); // Test user
-        $userId = $session->get('user_id');
+        // ✅ Récupérer user
+        $userId = $session->get('user_id') ?? ($data['user_id'] ?? null);
         $user = $userRepository->find($userId);
-        if (!$user) return new JsonResponse(['error' => 'Unauthorized'], 401);
-
-        $cart = $cartRepository->findOneBy(['user' => $user]);
-
-        // 🔁 Si pas de panier, on en crée un
-        if (!$cart) {
-            $cart = new \App\Entity\Cart();
-            $cart->setUser($user);
-            $em->persist($cart);
-            $em->flush();
+        if (!$user) {
+            return new JsonResponse(['error' => 'Unauthorized'], 401);
         }
 
-        // 🛒 Récupérer les produits du panier
+        // ✅ Récupérer panier
+        $cart = $cartRepository->findOneBy(['user' => $user]);
+        if (!$cart) {
+            return new JsonResponse(['error' => 'No cart found'], 404);
+        }
+
         $cartProducts = $cartProductRepository->findBy(['cart' => $cart]);
 
-        // 🧾 Vérif champs requis
-        if (empty($data['exact_address']) || empty($data['event_date']) || empty($data['payment_method'])) {
-            return new JsonResponse(['error' => 'Missing required fields'], 400);
-        }
-
-        // 💰 Total
         $total = 0;
         foreach ($cartProducts as $item) {
             $total += $item->getTotalPrice();
         }
 
-        // 🧾 Création de la commande
+        $finalPrice = $total;
+
+        // ✅ Appliquer la réduction des points fidélité si atteinte du minimum
+        $pointsMinimum = 100; // 💬 Seuil minimum pour utiliser les points
+        $pointsUsed = $data['points'] ?? 0; // Points envoyés depuis Postman
+
+        if ($pointsUsed) {
+            $fidelityPoints = $fidelityPointRepository->findOneBy(['user' => $user]);
+            if ($fidelityPoints) {
+                if ($fidelityPoints->getPoints() >= $pointsMinimum) {
+                    if ($fidelityPoints->getPoints() >= $pointsUsed) {
+                        $discountAmount = $pointsUsed * 0.1; // 1 point = 0.1 dinar
+                        $finalPrice -= $discountAmount;
+                        $fidelityPoints->setPoints($fidelityPoints->getPoints() - $pointsUsed);
+                        $em->persist($fidelityPoints);
+                        $em->flush();
+                    }
+                }
+            }
+        }
+
+        // ✅ Créer la commande
         $order = new Order();
         $order->setUser($user);
         $order->setExactAddress($data['exact_address']);
         $order->setEventDate(new \DateTime($data['event_date']));
         $order->setPaymentMethod($data['payment_method']);
         $order->setOrderedAt(new \DateTime());
+        $order->setTotalPrice($finalPrice);
         $order->setStatus('PENDING');
-        $order->setTotalPrice($total);
 
-        // 👇 Supprimer les CartProducts
+        // ✅ Nouveau panier vide
+        $newCart = new Cart();
+        $newCart->setUser($user);
+        $em->persist($newCart);
+
+        $order->setCart($newCart);
+        $em->persist($order);
+
+        // ✅ Supprimer ancien panier
         foreach ($cartProducts as $item) {
             $em->remove($item);
         }
-        $em->flush();
-
-        // 👇 Supprimer le panier actuel
         $em->remove($cart);
-        $em->flush();
 
-        // 🔁 Créer un nouveau panier vide
-        $newCart = new \App\Entity\Cart();
-        $newCart->setUser($user);
-        $em->persist($newCart); // 🔑 persist d'abord
-        $em->flush();
+        // ✅ Ajouter les points fidélité EARNED
+        $earnedPoints = floor($finalPrice / 10);
+        if ($earnedPoints > 0) {
+            $fidelityPointEarned = new FidelityPoint();
+            $fidelityPointEarned->setUser($user);
+            $fidelityPointEarned->setPoints($earnedPoints);
+            $fidelityPointEarned->setType('earned');
+            $fidelityPointEarned->setDate(new \DateTimeImmutable());
+            $fidelityPointEarned->setReason('Commande API');
+            $em->persist($fidelityPointEarned);
+        }
 
-        // 📎 Associer à l’ordre après persist
-        $order->setCart($newCart);
-
-        // 💾 Enregistrer la commande
-        $em->persist($order);
         $em->flush();
 
         return new JsonResponse([
-            'message' => 'Order created successfully',
+            'message' => 'Order created successfully via API',
             'order_id' => $order->getOrderId(),
-            'total' => $order->getTotalPrice()
+            'total_price' => $order->getTotalPrice(),
+            'points_used' => $pointsUsed,
+            'earned_points' => $earnedPoints,
         ], 201);
-    }
-
-    public function processOrder(
-        Request $request,
-        CartRepository $cartRepository,
-        CartProductRepository $cartProductRepository,
-        EntityManagerInterface $em,
-        SessionInterface $session,
-        UserRepository $userRepository
-    ): Response {
-        $userId = $session->get('user_id');
-        $user = $userRepository->find($userId);
-
-        if (!$user) {
-            $this->addFlash('error', 'You need to be logged in.');
-            return $this->redirectToRoute('app_login');
-        }
-
-        $cart = $cartRepository->findOneBy(['user' => $user]);
-
-        if (!$cart) {
-            $this->addFlash('error', 'No cart found.');
-            return $this->redirectToRoute('aya_cart');
-        }
-
-        $cartProducts = $cartProductRepository->findBy(['cart' => $cart]);
-
-        // Calcul total
-        $total = 0;
-        foreach ($cartProducts as $item) {
-            $total += $item->getTotalPrice();
-        }
-
-        // Enregistrer les réductions
-        $order = new Order();
-        $order->setUser($user);
-        $order->setOrderedAt(new \DateTime());
-        $order->setTotalPrice($total);
-
-        // Ajouter les réductions
-        // Exemple dans la méthode `new` du contrôleur
-        $walletUsed = $session->get('wallet_used', 0);
-        $giftCardUsed = $session->get('gift_card_amount', 0);
-        $pointsUsed = $session->get('points_used', 0);
-        $couponDiscount = $session->get('coupon_discount', 0);
-
-        // Calcul du total avec les réductions
-        $finalPrice = $total - $walletUsed - $giftCardUsed - $pointsUsed - $couponDiscount;
-        $order->setTotalPrice($finalPrice);
-
-        $em->persist($order);
-        $em->flush();
-
-        // Nettoyer le panier
-        foreach ($cartProducts as $item) {
-            $em->remove($item);
-        }
-
-        $em->remove($cart);
-        $em->flush();
-
-        // Rediriger vers la confirmation
-        $this->addFlash('success', 'Your order has been successfully placed.');
-        return $this->redirectToRoute('aya_order_confirm', ['id' => $order->getOrderId()]);
     }
 }
