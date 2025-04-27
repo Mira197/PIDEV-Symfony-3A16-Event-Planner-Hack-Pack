@@ -1,6 +1,7 @@
+# config/packages/monolog.yaml
 monolog:
-    channels:
-        - deprecation # Deprecations are logged in the dedicated "deprecation" channel when it exists
+    # Supprimer channels au niveau racine, car ce n'est pas nécessaire
+    # Les canaux sont automatiquement reconnus lorsqu'ils sont utilisés dans les handlers
 
 when@dev:
     monolog:
@@ -9,19 +10,16 @@ when@dev:
                 type: stream
                 path: "%kernel.logs_dir%/%kernel.environment%.log"
                 level: debug
-                channels: ["!event"]
-            # uncomment to get logging in your browser
-            # you may have to allow bigger header sizes in your Web server configuration
-            #firephp:
-            #    type: firephp
-            #    level: info
-            #chromephp:
-            #    type: chromephp
-            #    level: info
+                channels: ["!event", "!translation"] # Exclure le canal translation du handler principal
             console:
                 type: console
                 process_psr_3_messages: false
                 channels: ["!event", "!doctrine", "!console"]
+            translation:
+                type: stream
+                path: "%kernel.logs_dir%/translation.log"
+                level: info
+                channels: ["translation"] # Associer ce handler au canal translation
 
 when@test:
     monolog:
@@ -45,7 +43,7 @@ when@prod:
                 action_level: error
                 handler: nested
                 excluded_http_codes: [404, 405]
-                buffer_size: 50 # How many messages should be saved? Prevent memory leaks
+                buffer_size: 50
             nested:
                 type: stream
                 path: php://stderr

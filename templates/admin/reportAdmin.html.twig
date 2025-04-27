@@ -1,0 +1,185 @@
+{% extends 'admin/baseAdmin.html.twig' %}
+
+{% block head %}
+	<link rel="stylesheet" href="{{ asset('assetsAya/css/adminOrder.css') }}">
+	{{ parent() }}
+	<style>
+		.hidden-column {
+			display: none;
+		}
+
+		/* ====== Report Status Styles ====== */
+		.status-btn {
+			padding: 5px 10px;
+			border-radius: 5px;
+			font-weight: 500;
+			font-size: 0.9rem;
+			display: inline-block;
+			text-align: center;
+			min-width: 90px;
+		}
+
+		.success-btn {
+			background-color: #d1f2eb;
+			color: #1abc9c;
+		}
+
+		.warning-btn {
+			background-color: #fcf3cf;
+			color: #f1c40f;
+		}
+
+		.close-btn {
+			background-color: #f5b7b1;
+			color: #c0392b;
+		}
+	</style>
+{% endblock %}
+
+{% block section %}
+	<div class="admin-mui-wrapper">
+		<h2>🚨 Reports Management</h2>
+
+		<!-- 🔍 Filtres + Recherche + Export -->
+		<div class="admin-filters">
+			<div class="left-search">
+				<input type="text" id="reportSearch" placeholder="🔍 Search reports..." class="form-control">
+			</div>
+
+			<div class="center-filters">
+				<button class="status-filter active" data-filter="">All</button>
+				<button class="status-filter" data-filter="Pending">Pending</button>
+				<button class="status-filter" data-filter="Verified">Verified</button>
+				<button class="status-filter" data-filter="Rejected">Rejected</button>
+			</div>
+
+			<div class="right-actions d-flex align-items-center">
+				<button class="btn btn-outline-secondary me-2" id="exportReportCsvBtn">⬇️ Export</button>
+				<input type="date" id="reportDateFilter" class="form-control" style="max-width: 150px;">
+			</div>
+		</div>
+		<table class="admin-mui-table">
+			<thead>
+				<tr>
+					<th class="hidden-column">#ID</th>
+					<th>Reason</th>
+					<th>Description</th>
+					<th>Status</th>
+					<th>Date</th>
+					<th>Post Title</th>
+					<th>Actions</th>
+				</tr>
+			</thead>
+
+			<tbody id="reportTable">
+				{% for report in reports %}
+					<tr data-status="{{ report.status }}">
+						<td class="hidden-column">{{ report.report_id }}</td>
+						<td>{{ report.reason }}</td>
+						<td>{{ report.description|default('—') }}</td>
+						<td>
+							{% if report.status == 'Pending' %}
+								<span class="status-btn warning-btn">Pending</span>
+							{% elseif report.status == 'Verified' %}
+								<span class="status-btn success-btn">Verified</span>
+							{% elseif report.status == 'Rejected' %}
+								<span class="status-btn close-btn">Rejected</span>
+							{% else %}
+								<span class="status-btn">{{ report.status }}</span>
+							{% endif %}
+						</td>
+						<td>{{ report.reportDate ? report.reportDate|date('Y-m-d H:i') : '—' }}</td>
+						<td>{{ report.publication.title ?? '—' }}</td>
+						<td>
+							<a href="{{ path('report_edit', {'id': report.report_id}) }}" class="btn-edit">✏️</a>
+							<button type="button" class="btn-delete delete-report-btn" data-url="{{ path('report_delete', {'id': report.report_id }) }}">
+								🗑️
+							</button>
+
+						</td>
+					</tr>
+				{% else %}
+					<tr>
+						<td colspan="7" class="empty-row">No reports found.</td>
+					</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+	</div>
+{% endblock %}
+
+{% block javascripts %}
+	{{ parent() }}
+	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+	<script>
+		document.addEventListener('DOMContentLoaded', function () {
+			const searchInput = document.getElementById('reportSearch');
+			const dateInput = document.getElementById('reportDateFilter');
+			const filters = document.querySelectorAll('.status-filter');
+			let currentStatus = '';
+
+			// Fonction de récupération filtrée
+			function fetchReports(query = '', status = '', date = '') {
+				const url = `{{ path('admin_report_search') }}?q=${encodeURIComponent(query)}&status=${encodeURIComponent(status)}&date=${encodeURIComponent(date)}`;
+				
+				fetch(url, {
+					headers: {
+						'X-Requested-With': 'XMLHttpRequest'
+					}
+				})
+				.then(res => res.text())
+				.then(html => {
+					document.getElementById('reportTable').innerHTML = html;
+					initDeleteButtons(); // Re-bind des boutons delete
+				});
+			}
+
+			// Rechercher dynamiquement
+			searchInput.addEventListener('input', () => {
+				fetchReports(searchInput.value, currentStatus, dateInput.value);
+			});
+
+			// Filtrage par date
+			dateInput.addEventListener('change', () => {
+				fetchReports(searchInput.value, currentStatus, dateInput.value);
+			});
+
+			// Filtrage par statut
+			filters.forEach(btn => {
+				btn.addEventListener('click', function () {
+					filters.forEach(b => b.classList.remove('active'));
+					this.classList.add('active');
+					currentStatus = this.dataset.filter;
+					fetchReports(searchInput.value, currentStatus, dateInput.value);
+				});
+			});
+
+			// Suppression SweetAlert
+			function initDeleteButtons() {
+				document.querySelectorAll('.delete-report-btn').forEach(button => {
+					button.addEventListener('click', function () {
+						const url = this.dataset.url;
+
+						Swal.fire({
+							title: "Are you sure?",
+							text: "This report will be deleted!",
+							icon: "warning",
+							showCancelButton: true,
+							confirmButtonColor: "#533C56",
+							cancelButtonColor: "#aaa",
+							confirmButtonText: "Yes, delete it"
+						}).then((result) => {
+							if (result.isConfirmed) {
+								window.location.href = url;
+							}
+						});
+					});
+				});
+			}
+
+			initDeleteButtons(); // Initial bind au chargement
+		});
+	</script>
+{% endblock %}
+

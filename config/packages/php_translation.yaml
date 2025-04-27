@@ -1,0 +1,3 @@
+translation:
+    locales: ['en', 'fr', 'es', 'de', 'it'] # Ajout des langues demandées
+    

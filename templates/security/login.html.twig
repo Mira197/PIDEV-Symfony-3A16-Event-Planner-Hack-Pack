@@ -1,0 +1,114 @@
+{# {% extends 'base.html.twig' %}
+
+{% block title %}Log in!{% endblock %}
+
+{% block body %}
+<form method="post">
+    {% if error %}
+        <div class="alert alert-danger">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
+    {% endif %}
+
+    {% if app.user %}
+        <div class="mb-3">
+            You are logged in as {{ app.user.userIdentifier }}, <a href="{{ path('app_logout') }}">Logout</a>
+        </div>
+    {% endif %}
+
+    <h1 class="h3 mb-3 font-weight-normal">Please sign in</h1>
+    <label for="inputEmail">Email</label>
+    <input type="email" value="{{ last_username }}" name="email" id="inputEmail" class="form-control" autocomplete="email" required autofocus>
+    <label for="inputPassword">Password</label>
+    <input type="password" name="password" id="inputPassword" class="form-control" autocomplete="current-password" required>
+
+    <input type="hidden" name="_csrf_token"
+           value="{{ csrf_token('authenticate') }}"
+    >
+
+    <button class="btn btn-lg btn-primary" type="submit">
+        Sign in
+    </button>
+</form>
+{% endblock %} #}
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>Login Form</title>
+		<meta
+		name="viewport" content="width=device-width, initial-scale=1.0">
+		<!-- MATERIAL DESIGN ICONIC FONT -->
+		<link
+		rel="stylesheet" href="{{ asset('fonts/material-design-iconic-font/css/material-design-iconic-font.min.css') }}">
+		<!-- STYLE CSS -->
+		<link rel="stylesheet" href="{{ asset('css/styleh.css') }}">
+		<style>
+			/* Ajouter une marge autour du formulaire */
+			.login-form {
+				margin: 50px;
+			}
+
+			/* Changer la couleur des liens en beige */
+			.forgot-pass a,
+			.signup a {
+				color: #d6d0b8;
+			}
+
+			.signup {
+				margin-top: 10px;
+				margin-bottom: 20px;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="wrapper" style="background-image: url('{{ asset('img/output-onlinepngtools.png') }}');">
+			<div class="inner">
+				<div class="image-holder">
+					<img src="{{ asset('img/1.jpg') }}" height="650px">
+				</div>
+
+				<!-- Intégration du formulaire Symfony ici -->
+				<form method="post" class="login-form">
+					{% if error %}
+						<div class="alert alert-danger">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
+					{% endif %}
+
+					{% if app.user %}
+						<div
+							class="mb-3">{# You are logged in as {{ app.user.userIdentifier }}, <a href="{{ path('app_logout') }}">Logout</a> #}
+						</div>
+					{% endif %}
+
+					<h3>bienvenue a hackpack
+					</h3>
+					{% if blocked %}
+						<div class="alert alert-danger" role="alert">
+							Votre compte est actuellement bloqué  Veuillez contacter l'administrateur.
+						</div>
+					{% endif %}
+
+					<input type="email" value="{{ last_username }}" name="email" id="inputEmail" class="form-control" autocomplete="email" required autofocus placeholder="Votre adresse e-mail">
+
+					<input type="password" name="password" id="inputPassword" class="form-control" autocomplete="current-password" required placeholder="Votre mot de passe">
+
+					<div class="forgot-pass">
+						<a href="{{ path('app_forgot_password_request') }}">mot de passe oublié ?</a>
+					</div>
+
+					<input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+
+					<button class="btn btn-lg btn-primary" type="submit">
+						Sign in
+					</button>
+
+
+					<div class="signup">
+						Pas encore membre ?
+						<a href="{{ path('user_register') }}">Inscrivez-vous maintenant</a>
+					</div>
+
+				</form>
+				<!-- Fin du formulaire Symfony -->
+			</div>
+		</div>
+	</body>
+</html>

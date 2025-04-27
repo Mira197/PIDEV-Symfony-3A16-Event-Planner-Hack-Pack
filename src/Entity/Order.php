@@ -2,36 +2,70 @@
 
 namespace App\Entity;
 
-use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
-
+use Symfony\Component\Validator\Constraints as Assert;
 use App\Repository\OrderRepository;
 
 #[ORM\Entity(repositoryClass: OrderRepository::class)]
-#[ORM\Table(name: 'order')]
+#[ORM\Table(name: '`order`')]
 class Order
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column(type: 'integer')]
+    #[ORM\Column(name: 'order_id', type: 'integer')]
     private ?int $order_id = null;
-
-    public function getOrder_id(): ?int
-    {
-        return $this->order_id;
-    }
-
-    public function setOrder_id(int $order_id): self
-    {
-        $this->order_id = $order_id;
-        return $this;
-    }
 
     #[ORM\OneToOne(targetEntity: Cart::class, inversedBy: 'order')]
     #[ORM\JoinColumn(name: 'cart_id', referencedColumnName: 'cart_id', unique: true)]
     private ?Cart $cart = null;
+
+    #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'orders')]
+    #[ORM\JoinColumn(name: 'user_id', referencedColumnName: 'id_user')]
+    #[Assert\NotNull(message: "User cannot be null.")]
+    private ?User $user = null;
+
+    #[ORM\Column(type: 'string', nullable: true)]
+    #[Assert\Choice(choices: ['PENDING', 'CONFIRMED', 'CANCELLED', 'DELIVERED'])]
+    private ?string $status = null;
+
+    #[ORM\Column(type: 'string', length: 255)]
+    #[Assert\NotBlank(message: "Please select a payment method.")]
+    private ?string $payment_method = null;
+
+    #[ORM\Column(type: 'text')]
+    #[Assert\NotBlank(message: "Delivery address is required.")]
+    #[Assert\Length(
+        min: 10,
+        minMessage: "This value is too short. It should have {{ limit }} characters or more."
+    )]
+    private ?string $exact_address = null;
+
+    #[ORM\Column(type: 'datetime')]
+    #[Assert\NotNull(message: "Please select a valid event date.")]
+    #[Assert\GreaterThan("today", message: "The event date must be in the future.")]
+    private ?\DateTimeInterface $event_date = null;
+
+    #[ORM\Column(type: 'datetime')]
+    #[Assert\NotNull(message: "Ordered at cannot be null.")]
+    private ?\DateTimeInterface $ordered_at = null;
+
+    #[ORM\Column(type: 'decimal', precision: 10, scale: 2)]
+    #[Assert\NotNull(message: "Total price cannot be null.")]
+    #[Assert\PositiveOrZero(message: "Total price must be zero or positive.")]
+    private ?float $total_price = null;
+
+    // ---------------- Getters & Setters ----------------
+
+    public function getOrderId(): ?int
+    {
+        return $this->order_id;
+    }
+
+    public function setOrderId(int $order_id): self
+    {
+        $this->order_id = $order_id;
+        return $this;
+    }
 
     public function getCart(): ?Cart
     {
@@ -44,10 +78,6 @@ class Order
         return $this;
     }
 
-    #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'orders')]
-    #[ORM\JoinColumn(name: 'user_id', referencedColumnName: 'id_user')]
-    private ?User $user = null;
-
     public function getUser(): ?User
     {
         return $this->user;
@@ -58,9 +88,6 @@ class Order
         $this->user = $user;
         return $this;
     }
-
-    #[ORM\Column(type: 'string', nullable: true)]
-    private ?string $status = null;
 
     public function getStatus(): ?string
     {
@@ -73,90 +100,14 @@ class Order
         return $this;
     }
 
-    #[ORM\Column(type: 'string', nullable: false)]
-    private ?string $payment_method = null;
-
-    public function getPayment_method(): ?string
-    {
-        return $this->payment_method;
-    }
-
-    public function setPayment_method(string $payment_method): self
-    {
-        $this->payment_method = $payment_method;
-        return $this;
-    }
-
-    #[ORM\Column(type: 'text', nullable: false)]
-    private ?string $exact_address = null;
-
-    public function getExact_address(): ?string
-    {
-        return $this->exact_address;
-    }
-
-    public function setExact_address(string $exact_address): self
-    {
-        $this->exact_address = $exact_address;
-        return $this;
-    }
-
-    #[ORM\Column(type: 'datetime', nullable: false)]
-    private ?\DateTimeInterface $event_date = null;
-
-    public function getEvent_date(): ?\DateTimeInterface
-    {
-        return $this->event_date;
-    }
-
-    public function setEvent_date(\DateTimeInterface $event_date): self
-    {
-        $this->event_date = $event_date;
-        return $this;
-    }
-
-    #[ORM\Column(type: 'datetime', nullable: false)]
-    private ?\DateTimeInterface $ordered_at = null;
-
-    public function getOrdered_at(): ?\DateTimeInterface
-    {
-        return $this->ordered_at;
-    }
-
-    public function setOrdered_at(\DateTimeInterface $ordered_at): self
-    {
-        $this->ordered_at = $ordered_at;
-        return $this;
-    }
-
-    #[ORM\Column(type: 'decimal', nullable: false)]
-    private ?float $total_price = null;
-
-    public function getTotal_price(): ?float
-    {
-        return $this->total_price;
-    }
-
-    public function setTotal_price(float $total_price): self
-    {
-        $this->total_price = $total_price;
-        return $this;
-    }
-
-    public function getOrderId(): ?int
-    {
-        return $this->order_id;
-    }
-
     public function getPaymentMethod(): ?string
     {
         return $this->payment_method;
     }
 
-    public function setPaymentMethod(string $payment_method): static
+    public function setPaymentMethod(string $payment_method): self
     {
         $this->payment_method = $payment_method;
-
         return $this;
     }
 
@@ -165,10 +116,9 @@ class Order
         return $this->exact_address;
     }
 
-    public function setExactAddress(string $exact_address): static
+    public function setExactAddress(string $exact_address): self
     {
         $this->exact_address = $exact_address;
-
         return $this;
     }
 
@@ -177,10 +127,9 @@ class Order
         return $this->event_date;
     }
 
-    public function setEventDate(\DateTimeInterface $event_date): static
+    public function setEventDate(?\DateTimeInterface $event_date): self
     {
         $this->event_date = $event_date;
-
         return $this;
     }
 
@@ -189,23 +138,20 @@ class Order
         return $this->ordered_at;
     }
 
-    public function setOrderedAt(\DateTimeInterface $ordered_at): static
+    public function setOrderedAt(?\DateTimeInterface $ordered_at): self
     {
         $this->ordered_at = $ordered_at;
-
         return $this;
     }
 
-    public function getTotalPrice(): ?string
+    public function getTotalPrice(): ?float
     {
         return $this->total_price;
     }
 
-    public function setTotalPrice(string $total_price): static
+    public function setTotalPrice(float $total_price): self
     {
         $this->total_price = $total_price;
-
         return $this;
     }
-
 }

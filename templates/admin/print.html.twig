@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Liste des utilisateurs</title>
+    <style>
+        /* Style du tableau */
+        .table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        /* Style des lignes impaires */
+        tr:nth-child(odd) {
+            background-color: #f9f9f9;
+        }
+        /* Style des boutons */
+        .btn {
+            padding: 6px 10px;
+            border: none;
+            cursor: pointer;
+            border-radius: 4px;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .btn-danger {
+            background-color: #dc3545;
+            color: white;
+        }
+        .btn-success {
+            background-color: #28a745;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Liste des utilisateurs</h1>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Last Name</th>
+            <th>First Name</th>
+            <th>Username</th>
+            <th>Role</th>
+            <th>Phone Number</th>
+            <th>Blocked</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for user in users %}
+        <tr>
+            <td>{{ user.lastName }}</td>
+            <td>{{ user.firstName }}</td>
+            <td>{{ user.username }}</td>
+            <td>{{ user.role | lower }}</td>
+            <td>{{ user.numtel }}</td>
+            <td>{{ user.blocked ? 'Oui' : 'Non' }}</td>
+            <td>
+                {# {% if user.role != 'ADMIN' %}
+                    {% if not user.blocked %}
+                        <a href="{{ path('saisir_duree', {'id': user.iduser}) }}" class="btn btn-danger">Bloquer</a>
+                    {% else %}
+                        <a href="{{ path('debloquer_utilisateur', {'id': user.iduser}) }}" class="btn btn-success">Débloquer</a>
+                    {% endif %}
+                {% endif %} #}
+            </td>
+        </tr>
+        {% else %}
+        <tr>
+            <td colspan="7">Aucun enregistrement trouvé</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+</body>
+</html>

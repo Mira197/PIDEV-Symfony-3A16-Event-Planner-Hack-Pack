@@ -1,0 +1,168 @@
+{% extends 'admin/baseAdmin.html.twig' %}
+
+{% block head %}
+    <link rel="stylesheet" href="{{ asset('assetsAya/css/adminOrder.css') }}">
+    {{ parent() }}
+    <style>
+        .hidden-column {
+            display: none;
+        }
+        .publication-img {
+            width: 40px;
+            height: auto;
+            border-radius: 4px;
+            margin-right: 8px;
+        }
+        .checkbox-item {
+            transform: scale(1.2);
+        }
+    </style>
+{% endblock %}
+
+{% block section %}
+    <div class="admin-mui-wrapper">
+        <h2>📰 Publications Management</h2>
+
+        <div class="admin-filters">
+            <div class="left-search">
+                <input type="text" id="adminPublicationSearch" placeholder="🔍 Search publications..." class="form-control">
+            </div>
+            <div class="center-filters">
+                <button class="status-filter active" data-filter="">All</button>
+                <button class="status-filter" data-filter="Inappropriate">Inappropriate</button>
+                <button class="status-filter" data-filter="Appropriate">Appropriate</button>
+            </div>
+            <div class="right-actions">
+                <a href="{{ path('app_publication_new_admin') }}" class="btn btn-outline-secondary">➕ Add Post</a>
+                <button class="btn btn-outline-secondary" id="exportPublicationCsvBtn">⬇️ Export</button>
+                <button type="submit" form="bulkDeleteForm" class="btn btn-outline-danger">🗑️ Delete Selected</button>
+            </div>
+        </div>
+
+        <form method="post" id="bulkDeleteForm" action="{{ path('publication_bulk_delete') }}">
+            <table class="admin-mui-table">
+                <thead>
+                    <tr>
+                        <th><input type="checkbox" id="checkAll"></th>
+                        <th>Title</th>
+                        <th>Description</th>
+                        <th>User</th>
+                        <th>Status</th>
+                        <th>Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="adminPublicationsTable">
+                    {% include 'admin/_publication_rows.html.twig' with { publications: publications } %}
+                </tbody>
+            </table>
+        </form>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+// Empêche la double soumission
+document.getElementById('bulkDeleteForm')?.addEventListener('submit', function(e) {
+    e.preventDefault();
+    const form = this;
+    Swal.fire({
+        title: 'Confirm deletion',
+        text: 'Are you sure you want to delete the selected publications?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Delete',
+        cancelButtonText: 'Cancel'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            form.submit();
+        }
+    });
+});
+document.addEventListener('DOMContentLoaded', function () {
+    const searchInput = document.getElementById('adminPublicationSearch');
+    const filters = document.querySelectorAll('.status-filter');
+    let currentFilter = '';
+
+    function fetchPublications(query = '', filter = '') {
+        fetch(`{{ path('admin_publication_search') }}?q=${encodeURIComponent(query)}&status=${encodeURIComponent(filter)}`, {
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(response => response.text())
+        .then(html => {
+            document.getElementById('adminPublicationsTable').innerHTML = html;
+            attachDeleteEvents(); // Réattacher les events
+        });
+    }
+
+    searchInput.addEventListener('input', () => {
+        fetchPublications(searchInput.value, currentFilter);
+    });
+
+    filters.forEach(btn => {
+        btn.addEventListener('click', function () {
+            filters.forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            currentFilter = this.dataset.filter;
+            fetchPublications(searchInput.value, currentFilter);
+        });
+    });
+
+    function attachDeleteEvents() {
+    document.querySelectorAll('.delete-btn').forEach(button => {
+        button.addEventListener('click', function (e) {
+            e.preventDefault();
+            e.stopImmediatePropagation(); // Utilisez stopImmediatePropagation au lieu de stopPropagation
+
+            const id = this.dataset.id;
+            const csrfToken = this.dataset.token;
+
+            Swal.fire({
+                title: 'Are you sure?',
+                text: 'This publication will be deleted!',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, delete it!',
+                cancelButtonText: 'Cancel',
+                focusCancel: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch(`/admin/publication/delete/${id}`, {
+                        method: 'POST',
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            _token: csrfToken
+                        })
+                    })
+                    .then(response => {
+                        if (!response.ok) throw new Error('Network response was not ok');
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.success) {
+                            return Swal.fire('Deleted!', '', 'success');
+                        } else {
+                            throw new Error(data.message || 'Failed to delete');
+                        }
+                    })
+                    .then(() => {
+                        fetchPublications(searchInput.value, currentFilter);
+                    })
+                    .catch(error => {
+                        Swal.fire('Error', error.message, 'error');
+                        console.error('Error:', error);
+                    });
+                }
+            });
+        });
+    });
+}
+    attachDeleteEvents();
+});
+</script>
+{% endblock %}

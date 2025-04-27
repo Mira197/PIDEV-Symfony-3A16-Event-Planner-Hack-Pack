@@ -1,0 +1,30 @@
+{% for report in reports %}
+	<tr data-status="{{ report.status }}">
+		<td class="hidden-column">{{ report.report_id }}</td>
+		<td>{{ report.reason }}</td>
+		<td>{{ report.description|default('—') }}</td>
+		<td>
+			{% if report.status == 'Pending' %}
+				<span class="status-btn warning-btn">Pending</span>
+			{% elseif report.status == 'Verified' %}
+				<span class="status-btn success-btn">Verified</span>
+			{% elseif report.status == 'Rejected' %}
+				<span class="status-btn close-btn">Rejected</span>
+			{% else %}
+				<span class="status-btn">{{ report.status }}</span>
+			{% endif %}
+		</td>
+		<td>{{ report.reportDate ? report.reportDate|date('Y-m-d H:i') : '—' }}</td>
+		<td>{{ report.publication.title ?? '—' }}</td>
+		<td>
+			<a href="{{ path('report_edit', {'id': report.report_id}) }}" class="btn-edit">✏️</a>
+			<a href="{{ path('report_delete', {'id': report.report_id }) }}" onclick="return confirm('Are you sure you want to delete this post?')" class="btn-delete delete-report-btn">
+				🗑️
+			</a>
+		</td>
+	</tr>
+{% else %}
+	<tr>
+		<td colspan="7" class="empty-row">No reports found.</td>
+	</tr>
+{% endfor %}

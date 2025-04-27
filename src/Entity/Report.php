@@ -6,6 +6,8 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Symfony\Component\Validator\Constraints as Assert;
+
 
 use App\Repository\ReportRepository;
 
@@ -30,6 +32,11 @@ class Report
     }
 
     #[ORM\Column(type: 'string', nullable: false)]
+    #[Assert\NotBlank(message: 'The reason is required.')]
+    #[Assert\Regex(
+        pattern: '/^[^\d]+$/',
+        message: 'The reason cannot contain numbers.'
+    )]
     private ?string $reason = null;
 
     public function getReason(): ?string
@@ -44,6 +51,7 @@ class Report
     }
 
     #[ORM\Column(type: 'text', nullable: true)]
+    #[Assert\NotBlank(message: 'The description is required.')]
     private ?string $description = null;
 
     public function getDescription(): ?string
@@ -72,7 +80,12 @@ class Report
     }
 
     #[ORM\Column(type: 'string', nullable: false)]
-    private ?string $status = null;
+    #[Assert\NotBlank(message: 'The status is required.')]
+    #[Assert\Choice(
+        choices: ['Pending', 'Verified', 'Rejected'],
+        message: 'Choose a valid status: Pending, Verified, or Rejected.'
+    )]
+    private ?string $status = 'Pending';
 
     public function getStatus(): ?string
     {

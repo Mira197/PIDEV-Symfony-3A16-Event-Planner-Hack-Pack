@@ -1,0 +1,189 @@
+.event-form-container {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    padding: 30px;
+    max-width: 800px;
+    margin: 0 auto;
+    margin-top: 30px;
+    margin-bottom: 60px;
+}
+
+.input-style-1,
+.select-style-1,
+.form-check {
+    margin-bottom: 20px;
+}
+
+.input-style-1 label,
+.select-style-1 label {
+    font-weight: 500;
+    font-size: 15px;
+    margin-bottom: 6px;
+    display: block;
+}
+
+.input-style-1 input,
+.input-style-1 textarea,
+.select-style-1 select {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    background: #f9f9f9;
+}
+
+.select-position {
+    position: relative;
+}
+
+.form-check-input {
+    margin-right: 10px;
+}
+
+.btn-save-event {
+    background-color: #533C56;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 6px;
+    border: none;
+    transition: background 0.3s ease;
+    display: block;
+    margin-top: 20px;
+}
+
+.btn-save-event:hover {
+    background-color: #3a204a;
+}
+.title-wrapper {
+    background-color: transparent;
+    padding-top: 20px;
+    padding-bottom: 0px;
+    margin-bottom: 0;
+    
+}
+
+.title-wrapper .title h2 {
+    font-size: 28px;
+    font-weight: 600;
+    color: #1f2937;
+    margin: 0;
+}
+
+.title-wrapper .main-btn {
+    font-size: 14px;
+    font-weight: 500;
+    border: 1px solid #1f2937;
+    color: #1f2937;
+    background: transparent;
+    border-radius: 5px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    padding: 8px 20px;
+}
+
+.title-wrapper .main-btn:hover {
+    background-color: #1f2937;
+    color: #fff;
+}
+.title-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 0 15px;
+}
+/*style for form validation error messages*/
+.form-error {
+    color: #dc3545; /* rouge doux */
+    font-size: 14px;
+    margin-top: 4px;
+    padding-left: 2px;
+    font-style: italic;
+}
+.is-invalid {
+    border-color: #dc3545;
+    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+}
+
+/*arrow*/
+#fh5co-header {
+    position: relative; /* Assure-toi que le header a une position relative */
+}
+.scroll-indicator {
+    position: absolute;
+    bottom: 30px;
+    right: 40px;
+    z-index: 10;
+    pointer-events: auto;
+}
+
+.svg-arrow {
+    width: 150px;
+    height: 150px;
+    animation: arrowBounce 2s infinite;
+}
+@keyframes arrowBounce {
+    0%, 20%, 50%, 80%, 100% {
+        transform: translateY(0);
+    }
+    40% {
+        transform: translateY(8px);
+    }
+    60% {
+        transform: translateY(4px);
+    }
+}
+/* Custom alert styles for new Booking*/
+.custom-alert {
+    padding: 12px 20px;
+    margin: 20px 0;
+    border-radius: 6px;
+    position: relative;
+    font-size: 14px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.custom-alert-success {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.custom-alert-error,
+.custom-alert-danger {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.custom-alert-icon {
+    margin-right: 10px;
+}
+
+.custom-alert-close {
+    margin-left: 15px;
+    cursor: pointer;
+    font-weight: bold;
+    color: inherit;
+    font-size: 18px;
+}
+/* ✅ Centrage des alertes */
+.alert-wrapper {
+    max-width: 800px;
+    margin: 0 auto;
+    margin-top: 20px;
+    padding: 0 15px;
+}
+
+
+
+
+
+
+
+

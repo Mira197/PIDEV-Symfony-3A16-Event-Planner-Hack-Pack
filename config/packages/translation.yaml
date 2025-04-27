@@ -1,7 +1,7 @@
 framework:
-    default_locale: en
+    default_locale: fr  # La langue par défaut de ton application (ici français)
     translator:
-        default_path: '%kernel.project_dir%/translations'
+        default_path: '%kernel.project_dir%/translations'  # Dossier où sont stockés les fichiers de traduction
         fallbacks:
-            - en
-        providers:
+            - fr  # Si une traduction est manquante, on revient au français
+

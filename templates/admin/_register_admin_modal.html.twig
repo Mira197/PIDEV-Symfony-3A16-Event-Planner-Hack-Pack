@@ -1,0 +1,25 @@
+<div class="modal fade" id="adminRegisterModal" tabindex="-1" aria-hidden="true">
+	<div class="modal-dialog modal-lg modal-dialog-centered">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title">Ajouter un administrateur</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+			</div>
+			<div class="modal-body">
+{{ form_start(form, {
+    'action': path('admin_register'), 
+    'attr': {'id': 'admin-register-form'}
+}) }}
+				{{ form_row(form.lastName) }}
+				{{ form_row(form.firstName) }}
+				{{ form_row(form.username) }}
+				{{ form_row(form.email) }}
+				{{ form_row(form.numtel) }}
+				{{ form_row(form.password) }}
+				{{ form_row(form.passwordConfirmation) }}
+				{{ form_row(form.submit) }}
+				{{ form_end(form) }}
+			</div>
+		</div>
+	</div>
+</div>

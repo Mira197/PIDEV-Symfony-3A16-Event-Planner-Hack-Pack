@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>Formulaire d'inscription</title>
+		<meta
+		name="viewport" content="width=device-width, initial-scale=1.0">
+
+		<!-- MATERIAL DESIGN ICONIC FONT -->
+		<link
+		rel="stylesheet" href="{{ asset('fonts/material-design-iconic-font/css/material-design-iconic-font.min.css') }}">
+
+		<!-- STYLE CSS -->
+		<link rel="stylesheet" href="{{ asset('css/cssd/styleh.css') }}">
+
+		<style>
+			.form-wrapper {
+				margin: -400px; /* Vous pouvez ajuster la taille de la marge selon vos besoins */
+			}
+			.password-input {
+				position: relative;
+			}
+			.password-input input[type="password"] {
+				padding-right: 40px; /* Ajustez la taille de l'icône en fonction de vos besoins */
+			}
+			.password-input i {
+				position: absolute;
+				right: 10px;
+				top: 50%;
+				transform: translateY(-50%);
+				cursor: pointer;
+			}
+		</style>
+
+	</head>
+
+	<body>
+
+		<div class="wrapper" style="background-image: url('{{ asset('img/output-onlinepngtools.png') }}');">
+			<div class="inner">
+				<div class="image-holder">
+					<img src="{{ asset('img/sig.png') }}" height="750px">
+				</div>
+				<form {{ form_start(form, {'attr': {'novalidate': 'novalidate'}} ) }}
+					<h3>Formulaire d'inscription</h3>
+
+					{{ form_row(form.lastName, {'attr': {'placeholder': 'tapez ici votre prenom', 'class': 'form-control'}, 'label': 'Prénom'}) }}
+
+					{{ form_row(form.firstName, {'attr': {'placeholder': 'tapez ici votre Nom', 'class': 'form-control'}, 'label': 'Nom'}) }}
+
+					{{ form_row(form.username, {'attr': {'placeholder': 'tapez ici votre Nom d\'utilisateur', 'class': 'form-control'}, 'label': 'Nom d\'utilisateur'}) }}
+
+					<div class="password-input">
+						{{ form_row(form.password, {'attr': {'placeholder': 'tapez ici votre Mot de passe', 'class': 'form-control'}, 'label': 'Mot de passe'}) }}
+						<i class="zmdi zmdi-eye"></i>
+					</div>
+
+					<div class="password-input">
+						{{ form_row(form.passwordConfirmation, {'attr': {'placeholder': ' Pouvez vous Confirmer le mot de passe !', 'class': 'form-control'}, 'label': 'Confirmer le mot de passe'})}}
+						<i class="zmdi zmdi-eye"></i>
+					</div>
+
+					{{ form_row(form.email, {'attr': {'placeholder': ' tapez ici votre Adresse Email', 'class': 'form-control'}, 'label': 'Adresse Email'}) }}
+
+					{{ form_row(form.numtel, {'attr': {'placeholder': ' tapez ici votre Numéro de téléphone', 'class': 'form-control'}, 'label': 'Numéro de téléphone'}) }}
+
+					{{ form_row(form.role, {'attr': {'class': 'form-control'}, 'label': 'Rôle'}) }}
+
+					{{ form_row(form.submit, {'attr': {'class': 'button'}, 'label': 'Soumettre'}) }}
+
+					{{ form_end(form) }}
+					<!-- Fin du formulaire Symfony -->
+				</form>
+			</div>
+		</div>
+
+		<script>
+			document.addEventListener('DOMContentLoaded', function () {
+const passwordInputs = document.querySelectorAll('.password-input input[type="password"]');
+const passwordIcons = document.querySelectorAll('.password-input i');
+
+passwordIcons.forEach((icon, index) => {
+icon.addEventListener('click', function () {
+const type = passwordInputs[index].getAttribute('type') === 'password' ? 'text' : 'password';
+passwordInputs[index].setAttribute('type', type);
+
+// Changer l'icône en conséquence
+if (type === 'text') {
+icon.classList.remove('zmdi-eye');
+icon.classList.add('zmdi-eye-off');
+} else {
+icon.classList.remove('zmdi-eye-off');
+icon.classList.add('zmdi-eye');
+}
+});
+});
+});
+		</script>
+
+	</body>
+</html>

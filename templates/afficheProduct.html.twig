@@ -1,0 +1,971 @@
+<!DOCTYPE html>
+<html lang="en">
+
+	<head>
+		{% block head %}
+			<meta charset="UTF-8"/>
+			<meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+			<link rel="shortcut icon" href="admin/images/logo/logo1.png" type="image/x-icon"/>
+			<title>3alaKifiAdmin | Event Planner</title>
+
+			<!-- ========== All CSS files linkup ========= -->
+			<link rel="stylesheet" href="{{ asset('admin/css/bootstrap.min.css') }}">
+			<link rel="stylesheet" href="{{ asset('admin/css/lineicons.css') }}">
+			<link rel="stylesheet" href="{{ asset('admin/css/materialdesignicons.min.css') }}">
+			<link rel="stylesheet" href="{{ asset('admin/css/fullcalendar.css') }}">
+			<link rel="stylesheet" href="{{ asset('admin/css/main.css') }}">
+
+			<link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+			<link href='https://fonts.googleapis.com/css?family=Work+Sans:400,300,600,400italic,700' rel='stylesheet' type='text/css'>
+			<link href="https://fonts.googleapis.com/css?family=Sacramento" rel="stylesheet">
+			<link
+			rel="stylesheet" href="{{ asset('fonts/dripicons-v2.ttf') }}">
+
+			<!-- Animate.css -->
+			<link
+			rel="stylesheet" href="css/animate.css">
+			<!-- Icomoon Icon Fonts-->
+			<link
+			rel="stylesheet" href="css/icomoon.css">
+			<!-- Bootstrap  -->
+			<link
+			rel="stylesheet" href="css/bootstrap.css">
+
+			<!-- Magnific Popup -->
+			<link
+			rel="stylesheet" href="css/magnific-popup.css">
+
+			<!-- Owl Carousel  -->
+			<link rel="stylesheet" href="css/owl.carousel.min.css">
+			<link
+			rel="stylesheet" href="css/owl.theme.default.min.css">
+			<!-- Theme style  -->
+			<link rel="stylesheet" href="css/style.css">
+			<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+			<link
+				rel="stylesheet" href="{{ asset('css/AyaCSS.css') }}">
+
+		{% endblock %}
+	</head>
+	<body>
+		<div id="page">
+			{% block nav %}
+				<nav class="fh5co-nav" role="navigation">
+					<div class="container">
+						<div class="row">
+							<div class="col-xs-2">
+								<div id="fh5co-logo">
+									<a href="{{ path('app_home') }}">
+										<img src="{{ asset('images/logo2.png') }}" alt="Logo" style="max-height: 125px; width: auto;">
+									</a>
+								</a>
+							</div>
+						</div>
+						<div class="col-xs-10 text-right menu-1">
+							<ul>
+								<li class="active">
+									<a href="{{ path('app_home') }}">Home</a>
+								</li>
+								<li class="{% if app.request.attributes.get('_route') == 'about_us' %}active{% endif %}">
+									<a href="{{ path('about_us') }}">Story</a>
+								</li>
+
+								<li class="has-dropdown {% if app.request.attributes.get('_route') == 'app_services' %}active{% endif %}">
+									<a href="{{ path('app_services') }}">Services</a>
+
+									<ul class="dropdown">
+										<li>
+											<a href="{{ path('app_events') }}">Events</a>
+										</li>
+										<li>
+											<a href="{{ path('afficheclient') }}">Products</a>
+										</li>
+										<li class="{% if app.request.attributes.get('_route') == 'app_publication_client' %}active{% endif %}">
+											<a href="{{ path('app_publication_client') }}">Forum</a>
+										</li>
+
+									</ul>
+								</li>
+								<li class="has-dropdown {% if app.request.attributes.get('_route') == 'app_gallery' %}active{% endif %}">
+									<a href="{{ path('app_gallery') }}">Gallery</a>
+								</li>
+
+								<li class="{% if app.request.attributes.get('_route') == 'contact_us' %}active{% endif %}">
+									<a href="{{ path('contact_us') }}">Contact</a>
+								</li>
+
+								<li class="{% if app.request.attributes.get('_route') == 'contact_us' %}active{% endif %}">
+									<a href="{{ path('contact_us') }}" class="btn-signin">Sign in</a>
+								</li>
+								
+								{% set summary = aya_cart_summary() %}
+								<li class="nav-item-cart" id="aya-cart-hover" style="position: relative;">
+									<a href="{{ path('aya_cart') }}" style="position: relative;">
+										<i class="dripicon-cart" style="font-size: 22px;">Q</i>
+										{% if summary.cartProducts is not empty %}
+											<span class="aya-cart-badge">{{ summary.cartProducts|length }}</span>
+										{% endif %}
+									</a>
+
+									<div class="aya-cart-preview">
+										{% if summary.cartProducts is not empty %}
+											<div class="cart-items-list">
+												{% for item in summary.cartProducts %}
+													<div class="preview-item">
+														<img src="data:image/jpeg;base64,{{ item.getProduct().getImage() }}" class="product-thumb" alt="{{ item.getProduct().getName() }}">
+														<div class="item-info">
+															<strong class="product-name">{{ item.getProduct().getName() }}</strong>
+															<div class="item-meta">
+																x{{ item.getQuantity() }}
+																•
+																{{ item.getTotalPrice() }}
+																TND
+															</div>
+														</div>
+													</div>
+												{% endfor %}
+											</div>
+
+											<hr class="preview-divider">
+											<div class="cart-total">
+												<span>Total:</span>
+												<strong>{{ summary.total }}
+													TND</strong>
+											</div>
+
+											<div class="cart-actions">
+												<a href="{{ path('aya_cart') }}" class="btn-view-cart">🛒 View Cart</a>
+											</div>
+										{% else %}
+											<div class="preview-empty">
+												<img src="{{ asset('images/empty-cart.png') }}" alt="Cart Empty">
+												<p>
+													<strong>Shopping cart is Empty</strong>
+												</p>
+												<p class="empty-note">
+													Welcome back! If you had items in your cart, we saved them for you.<br>
+													<a href="{{ path('contact_us') }}">
+														<u>SIGN IN</u>
+													</a>
+													now to see them.
+												</p>
+											</div>
+										{% endif %}
+									</div>
+
+								</li>
+							</ul>
+						</div>
+					</div>
+
+				</div>
+			</nav>
+		{% endblock %}
+		{% block preloader %}
+			<!-- ======== Preloader =========== -->
+			<div id="preloader">
+				<div class="spinner"></div>
+			</div>
+			<header id="fh5co-header" class="fh5co-cover fh5co-cover-sm" role="banner" style="background-image:url('{{ asset('images/eventspage9.jpg') }}');">
+				<div class="overlay"></div>
+				<div class="fh5co-container">
+					<div class="row">
+						<div class="col-md-8 col-md-offset-2 text-center">
+							<div class="display-t">
+								<div class="display-tc animate-box" data-animate-effect="fadeIn">
+									<h1>List of Products</h1>
+								   
+									
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</header>
+			<!-- ======== Preloader =========== -->
+		{% endblock %}
+
+
+		{% block section %}
+			<section class="section">
+				<div class="container-fluid">
+					<div class="title-wrapper pt-30">
+						<div class="row align-items-center">
+							<div class="col-md-6">
+								
+								<form id="filter-form" class="mb-4">
+									<div class="row justify-content-center">
+										<div class="col-md-4">
+											<select name="category" id="category" class="form-control">
+												<option value="">All Categories</option>
+												{% for category in groupedProducts|keys %}
+													<option value="{{ category }}">{{ category }}</option>
+												{% endfor %}
+											</select>
+										</div>
+									</div>
+								</form>
+								
+								
+							</div>
+						</div>
+					</div>
+					<!-- ========= card-style-2 start ========= -->
+					<div class="row">
+						<div class="col-12">
+							<div class="title mt-30 mb-30">
+								
+							</div>
+						</div>
+
+						<div id="product-list">
+							{% include 'partials/_products.html.twig' %}
+						</div>
+						
+
+		{% if groupedProducts is empty %}
+		<p class="text-center">No products available.</p>
+	{% endif %}
+	
+
+					</div>
+				</section>
+			{% endblock %}
+
+
+			<!-- ========== footer start =========== -->
+			{% block footer %}
+				<footer class="footer">
+					<div class="container-fluid">
+						<div class="row">
+							<div class="col-md-6 order-last order-md-first">
+								<div class="copyright text-center text-md-start">
+									<p class="text-sm">
+										Designed and Developed by
+										<a href="https://plainadmin.com" rel="nofollow" target="_blank">
+											HackPack
+
+										</a>
+									</p>
+								</div>
+							</div>
+							<!-- end col-->
+							<div class="col-md-6">
+								<div class="terms d-flex justify-content-center justify-content-md-end">
+									<a href="#0" class="text-sm">Term & Conditions</a>
+									<a href="#0" class="text-sm ml-15">Privacy & Policy</a>
+								</div>
+							</div>
+						</div>
+						<!-- end row -->
+					</div>
+					<!-- end container -->
+				</footer>
+			{% endblock %}
+			<!-- ========== footer end =========== -->
+		</main>
+		<!-- ======== main-wrapper end =========== -->
+
+		<!-- ========= All Javascript files linkup ======== -->
+
+		{% block javascripts %}
+			<script src="{{ asset('admin/js/bootstrap.bundle.min.js') }}"></script>
+			<script src="{{ asset('admin/js/Chart.min.js') }}"></script>
+			<script src="{{ asset('admin/js/dynamic-pie-chart.js') }}"></script>
+			<script src="{{ asset('admin/js/moment.min.js') }}"></script>
+			<script src="{{ asset('admin/js/fullcalendar.js') }}"></script>
+			<script src="{{ asset('admin/js/jvectormap.min.js') }}"></script>
+			<script src="{{ asset('admin/js/world-merc.js') }}"></script>
+			<script src="{{ asset('admin/js/polyfill.js') }}"></script>
+			<script src="{{ asset('admin/js/main.js') }}"></script>
+
+			<script>
+				// ======== jvectormap activation
+var markers = [
+{
+name: "Egypt",
+coords: [26.8206, 30.8025]
+},
+{
+name: "Russia",
+coords: [61.524, 105.3188]
+},
+{
+name: "Canada",
+coords: [56.1304, -106.3468]
+},
+{
+name: "Greenland",
+coords: [71.7069, -42.6043]
+}, {
+name: "Brazil",
+coords: [-14.235, -51.9253]
+},
+];
+
+var jvm = new jsVectorMap({
+map: "world_merc",
+selector: "#map",
+zoomButtons: true,
+
+regionStyle: {
+initial: {
+fill: "#d1d5db"
+}
+},
+
+labels: {
+markers: {
+render: (marker) => marker.name
+}
+},
+
+markersSelectable: true,
+selectedMarkers: markers.map(
+(marker, index) => {
+var name = marker.name;
+
+if (name === "Russia" || name === "Brazil") {
+return index;
+}
+}
+),
+markers: markers,
+markerStyle: {
+initial: {
+fill: "#4A6CF7"
+},
+selected: {
+fill: "#ff5050"
+}
+},
+markerLabelStyle: {
+initial: {
+fontWeight: 400,
+fontSize: 14
+}
+}
+});
+// ====== calendar activation
+document.addEventListener("DOMContentLoaded", function () {
+var calendarMiniEl = document.getElementById("calendar-mini");
+var calendarMini = new FullCalendar.Calendar(calendarMiniEl, {
+initialView: "dayGridMonth",
+headerToolbar: {
+end: "today prev,next"
+}
+});
+calendarMini.render();
+});
+
+// =========== chart one start
+const ctx1 = document.getElementById("Chart1").getContext("2d");
+const chart1 = new Chart(ctx1, {
+type: "line",
+data: {
+labels: [
+"Jan",
+"Fab",
+"Mar",
+"Apr",
+"May",
+"Jun",
+"Jul",
+"Aug",
+"Sep",
+"Oct",
+"Nov",
+"Dec",
+],
+datasets: [
+{
+label: "",
+backgroundColor: "transparent",
+borderColor: "#365CF5",
+data: [
+600,
+800,
+750,
+880,
+940,
+880,
+900,
+770,
+920,
+890,
+976,
+1100,
+],
+pointBackgroundColor: "transparent",
+pointHoverBackgroundColor: "#365CF5",
+pointBorderColor: "transparent",
+pointHoverBorderColor: "#fff",
+pointHoverBorderWidth: 5,
+borderWidth: 5,
+pointRadius: 8,
+pointHoverRadius: 8,
+cubicInterpolationMode: "monotone", // Add this line for curved line
+},
+]
+},
+options: {
+plugins: {
+tooltip: {
+callbacks: {
+labelColor: function (context) {
+return {backgroundColor: "#ffffff", color: "#171717"};
+}
+},
+intersect: false,
+backgroundColor: "#f9f9f9",
+title: {
+fontFamily: "Plus Jakarta Sans",
+color: "#8F92A1",
+fontSize: 12
+},
+body: {
+fontFamily: "Plus Jakarta Sans",
+color: "#171717",
+fontStyle: "bold",
+fontSize: 16
+},
+multiKeyBackground: "transparent",
+displayColors: false,
+padding: {
+x: 30,
+y: 10
+},
+bodyAlign: "center",
+titleAlign: "center",
+titleColor: "#8F92A1",
+bodyColor: "#171717",
+bodyFont: {
+family: "Plus Jakarta Sans",
+size: "16",
+weight: "bold"
+}
+},
+legend: {
+display: false
+}
+},
+responsive: true,
+maintainAspectRatio: false,
+title: {
+display: false
+},
+scales: {
+y: {
+grid: {
+display: false,
+drawTicks: false,
+drawBorder: false
+},
+ticks: {
+padding: 35,
+max: 1200,
+min: 500
+}
+},
+x: {
+grid: {
+drawBorder: false,
+color: "rgba(143, 146, 161, .1)",
+zeroLineColor: "rgba(143, 146, 161, .1)"
+},
+ticks: {
+padding: 20
+}
+}
+}
+}
+});
+// =========== chart one end
+
+// =========== chart two start
+const ctx2 = document.getElementById("Chart2").getContext("2d");
+const chart2 = new Chart(ctx2, {
+type: "bar",
+data: {
+labels: [
+"Jan",
+"Fab",
+"Mar",
+"Apr",
+"May",
+"Jun",
+"Jul",
+"Aug",
+"Sep",
+"Oct",
+"Nov",
+"Dec",
+],
+datasets: [
+{
+label: "",
+backgroundColor: "#365CF5",
+borderRadius: 30,
+barThickness: 6,
+maxBarThickness: 8,
+data: [
+600,
+700,
+1000,
+700,
+650,
+800,
+690,
+740,
+720,
+1120,
+876,
+900,
+]
+},
+]
+},
+options: {
+plugins: {
+tooltip: {
+callbacks: {
+titleColor: function (context) {
+return "#8F92A1";
+},
+label: function (context) {
+let label = context.dataset.label || "";
+
+if (label) {
+label += ": ";
+}
+label += context.parsed.y;
+return label;
+}
+},
+backgroundColor: "#F3F6F8",
+titleAlign: "center",
+bodyAlign: "center",
+titleFont: {
+size: 12,
+weight: "bold",
+color: "#8F92A1"
+},
+bodyFont: {
+size: 16,
+weight: "bold",
+color: "#171717"
+},
+displayColors: false,
+padding: {
+x: 30,
+y: 10
+}
+}
+},
+legend: {
+display: false
+},
+legend: {
+display: false
+},
+layout: {
+padding: {
+top: 15,
+right: 15,
+bottom: 15,
+left: 15
+}
+},
+responsive: true,
+maintainAspectRatio: false,
+scales: {
+y: {
+grid: {
+display: false,
+drawTicks: false,
+drawBorder: false
+},
+ticks: {
+padding: 35,
+max: 1200,
+min: 0
+}
+},
+x: {
+grid: {
+display: false,
+drawBorder: false,
+color: "rgba(143, 146, 161, .1)",
+drawTicks: false,
+zeroLineColor: "rgba(143, 146, 161, .1)"
+},
+ticks: {
+padding: 20
+}
+}
+},
+plugins: {
+legend: {
+display: false
+},
+title: {
+display: false
+}
+}
+}
+});
+// =========== chart two end
+
+// =========== chart three start
+const ctx3 = document.getElementById("Chart3").getContext("2d");
+const chart3 = new Chart(ctx3, {
+type: "line",
+data: {
+labels: [
+"Jan",
+"Feb",
+"Mar",
+"Apr",
+"May",
+"Jun",
+"Jul",
+"Aug",
+"Sep",
+"Oct",
+"Nov",
+"Dec",
+],
+datasets: [
+{
+label: "Revenue",
+backgroundColor: "transparent",
+borderColor: "#365CF5",
+data: [
+80,
+120,
+110,
+100,
+130,
+150,
+115,
+145,
+140,
+130,
+160,
+210
+],
+pointBackgroundColor: "transparent",
+pointHoverBackgroundColor: "#365CF5",
+pointBorderColor: "transparent",
+pointHoverBorderColor: "#365CF5",
+pointHoverBorderWidth: 3,
+pointBorderWidth: 5,
+pointRadius: 5,
+pointHoverRadius: 8,
+fill: false,
+tension: 0.4
+}, {
+label: "Profit",
+backgroundColor: "transparent",
+borderColor: "#9b51e0",
+data: [
+120,
+160,
+150,
+140,
+165,
+210,
+135,
+155,
+170,
+140,
+130,
+200,
+],
+pointBackgroundColor: "transparent",
+pointHoverBackgroundColor: "#9b51e0",
+pointBorderColor: "transparent",
+pointHoverBorderColor: "#9b51e0",
+pointHoverBorderWidth: 3,
+pointBorderWidth: 5,
+pointRadius: 5,
+pointHoverRadius: 8,
+fill: false,
+tension: 0.4
+}, {
+label: "Order",
+backgroundColor: "transparent",
+borderColor: "#f2994a",
+data: [
+180,
+110,
+140,
+135,
+100,
+90,
+145,
+115,
+100,
+110,
+115,
+150
+],
+pointBackgroundColor: "transparent",
+pointHoverBackgroundColor: "#f2994a",
+pointBorderColor: "transparent",
+pointHoverBorderColor: "#f2994a",
+pointHoverBorderWidth: 3,
+pointBorderWidth: 5,
+pointRadius: 5,
+pointHoverRadius: 8,
+fill: false,
+tension: 0.4
+},
+]
+},
+options: {
+plugins: {
+tooltip: {
+intersect: false,
+backgroundColor: "#fbfbfb",
+titleColor: "#8F92A1",
+bodyColor: "#272727",
+titleFont: {
+size: 16,
+family: "Plus Jakarta Sans",
+weight: "400"
+},
+bodyFont: {
+family: "Plus Jakarta Sans",
+size: 16
+},
+multiKeyBackground: "transparent",
+displayColors: false,
+padding: {
+x: 30,
+y: 15
+},
+borderColor: "rgba(143, 146, 161, .1)",
+borderWidth: 1,
+enabled: true
+},
+title: {
+display: false
+},
+legend: {
+display: false
+}
+},
+layout: {
+padding: {
+top: 0
+}
+},
+responsive: true,
+// maintainAspectRatio: false,
+legend: {
+display: false
+},
+scales: {
+y: {
+grid: {
+display: false,
+drawTicks: false,
+drawBorder: false
+},
+ticks: {
+padding: 35
+},
+max: 350,
+min: 50
+},
+x: {
+grid: {
+drawBorder: false,
+color: "rgba(143, 146, 161, .1)",
+drawTicks: false,
+zeroLineColor: "rgba(143, 146, 161, .1)"
+},
+ticks: {
+padding: 20
+}
+}
+}
+}
+});
+// =========== chart three end
+
+// ================== chart four start
+const ctx4 = document.getElementById("Chart4").getContext("2d");
+const chart4 = new Chart(ctx4, {
+type: "bar",
+data: {
+labels: [
+"Jan",
+"Feb",
+"Mar",
+"Apr",
+"May",
+"Jun"
+],
+datasets: [
+{
+label: "",
+backgroundColor: "#365CF5",
+borderColor: "transparent",
+borderRadius: 20,
+borderWidth: 5,
+barThickness: 20,
+maxBarThickness: 20,
+data: [
+600,
+700,
+1000,
+700,
+650,
+800
+]
+}, {
+label: "",
+backgroundColor: "#d50100",
+borderColor: "transparent",
+borderRadius: 20,
+borderWidth: 5,
+barThickness: 20,
+maxBarThickness: 20,
+data: [
+690,
+740,
+720,
+1120,
+876,
+900
+]
+},
+]
+},
+options: {
+plugins: {
+tooltip: {
+backgroundColor: "#F3F6F8",
+titleColor: "#8F92A1",
+titleFontSize: 12,
+bodyColor: "#171717",
+bodyFont: {
+weight: "bold",
+size: 16
+},
+multiKeyBackground: "transparent",
+displayColors: false,
+padding: {
+x: 30,
+y: 10
+},
+bodyAlign: "center",
+titleAlign: "center",
+enabled: true
+},
+legend: {
+display: false
+}
+},
+layout: {
+padding: {
+top: 0
+}
+},
+responsive: true,
+// maintainAspectRatio: false,
+title: {
+display: false
+},
+scales: {
+y: {
+grid: {
+display: false,
+drawTicks: false,
+drawBorder: false
+},
+ticks: {
+padding: 35,
+max: 1200,
+min: 0
+}
+},
+x: {
+grid: {
+display: false,
+drawBorder: false,
+color: "rgba(143, 146, 161, .1)",
+zeroLineColor: "rgba(143, 146, 161, .1)"
+},
+ticks: {
+padding: 20
+}
+}
+}
+}
+});
+// =========== chart four end
+			</script>
+			<!-- jQuery -->
+<script src="{{ asset('js/jquery.min.js') }}"></script>
+<!-- jQuery Easing -->
+<script src="{{ asset('js/jquery.easing.1.3.js') }}"></script>
+<!-- Bootstrap -->
+<script src="{{ asset('js/bootstrap.min.js') }}"></script>
+<!-- Waypoints -->
+<script src="{{ asset('js/jquery.waypoints.min.js') }}"></script>
+<!-- Carousel -->
+<script src="{{ asset('js/owl.carousel.min.js') }}"></script>
+<!-- countTo -->
+<script src="{{ asset('js/jquery.countTo.js') }}"></script>
+
+<!-- Stellar -->
+<script src="{{ asset('js/jquery.stellar.min.js') }}"></script>
+<!-- Magnific Popup -->
+<script src="{{ asset('js/jquery.magnific-popup.min.js') }}"></script>
+<script src="{{ asset('js/magnific-popup-options.js') }}"></script>
+
+<!-- // <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/0.0.1/prism.min.js"></script> -->
+<script src="{{ asset('js/simplyCountdown.js') }}"></script>
+<script>
+	document.addEventListener('DOMContentLoaded', function () {
+		window.scrollTo({
+			top: 500,
+			behavior: 'smooth'
+		});
+	});
+</script>
+<!-- Main -->
+<script src="{{ asset('js/main.js') }}"></script>
+
+			<script>
+				document.getElementById('category').addEventListener('change', function () {
+					const selectedCategory = this.value;
+				
+					fetch('{{ path("ajax_filter_products") }}?category=' + encodeURIComponent(selectedCategory), {
+						headers: {
+							'X-Requested-With': 'XMLHttpRequest'
+						}
+					})
+					.then(response => response.text())
+					.then(html => {
+						document.getElementById('product-list').innerHTML = html;
+					});
+				});
+				</script>
+				
+			<style>
+				.card-image img {
+					width: 100%;
+					height: 200px;
+					object-fit: cover;
+					border-radius: 5px;
+				}
+			</style>
+
+		{% endblock %}
+	</body>
+</html>

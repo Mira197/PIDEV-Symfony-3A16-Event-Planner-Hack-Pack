@@ -1,0 +1,45 @@
+<div class="event-form-container">
+    {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+
+    <div class="select-style-1">
+        {{ form_label(form.locationName) }}
+        <div class="select-position">
+            {{ form_widget(form.locationName, {
+                'attr': {
+                    'class': form_errors(form.locationName) ? 'is-invalid' : ''
+                }
+            }) }}
+        </div>
+        {% if form_errors(form.locationName) %}
+            <div class="form-error">{{ form_errors(form.locationName) }}</div>
+        {% endif %}
+    </div>
+
+    <div class="input-style-1">
+        {{ form_label(form.start_date) }}
+        {{ form_widget(form.start_date, {
+            'attr': {
+                'class': form_errors(form.start_date) ? 'is-invalid' : ''
+            }
+        }) }}
+        {% if form_errors(form.start_date) %}
+            <div class="form-error">{{ form_errors(form.start_date) }}</div>
+        {% endif %}
+    </div>
+
+    <div class="input-style-1">
+        {{ form_label(form.end_date) }}
+        {{ form_widget(form.end_date, {
+            'attr': {
+                'class': form_errors(form.end_date) ? 'is-invalid' : ''
+            }
+        }) }}
+        {% if form_errors(form.end_date) %}
+            <div class="form-error">{{ form_errors(form.end_date) }}</div>
+        {% endif %}
+    </div>
+
+    <button class="btn-save-event">{{ button_label|default('Book') }}</button>
+
+    {{ form_end(form) }}
+</div>
