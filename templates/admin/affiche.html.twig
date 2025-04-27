@@ -7,6 +7,13 @@
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 	<div class="admin-mui-wrapper">
 		<h2> Manage Products</h2>
+        <!-- Barre de recherche + actions -->
+		<div class="admin-filters">
+			<div class="left-search">
+				<input type="text" id="productSearchInput" placeholder="🔍 Search events..." class="form-control">
+			</div>
+			
+		</div>
 
 		<!-- Barre de recherche + actions -->
 		<div class="title mt-30 mb-30">
@@ -31,7 +38,7 @@
 				</tr>
 			</thead>
 
-			<tbody id="eventsTable">
+			<tbody id="productsTable">
 				 {% for product in products %}
 					<tr>
 						<td>
@@ -66,4 +73,66 @@
 </div>
 
 	</div>
+{% endblock %}
+{% block javascripts %}
+{{ parent() }}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script>
+    $(document).ready(function () {
+        $('#productSearchInput').on('keyup', function () {
+            let query = $(this).val();
+
+            if (query.trim() === '') {
+                window.location.reload();
+                return;
+            }
+
+            $.ajax({
+                url: "{{ path('product_ajax_search') }}", // Remplacer par la nouvelle route
+                type: 'GET',
+                data: { q: query },
+                success: function (data) {
+                    let tbody = $('#productsTable'); // Modifier l'id du tableau
+                    tbody.empty();
+
+                    if (data.length === 0) {
+                        tbody.append('<tr><td colspan="7">No products found.</td></tr>');
+                        return;
+                    }
+
+                    data.forEach(function (product) {
+                        const imageCell = product.base64Image
+    ? `<img src="data:image/jpeg;base64,${product.base64Image}" width="70" height="50" style="object-fit:cover; border-radius:6px;">`
+    : '<em>No image</em>';
+
+                        tbody.append(`
+                            <tr>
+                                <td>${imageCell}</td>
+                                <td>${product.name}</td>
+                                <td>${product.category}</td>
+                                <td>${product.price} TND</td>
+                                <td>${product.stock}</td>
+                                
+                                
+                               
+                                <td>
+							<a href="/admin/product/delete/${product.product_id}" class="main-btn danger-btn-outline btn-hover px-3 py-2">
+                <i class="fa-solid fa-trash" style="font-size: 18px;color: #533C56;"></i>
+            </a>
+            <a href="/admin/product/edit/${product.product_id}" class="btn btn-outline-warning btn-sm">
+                <i class="fa-solid fa-pen" style="font-size: 14px;color: #533C56;"></i>
+            </a>
+						</td>
+                            </tr>
+                        `);
+                    });
+                },
+                error: function () {
+                    alert("Error fetching product results.");
+                }
+            });
+        });
+    });
+</script>
 {% endblock %}

@@ -15,7 +15,13 @@ class ProductRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, Product::class);
     }
-
+    public function searchByKeyword(string $keyword): \Doctrine\ORM\QueryBuilder
+    {
+        return $this->createQueryBuilder('p')
+            ->where('p.name LIKE :kw OR p.description LIKE :kw OR p.category LIKE :kw')
+            ->setParameter('kw', '%' . $keyword . '%')
+            ->orderBy('p.name', 'ASC');
+    }
 //    /**
 //     * @return Product[] Returns an array of Product objects
 //     */

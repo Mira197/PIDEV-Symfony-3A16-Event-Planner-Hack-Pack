@@ -19,7 +19,8 @@ use App\Repository\UserRepository;
 use Knp\Component\Pager\PaginatorInterface;
 use App\Service\CurrencyConverter;
 use Symfony\Contracts\HttpClient\HttpClientInterface; // 🔥 pour appeler l'API de conversion
-
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 
 
 
@@ -359,6 +360,28 @@ public function mesProduits(SessionInterface $session, ProductRepository $produc
     return $this->render('admin/affichefournisseur.html.twig', [
         'products' => $products,
     ]);
+}
+#[Route('/ajax/search-product', name: 'product_ajax_search', methods: ['GET'])]
+public function ajaxSearchProduct(Request $request, ProductRepository $productRepository, NormalizerInterface $normalizer): JsonResponse
+{
+    $keyword = $request->query->get('q', '');
+    $products = $productRepository->searchByKeyword($keyword)->getQuery()->getResult();
+
+    // Convertir l'image BLOB (si tu utilises une image BLOB en base64)
+   
+
+    $json = $normalizer->normalize($products, 'json', [
+        'attributes' => [
+            'product_id',     // important pour les boutons delete/edit
+            'name',
+            'category',
+            'price',
+            'stock' => ['stock_id'], // on va chercher l'ID du stock lié
+            'base64Image'
+        ]
+    ]);
+
+    return new JsonResponse($json);
 }
 
 
