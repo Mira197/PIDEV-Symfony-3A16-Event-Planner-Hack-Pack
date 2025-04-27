@@ -42,6 +42,8 @@ class AyaOrderController extends AbstractController
         // ✅ 1. Récupérer l'utilisateur connecté
         $userId = $session->get('user_id');
         $user = $userRepository->find($userId);
+        $walletCredit = $walletTransactionRepository->calculateWalletBalance($user);
+
 
         if (!$user) {
             return $this->redirectToRoute('app_login');
@@ -128,12 +130,19 @@ class AyaOrderController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $paymentMode = $request->getSession()->get('payment_mode', 'stripe_only');
+            $order->setPaymentMethod($paymentMode); // 🆕 stocker ce que l'utilisateur a choisi
+
             $finalTotalFromForm = $request->request->get('final_total');
 
             if ($finalTotalFromForm !== null) {
                 $order->setTotalPrice(floatval($finalTotalFromForm));
             }
+            if ($order->getTotalPrice() == 0.00) {
+                $order->setPaymentMethod('Wallet Only');
+            }
             $order->setStatus('PENDING');
+
 
             // ✅ 9. Nouveau panier vide
             $newCart = new Cart();
@@ -176,6 +185,7 @@ class AyaOrderController extends AbstractController
             'form' => $form->createView(),
             'cart' => $cart,
             'total' => $total,
+            'wallet_credit' => $walletCredit,
         ]);
     }
     #[Route('/api/order/new', name: 'api_aya_order_new', methods: ['POST'])]

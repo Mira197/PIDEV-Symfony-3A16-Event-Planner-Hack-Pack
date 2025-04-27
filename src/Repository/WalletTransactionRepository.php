@@ -46,4 +46,21 @@ class WalletTransactionRepository extends ServiceEntityRepository
 
         return $result ? (float) $result : 0.0;
     }
+    public function calculateWalletBalance(User $user): float
+{
+    $qb = $this->createQueryBuilder('w')
+        ->select('
+            SUM(CASE WHEN w.type = :deposit THEN w.amount ELSE 0 END) -
+            SUM(CASE WHEN w.type = :payment THEN w.amount ELSE 0 END)
+        ')
+        ->where('w.user = :user')
+        ->setParameter('user', $user)
+        ->setParameter('deposit', 'deposit')
+        ->setParameter('payment', 'payment');
+
+    $result = $qb->getQuery()->getSingleScalarResult();
+
+    return (float) ($result ?? 0.0);
+}
+
 }
