@@ -61,6 +61,7 @@
 				<div class="order-form-container">
 					<h2 class="mb-4 text-center">🧾 Validate Your Order</h2>
 					{{ form_start (form, {'attr': {'novalidate': 'novalidate'}}) }}
+					<input type="hidden" id="final_total_field" name="final_total" value="{{ total }}">
 					<div class="form-group">
 						{{ form_label(form.exact_address) }}
 						{{ form_widget(form.exact_address, {'attr': {'class': 'form-control' ~ (form_errors(form.exact_address) ? ' is-invalid' : ''),'placeholder': 'Enter exact delivery address'}}) }}
@@ -122,38 +123,13 @@
 							<button class="btn btn-secondary apply-btn" id="apply-points">Apply</button>
 						</div>
 					</div>
-
-
-					<button class="btn btn-dark w-100 mt-4">CONTINUE</button>
+					 <div class="line d-flex justify-content-between" style="font-size: 1.3em; font-weight: bold; color: #6b336e;">
+        <span>🏁 Total</span>
+        <span id="final-total">{{ total|number_format(2, '.', ' ') }} TND</span>
+    </div>
 				</div>
 			</div>
-			<!-- Cart Summary (Right Side) -->
-			<div class="col-md-4">
-				<div class="cart-summary">
-					<h5>Cart Summary</h5>
-					<div class="line total">
-						<span>Total</span>
-						<span id="cart-total">{{ total }}
-							TND</span>
-						<!-- Total récupéré ici -->
-					</div>
-					<!-- Tax, Coupon, and other lines -->
-					<div class="line">
-						<span>Tax</span>
-						<span>+ 0.00 TND</span>
-					</div>
-					<div class="line">
-						<span>Coupon</span>
-						<span>− 0.00 TND</span>
-					</div>
-					<hr>
-					<div class="line total">
-						<span>Total</span>
-						<span id="final-total">{{ total }}
-							TND</span>
-					</div>
-					{# <a href="{{ path('aya_order_confirm') }}" class="btn btn-success btn-checkout">Proceed to Checkout</a> #}
-				</div>
+
 			</div>
 
 
@@ -168,7 +144,9 @@
     document.addEventListener('DOMContentLoaded', function () {
 		const initialTotal = parseFloat('{{ total|default(0)|replace({",": "."}) }}') || 0;
 sessionStorage.setItem('initial_total', initialTotal);
+sessionStorage.setItem('current_total', initialTotal);
 console.log('Initial Total Loaded:', initialTotal);
+console.log('current_total', initialTotal);
 sessionStorage.setItem('initial_total', initialTotal);
 
         // Fonction générale pour afficher SweetAlert TOAST ou Popup
@@ -201,22 +179,30 @@ function showAlert(icon, title, text, useToast = false) {
 }
 
         // 🔥 Fonction pour mettre à jour le total
-        function updateTotal() {
-    let initialTotal = parseFloat(sessionStorage.getItem('initial_total') || 0);
+		function updateTotal() {
+    let currentTotal = parseFloat(sessionStorage.getItem('current_total') || sessionStorage.getItem('initial_total') || 0);
 
     const couponDiscount = parseFloat(sessionStorage.getItem('coupon_discount') || 0);
     const walletUsed = parseFloat(sessionStorage.getItem('wallet_used') || 0);
     const giftCardAmount = parseFloat(sessionStorage.getItem('gift_card_amount') || 0);
     const pointsUsed = parseFloat(sessionStorage.getItem('points_used') || 0);
 
-    let newTotal = initialTotal - couponDiscount - walletUsed - giftCardAmount - pointsUsed;
+    let newTotal = currentTotal - couponDiscount - walletUsed - giftCardAmount - pointsUsed;
 
-    if (newTotal < 0) newTotal = 0; // jamais négatif !
+    if (newTotal < 0) newTotal = 0;
 
     // Mise à jour visuelle
-    $('#cart-total').text(newTotal.toFixed(2) + ' TND');
     $('#final-total').text(newTotal.toFixed(2) + ' TND');
+
+    // 🔥 Mise à jour du champ caché pour Symfony
+    document.getElementById('final_total_field').value = newTotal.toFixed(2);
+
+    // Mise à jour du current_total pour la prochaine fois
+    sessionStorage.setItem('current_total', newTotal);
 }
+
+        
+
 
 
         // 🔥 Apply Coupon

@@ -128,6 +128,11 @@ class AyaOrderController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $finalTotalFromForm = $request->request->get('final_total');
+
+            if ($finalTotalFromForm !== null) {
+                $order->setTotalPrice(floatval($finalTotalFromForm));
+            }
             $order->setStatus('PENDING');
 
             // ✅ 9. Nouveau panier vide
@@ -170,7 +175,7 @@ class AyaOrderController extends AbstractController
         return $this->render('aya_order/aya_order.html.twig', [
             'form' => $form->createView(),
             'cart' => $cart,
-            'total' => $total, 
+            'total' => $total,
         ]);
     }
     #[Route('/api/order/new', name: 'api_aya_order_new', methods: ['POST'])]
