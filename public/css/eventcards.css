@@ -166,15 +166,15 @@
 }
 
 .event-status.booked {
-    background-color: #d4edda; /* vert */
-    color: #155724;
+    background-color: #f8d7da; /* red */
+    color: #721c24;
     border-radius: 12px;
     
 }
 
 .event-status.not-booked {
-    background-color: #f8d7da; /* rouge */
-    color: #721c24;
+    background-color: #d4edda; /* green */
+    color: #155724;
     border-radius: 12px; 
     
 }

@@ -271,4 +271,48 @@ final class EventController extends AbstractController
         return $this->redirectToRoute('app_events', [], Response::HTTP_SEE_OTHER);
     }
 
+    #[Route('/event/{id}/framevr', name: 'event_framevr')]
+    public function framevr(int $id, SessionInterface $session, UserRepository $userRepository): Response
+    {
+        $userId = $session->get('user_id');
+        $user = $userRepository->find($userId);
+
+        // (optionnel) vérifier que l'utilisateur peut voir cet event
+
+        $frameUrl = $_ENV['FRAMEVR_URL'];
+        $apiKey = $_ENV['FRAMEVR_API_KEY'];
+
+        return $this->render('event/framevr.html.twig', [
+            'frameUrl' => $frameUrl,
+            'apiKey' => $apiKey,
+        ]);
+    }
+
+    #[Route('/event/{id}/framevr-link', name: 'event_add_framevr')]
+    public function addFrameVrLink(
+        Request $request,
+        EventRepository $eventRepo,
+        EntityManagerInterface $em,
+        int $id
+    ): Response {
+        $event = $eventRepo->find($id);
+
+        if (!$event) {
+            throw $this->createNotFoundException('Event not found');
+        }
+
+        if ($request->isMethod('POST')) {
+            $link = $request->request->get('frameVrLink');
+            $event->setFrameVrLink($link);
+            $em->flush();
+            return $this->redirectToRoute('event_show', ['id' => $id]);
+        }
+
+        return $this->render('event/addFrameVr.html.twig', [
+            'event' => $event
+        ]);
+    }
+
+
+
 }
