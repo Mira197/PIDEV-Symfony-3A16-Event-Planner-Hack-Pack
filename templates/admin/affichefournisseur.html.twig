@@ -1,93 +1,68 @@
 {% extends 'admin/baseFournisseur.html.twig' %}
 
+
 {% block title %}Products{% endblock %}
 
 {% block section %}
-<section class="section">
-    <div class="container-fluid">
-        <div class="title-wrapper pt-30">
-            <div class="row align-items-center">
-                <div class="col-md-6">
-                    <div class="title">
-                        <h2>All Products</h2>
-                    </div>
-                    
+<link rel="stylesheet" href="{{ asset('assetsAya/css/adminOrder.css') }}">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+	<div class="admin-mui-wrapper">
+		<h2> Manage Products</h2>
 
-                </div>
-            </div>
-        </div>
-        <!-- ========= card-style-2 start ========= -->
-        <div class="row">
-            <div class="col-12">
-                <div class="title mt-30 mb-30">
+		<!-- Barre de recherche + actions -->
+		<div class="title mt-30 mb-30">
             
-                    <a href="{{ path('product_add_four') }}" class="main-btn primary-btn btn-hover">
-                        ajouter product
-                      </a>
-                      
-                      
-                </div>
-                
-            <div class="table-responsive">
-                <table class="table top-selling-table">
-                    <thead>
-                        <tr>
-                            <th></th>
-                            <th><h6 class="text-sm text-medium">Products</h6></th>
-                            
-                            <th class="min-width"><h6 class="text-sm text-medium">category</h6></th>
-                            <th class="min-width"><h6 class="text-sm text-medium">price</h6></th>
-                            <th class="min-width"><h6 class="text-sm text-medium">stock</h6></th>
-                            <th></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for product in products %}
-                            <tr>
-                                <td>
-                                    <div class="check-input-primary">
-                                        <input class="form-check-input" type="checkbox" id="checkbox-{{ loop.index }}"/>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="product">
-                                        {% set base64 = product.getBase64Image() %}
+            <a href="{{ path('product_add_four') }}" class="main-btn primary-btn btn-hover">
+                ajouter product
+              </a>
+              
+        </div>
+
+		<table class="admin-mui-table">
+			<thead>
+				<tr>
+					<th>             </th>
+					<th>name</th>
+					<th>category</th>
+					<th>price</th>
+					<th>stock</th>
+					<th>Actions</th>
+				</tr>
+			</thead>
+
+			<tbody id="eventsTable">
+				 {% for product in products %}
+					<tr>
+						<td>
+							{% set base64 = product.getBase64Image() %}
                     {% if base64 %}
                     <img src="data:image/jpeg;base64,{{ base64 }}" alt="Image"
                     style="width: 50px; height: 50px; object-fit: cover; border-radius: 8px; box-shadow: 0 3px 10px rgba(0,0,0,0.08);">
                                    {% endif %}
-                    <p class="text-sm">{{ product.name }}</p>
-                                    </div>
-                                </td>
-                                <td><p class="text-sm">{{ product.category }}</p></td>
-                                <td><p class="text-sm">${{ product.price }}</p></td>
-                                <td><p class="text-sm">{{ product.stock.stock_id }}</p></td>
-                                
-                                <td>
-                            
-                                    <a href="{{ path('product_edit', {'id': product.product_id}) }}" class="btn btn-warning btn-sm me-2">
-                                      <i class="lni lni-pencil"></i>
-                                    </a></td>
-                                    <td> <form method="post" action="{{ path('product_delete', {'id': product.product_id}) }}"
-                                          onsubmit="return confirm('Are you sure you want to delete this product?');">
-                                      
-                                      <button class="btn btn-danger btn-sm">
-                                        <i class="lni lni-trash-can"></i>
-                                      </button>
-                                    </form>
-                                    </td>
-                            </tr>
-                        {% else %}
-                            <tr>
-                                <td colspan="7">
-                                    <p class="text-center text-muted">No products available.</p>
-                                </td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-          <!-- end row -->
-        </div>
-    </section>
-    {% endblock %}
+						</td>
+						<td>{{ product.name }}</td>
+						<td>{{ product.category }}</td>
+						<td>${{ product.price }}</td>
+						<td>{{ product.stock.stock_id }}</td>
+						
+						<td>
+							<a href="{{ path('product_delete', {'id': product.product_id}) }}" class="main-btn danger-btn-outline btn-hover px-3 py-2">
+								<i class="fa-solid fa-trash" style="font-size: 18px;color: #533C56;"></i>
+							</a>
+							<a href="{{ path('product_edit', {'id': product.product_id}) }}" class="btn btn-outline-warning btn-sm">
+								<i class="fa-solid fa-pen" style="font-size: 14px;color: #533C56;"></i>
+							</a>
+						</td>
+					</tr>
+				{% else %}
+					<tr>
+						<td colspan="7" class="empty-row">No products found.</td>
+					</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+		
+</div>
+
+	</div>
+{% endblock %}
