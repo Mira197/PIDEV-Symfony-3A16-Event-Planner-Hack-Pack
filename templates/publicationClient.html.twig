@@ -45,10 +45,10 @@
                 {% endif %}
             </div>
 
-            <!-- Afficher les messages flash -->
+            <!-- Afficher les messages flash pour le débogage -->
             {% for label, messages in app.flashes %}
                 {% for message in messages %}
-                    <div class="alert alert-{{ label }} text-center" style="margin: 20px 0; padding: 10px; border-radius: 5px; color: #533C56;" data-timeout="5000">
+                    <div class="alert alert-{{ label }} text-center flash-message" style="margin: 20px 0; padding: 10px; border-radius: 5px; color: #533C56;" data-timeout="5000">
                         {{ message }}
                     </div>
                 {% endfor %}
@@ -284,9 +284,6 @@
         .alert-error {
             background-color: #f8d7da;
         }
-        .alert-success {
-            background-color: #d4edda; /* Vert clair pour les messages de succès */
-        }
     </style>
 
     <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
@@ -304,6 +301,18 @@
                         this.textContent = '💬 Comment';
                     }
                 });
+            });
+
+            // Script pour masquer les messages flash après 5 secondes
+            const flashMessages = document.querySelectorAll('.flash-message');
+            flashMessages.forEach(function (message) {
+                const timeout = message.getAttribute('data-timeout') || 5000; // Par défaut 5000ms (5 secondes)
+                setTimeout(function () {
+                    message.style.opacity = '0'; // Optionnel : ajout d'une transition de fondu
+                    setTimeout(function () {
+                        message.style.display = 'none'; // Masquer complètement après la transition
+                    }, 500); // Temps de la transition (0.5 seconde)
+                }, timeout);
             });
         });
 
@@ -340,20 +349,4 @@
         });
     </script>
     {% endif %}
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const flashMessages = document.querySelectorAll('.alert');
-            flashMessages.forEach(function (message) {
-                const timeout = message.getAttribute('data-timeout') || 5000; // 5 secondes par défaut
-                setTimeout(function () {
-                    message.style.transition = 'opacity 0.5s ease';
-                    message.style.opacity = '0';
-                    setTimeout(function () {
-                        message.remove();
-                    }, 500); // Attendre la fin de la transition avant de supprimer
-                }, timeout);
-            });
-        });
-    </script>
 {% endblock %}
