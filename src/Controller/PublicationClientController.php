@@ -20,41 +20,44 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
 class PublicationClientController extends AbstractController
 {
-    #[Route('/forum', name: 'app_publication_client')]
+     #[Route('/forum', name: 'app_publication_client')]
     public function index(Request $request, PublicationRepository $publicationRepository, PublicationTranslationService $translationService): Response
     {
+        // Récupérer les publications triées par date de publication (plus récent en premier)
         $publications = $publicationRepository->findBy([], ['publication_date' => 'DESC']);
-        $this->addFlash('debug', "Nombre de publications récupérées : " . count($publications));
-    
+        $this->addFlash('debug', "Number of publications retrieved: " . count($publications));
+
         $publicationData = [];
         foreach ($publications as $index => $publication) {
             if (!$publication instanceof \App\Entity\Publication) {
                 $this->addFlash('error', "Invalid publication at index {$index}: " . (is_object($publication) ? get_class($publication) : gettype($publication)));
                 continue;
             }
-    
+
             $paramName = 'publication_' . $publication->getPublicationId();
             $targetLanguage = $request->query->get($paramName);
-    
+
             $allQueryParams = $request->query->all();
             $this->addFlash('debug', "All query params: " . json_encode($allQueryParams));
             $this->addFlash('debug', "Publication ID: {$publication->getPublicationId()}, Param: {$paramName}, Target Language: " . ($targetLanguage ?? 'null'));
-    
+
+            // Préparer les données pour le template
             $data = [
-                'publication' => $publication,
-                'title' => $publication->getTitle(),
-                'description' => $publication->getDescription(),
+                'publication' => $publication, // Garder l'objet Publication pour accéder aux champs non traduits
+                'title' => $publication->getTitle(), // Titre original
+                'description' => $publication->getDescription(), // Description originale
             ];
-    
-            $this->addFlash('debug', "Texte original avant traduction - Titre: {$data['title']}, Description: {$data['description']}");
-    
+
+            $this->addFlash('debug', "Original text before translation - Title: {$data['title']}, Description: {$data['description']}");
+
+            // Appliquer la traduction si une langue cible est spécifiée
             if (!empty($targetLanguage) && is_string($targetLanguage)) {
                 $this->addFlash('debug', "Target language for publication {$publication->getPublicationId()} is valid: {$targetLanguage}");
                 try {
                     $data['title'] = $translationService->translate($data['title'], $targetLanguage);
-                    $this->addFlash('debug', "Titre traduit: {$data['title']}");
+                    $this->addFlash('debug', "Translated title: {$data['title']}");
                     $data['description'] = $translationService->translate($data['description'], $targetLanguage);
-                    $this->addFlash('debug', "Description traduite: {$data['description']}");
+                    $this->addFlash('debug', "Translated description: {$data['description']}");
                     $this->addFlash('info', "Publication {$publication->getPublicationId()} translated to {$targetLanguage}: {$data['title']}");
                 } catch (\Exception $e) {
                     $this->addFlash('error', "Translation error for publication {$publication->getPublicationId()}: " . $e->getMessage());
@@ -62,12 +65,12 @@ class PublicationClientController extends AbstractController
             } else {
                 $this->addFlash('debug', "No translation applied for publication {$publication->getPublicationId()} because target language is empty or invalid: " . var_export($targetLanguage, true));
             }
-    
+
             $publicationData[] = $data;
         }
-    
-        $this->addFlash('debug', "Nombre d'éléments dans publicationData : " . count($publicationData));
-        $this->addFlash('test', "Test message flash pour vérifier l'affichage");
+
+        $this->addFlash('debug', "Number of items in publicationData: " . count($publicationData));
+        $this->addFlash('test', "Test flash message to verify display");
         return $this->render('publicationclient.html.twig', [
             'publications' => $publicationData,
         ]);
@@ -136,13 +139,6 @@ public function new(
         'username' => $user->getUsername(), // Passer le username à la vue
     ]);
 }
-
-    
-    
-    
-    
-    
-
 
    #[Route('/publication/{id}/edit', name: 'app_publication_edit')]
 public function edit(
