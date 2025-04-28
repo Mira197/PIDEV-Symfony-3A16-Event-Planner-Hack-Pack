@@ -235,7 +235,8 @@ public function index(Request $request, ProductRepository $productRepository, Pa
 CurrencyConverter $currencyConverter,
 HttpClientInterface $httpClient): Response
 {
-    $products = $productRepository->findAll();
+    $products = $productRepository->findAvailableProductsOrderedByStockRatio();
+
     $selectedCurrency = $request->query->get('currency', 'TND');
     $conversionRate = 1.0; // Valeur par défaut
     if ($selectedCurrency !== 'TND') {
@@ -313,7 +314,7 @@ public function listProducts(Request $request, ProductRepository $productRepo): 
     ]);
 }
 #[Route('/products/ajax', name: 'ajax_filter_products')]
-public function ajaxFilterProducts(Request $request, ProductRepository $productRepository): Response
+public function ajaxFilterProducts(Request $request, ProductRepository $productRepository, PaginatorInterface $paginator): Response
 {
     $category = $request->query->get('category');
 
@@ -323,17 +324,42 @@ public function ajaxFilterProducts(Request $request, ProductRepository $productR
         $products = $productRepository->findAll();
     }
 
-    // Group by category
+    // Grouper et paginer correctement
     $groupedProducts = [];
     foreach ($products as $product) {
         $cat = $product->getCategory();
         $groupedProducts[$cat][] = $product;
     }
 
+    $paginatedGroups = [];
+    foreach ($groupedProducts as $category => $productsInCategory) {
+        $paramName = 'page_' . md5($category);
+        $currentPage = $request->query->getInt($paramName, 1);
+
+        $pagination = $paginator->paginate(
+            $productsInCategory,
+            $currentPage,
+            3,
+            [
+                'pageParameterName' => $paramName,
+            ]
+        );
+
+        $paginatedGroups[] = [
+            'category' => $category,
+            'pagination' => $pagination,
+            'hash' => $paramName,
+        ];
+    }
+
     return $this->render('partials/_products.html.twig', [
-        'groupedProducts' => $groupedProducts
+        'groupedProducts' => $paginatedGroups,
+        'selectedCurrency' => 'TND', // en AJAX tu peux forcer TND
+        'conversionRate' => 1.0,      // en AJAX aussi
     ]);
 }
+
+
 #[Route('/admin/product', name: 'app_product_list')]
 public function listProductsAdmin(ProductRepository $repo): Response
 {

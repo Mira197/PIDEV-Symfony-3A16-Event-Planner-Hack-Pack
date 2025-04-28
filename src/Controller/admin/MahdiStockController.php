@@ -148,7 +148,7 @@ class MahdiStockController extends AbstractController
             $em->flush();
         
             $this->addFlash('success', 'Stock ajouté avec succès !');
-            return $this->redirectToRoute('app_product_list');
+            return $this->redirectToRoute('mes_stocks');
         }
         
 
@@ -194,7 +194,7 @@ class MahdiStockController extends AbstractController
             $em->flush();
             // 🔥 Ajouter l'envoi du log
         $logSnagService->sendStockUpdate('Stock Updated', $stock->getStock_id(), $stock->getAvailable_quantity());
-            return $this->redirectToRoute('app_product_list');
+            return $this->redirectToRoute('mes_stocks');
         }
 
         return $this->render('admin/addstockfour.html.twig', [
@@ -202,23 +202,23 @@ class MahdiStockController extends AbstractController
             'editMode' => true,
         ]);
     }
-    #[Route('/admin/stock/delete/{id}', name: 'stock_delete', methods: ['POST'])]
+    #[Route('/admin/stock/delete/{id}', name: 'stock_delete')]
     public function delete(Request $request, Stock $stock, EntityManagerInterface $em): Response
     {
-        if ($this->isCsrfTokenValid('delete' . $stock->getStock_id(), $request->request->get('_token'))) {
+       
             $em->remove($stock);
             $em->flush();
-        }
+        
 
         return $this->redirectToRoute('affichestock');
     }
-    #[Route('/admin/stock/deletefour/{id}', name: 'stock_delete_four', methods: ['POST'])]
+    #[Route('/admin/stock/deletefour/{id}', name: 'stock_delete_four')]
     public function delete1(Request $request, Stock $stock, EntityManagerInterface $em): Response
     {
-        if ($this->isCsrfTokenValid('delete' . $stock->getStock_id(), $request->request->get('_token'))) {
+       
             $em->remove($stock);
             $em->flush();
-        }
+        
 
         return $this->redirectToRoute('mes_stocks');
     }

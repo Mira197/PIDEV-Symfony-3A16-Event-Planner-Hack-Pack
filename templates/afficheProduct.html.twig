@@ -230,9 +230,9 @@
 										<div class="col-md-4">
 											<select name="category" id="category" class="form-control">
 												<option value="">All Categories</option>
-												{% for category in groupedProducts|keys %}
-													<option value="{{ category }}">{{ category }}</option>
-												{% endfor %}
+												{% for group in groupedProducts %}
+                    <option value="{{ group.category }}">{{ group.category }}</option>
+                {% endfor %}
 											</select>
 										</div>
 									</div>
@@ -1013,7 +1013,50 @@ padding: 20
 					border-radius: 5px;
 				}
 			</style>
-
+			<script>
+				function attachPaginationListeners() {
+					document.querySelectorAll('.pagination a.page-link').forEach(link => {
+						link.addEventListener('click', function (e) {
+							e.preventDefault(); // empêcher le comportement normal du lien
+				
+							const url = this.getAttribute('href');
+				
+							fetch(url, {
+								headers: {
+									'X-Requested-With': 'XMLHttpRequest'
+								}
+							})
+							.then(response => response.text())
+							.then(html => {
+								document.getElementById('product-list').innerHTML = html;
+								attachPaginationListeners(); // Re-attach après chargement AJAX
+							});
+						});
+					});
+				}
+				
+				// Premier attachement initial au chargement
+				document.addEventListener('DOMContentLoaded', function () {
+					attachPaginationListeners();
+				});
+				
+				// Filtrage catégorie existant
+				document.getElementById('category').addEventListener('change', function () {
+					const selectedCategory = this.value;
+				
+					fetch('{{ path("ajax_filter_products") }}?category=' + encodeURIComponent(selectedCategory), {
+						headers: {
+							'X-Requested-With': 'XMLHttpRequest'
+						}
+					})
+					.then(response => response.text())
+					.then(html => {
+						document.getElementById('product-list').innerHTML = html;
+						attachPaginationListeners(); // Important pour attacher après filtre
+					});
+				});
+				</script>
+				
 		{% endblock %}
 	</body>
 </html>
