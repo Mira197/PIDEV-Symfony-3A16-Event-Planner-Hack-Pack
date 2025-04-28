@@ -83,9 +83,31 @@ class LocationController extends AbstractController
             if (!$cityMatch || !$enoughCapacity || !$aboveMinBudget || !$withinBudget) {
                 return false;
             }
+            // Vérifier la disponibilité de la salle
+            $conflicts = $bookingRepo->findConflicts($loc, $event->getStartDate(), $event->getEndDate());
+
+            // ✅ Si pas de conflits => disponible
+            if (count($conflicts) === 0) {
+                return true;
+            }
+
+            // Sinon, vérifier les conflits avec marge 1-2 jours
+            foreach ($conflicts as $conflict) {
+                $conflictStart = $conflict->getStartDate();
+                $conflictEnd = $conflict->getEndDate();
+
+                // Lieu sera libre dans 2 jours maximum après l'event
+                $acceptableStart = (clone $event->getEndDate())->modify('+2 days');
+
+                if ($conflictStart > $acceptableStart) {
+                    return true; // Réservation commence après la marge de 2 jours => OK
+                }
+            }
+
+            return false; // Sinon pas bon
 
             // Ne pas exclure les lieux déjà réservés (juste suggestion)
-            return true;
+            //return true;
         });
 
         // ✅ Conversion image en base64 si nécessaire

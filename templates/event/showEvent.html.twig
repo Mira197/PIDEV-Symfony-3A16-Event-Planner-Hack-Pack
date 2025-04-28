@@ -70,11 +70,21 @@
 						</tbody>
 					</table>
 
-					<div class="event-details-buttons">
+					<div class="event-details-buttons ">
 						<a href="{{ path('app_events') }}" class="main-btn dark-btn-outline btn-hover px-4 py-2 me-2">⬅ Back to List</a>
 						<a href="{{ path('booking_list') }}" class="main-btn dark-btn-outline btn-hover px-4 py-2 me-2">Booking List</a>
+						{% if event.status == 'booked' %}
+        					<span class="event-status booked">
+            					<i class="fas fa-check-circle me-1"></i> Booked
+        					</span>
+    					{% else %}
+        					<span class="event-status not-booked">
+            					<i class="fas fa-times-circle me-1"></i> Not Booked
+        					</span>
+    					{% endif %}
 
 					</div>
+					
 					<div style="margin-top: 30px;"></div>
 					<div class="d-flex flex-wrap gap-3">
 						<a href="{{ path('event_framevr', { id: event.idEvent }) }}" class="btn btn-outline-primary">
@@ -103,6 +113,7 @@
 	</div>
 
 	{#available locations affichage#}
+	{% if event.status != 'booked' %}
 	<div class="container mt-5">
 		<h2 class="mb-4">Available Venues</h2>
 	</div>
@@ -172,6 +183,7 @@
 				🔍 Explore Suggested Locations
 			</a>
 		</div>
+		{% endif %}
 
 		<!-- Weather Modal -->
 		<!-- Custom Weather Modal -->

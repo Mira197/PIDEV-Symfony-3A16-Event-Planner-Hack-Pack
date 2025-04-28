@@ -160,6 +160,9 @@ final class EventController extends AbstractController
         if ($event->getImageData()) {
             $event->base64Image = base64_encode(stream_get_contents($event->getImageData()));
         }
+        // 🔵 Ajouter : vérifier si cet event est booké
+        $hasBooking = $bookingRepo->findOneBy(['event' => $event]);
+        $event->status = $hasBooking ? 'booked' : 'not booked';
         // Récupérer toutes les locations disponibles (même ville, capacité suffisante, pas de conflit)
         // Charger tous les lieux
         $allLocations = $locationRepo->findAll();
