@@ -1,37 +1,60 @@
-{% for publication in publications %}
-	<tr data-status="{{ publication.statut }}">
-		<td><input type="checkbox" name="selected[]" value="{{ publication.publication_id }}" class="checkbox-item"></td>
-		<td>
-			<div style="display: flex; align-items: center;">
-				{% if publication.image %}
-					<img class="publication-img" src="data:image/jpeg;base64,{{ publication.base64Image }}" alt="Post Image">
-				{% else %}
-					<img class="publication-img" src="{{ asset('admin/images/no-image.png') }}" alt="No Image">
-				{% endif %}
-				<strong>{{ publication.title }}</strong>
-			</div>
-		</td>
-		<td>
-			<p class="text-sm">
-				{{ publication.description|length > 60 
-                    ? publication.description[:60] ~ '...' 
-                    : publication.description }}
-			</p>
-		</td>
-		<td>{{ publication.user.username ?? 'Anonymous' }}</td>
-		<td>
-			<p class="text-sm">{{ publication.statut }}</p>
-		</td>
-		<td>{{ publication.publication_date|date('Y-m-d H:i') }}</td>
-		<td>
-			<a href="{{ path('publication_edit_admin', {'id': publication.publication_id}) }}" class="btn-edit">✏️</a>
-			<button type="button" class="btn-delete delete-btn" data-id="{{ publication.publication_id }}" data-token="{{ csrf_token('delete_publication_' ~ publication.publication_id) }}">
-				🗑️
-			</button>
-		</td>
-	</tr>
-{% else %}
-	<tr>
-		<td colspan="7" class="empty-row">No publications found.</td>
-	</tr>
-{% endfor %}
+<div id="publicationsContent">
+    <table class="admin-mui-table">
+        <thead>
+                        <tr>
+                            <th><input type="checkbox" id="checkAll"></th>
+                            <th>Title</th>
+                            <th>Description</th>
+                            <th>User</th>
+                            <th>Status</th>
+                            <th>Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+        <tbody id="adminPublicationsTable">
+            {% for publication in pagination %}
+                <tr data-status="{{ publication.statut }}">
+                    <td><input type="checkbox" name="selected[]" value="{{ publication.publication_id }}" class="checkbox-item"></td>
+                    <td>
+                        <div style="display: flex; align-items: center;">
+                            {% if publication.image_url %}
+                                <img class="publication-img" src="{{ publication.image_url }}" alt="Post Image">
+                            {% elseif publication.image %}
+                                <img class="publication-img" src="data:image/jpeg;base64,{{ publication.base64Image }}" alt="Post Image">
+                            {% else %}
+                                <img class="publication-img" src="{{ asset('admin/images/no-image.png') }}" alt="No Image">
+                            {% endif %}
+                            <strong>{{ publication.title }}</strong>
+                        </div>
+                    </td>
+                    <td>
+                        <p class="text-sm">
+                            {{ publication.description|length > 60 
+                                ? publication.description[:60] ~ '...' 
+                                : publication.description }}
+                        </p>
+                    </td>
+                    <td>{{ publication.user.username ?? 'Anonymous' }}</td>
+                    <td>
+                        <p class="text-sm">{{ publication.statut ?? 'Pending' }}</p>
+                    </td>
+                    <td>{{ publication.publication_date|date('Y-m-d H:i') }}</td>
+                    <td>
+                        <a href="{{ path('publication_edit_admin', {'id': publication.publication_id}) }}" class="btn-edit">✏️</a>
+                        <button type="button" class="btn-delete delete-btn" data-id="{{ publication.publication_id }}" data-token="{{ csrf_token('delete_publication_' ~ publication.publication_id) }}">
+                            🗑️
+                        </button>
+                    </td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="7" class="empty-row">No publications found.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="pagination d-flex justify-content-center mt-4">
+        {{ knp_pagination_render(pagination, '@KnpPaginator/Pagination/bootstrap_v5_pagination.html.twig') }}
+    </div>
+</div>

@@ -2,6 +2,7 @@
 
 {% block head %}
     <link rel="stylesheet" href="{{ asset('assetsAya/css/adminOrder.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     {{ parent() }}
     <style>
         .hidden-column {
@@ -15,6 +16,32 @@
         }
         .checkbox-item {
             transform: scale(1.2);
+        }
+        /* Styles de pagination identiques à ceux de Manage Events */
+        .pagination {
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .page-item .page-link {
+            color: #6b336e;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+            padding: 6px 12px;
+            border: 1px solid #ddd;
+        }
+        .page-item .page-link:hover {
+            background-color: #f2f2f2;
+        }
+        .page-item.active .page-link {
+            background-color: #6b336e;
+            border-color: #6b336e;
+            color: white;
+            font-weight: bold;
+        }
+        .page-item.disabled .page-link {
+            color: #999;
+            background-color: #f0f0f0;
+            border-color: #ddd;
         }
     </style>
 {% endblock %}
@@ -40,22 +67,24 @@
         </div>
 
         <form method="post" id="bulkDeleteForm" action="{{ path('publication_bulk_delete') }}">
-            <table class="admin-mui-table">
-                <thead>
-                    <tr>
-                        <th><input type="checkbox" id="checkAll"></th>
-                        <th>Title</th>
-                        <th>Description</th>
-                        <th>User</th>
-                        <th>Status</th>
-                        <th>Date</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody id="adminPublicationsTable">
-                    {% include 'admin/_publication_rows.html.twig' with { publications: publications } %}
-                </tbody>
-            </table>
+            <div id="publicationsContent">
+                <table class="admin-mui-table">
+                   {# <thead>
+                        <tr>
+                            <th><input type="checkbox" id="checkAll"></th>
+                            <th>Title</th>
+                            <th>Description</th>
+                            <th>User</th>
+                            <th>Status</th>
+                            <th>Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>#}
+                    <tbody id="adminPublicationsTable">
+                        {% include 'admin/_publication_rows.html.twig' with { pagination: pagination } %}
+                    </tbody>
+                </table>
+            </div>
         </form>
     </div>
 {% endblock %}
@@ -63,8 +92,8 @@
 {% block javascripts %}
 {{ parent() }}
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-// Empêche la double soumission
 document.getElementById('bulkDeleteForm')?.addEventListener('submit', function(e) {
     e.preventDefault();
     const form = this;
@@ -81,19 +110,41 @@ document.getElementById('bulkDeleteForm')?.addEventListener('submit', function(e
         }
     });
 });
+
 document.addEventListener('DOMContentLoaded', function () {
     const searchInput = document.getElementById('adminPublicationSearch');
     const filters = document.querySelectorAll('.status-filter');
     let currentFilter = '';
 
-    function fetchPublications(query = '', filter = '') {
-        fetch(`{{ path('admin_publication_search') }}?q=${encodeURIComponent(query)}&status=${encodeURIComponent(filter)}`, {
+    function fetchPublications(query = '', filter = '', page = 1) {
+        fetch(`{{ path('admin_publication_search') }}?q=${encodeURIComponent(query)}&status=${encodeURIComponent(filter)}&page=${page}`, {
             headers: { 'X-Requested-With': 'XMLHttpRequest' }
         })
         .then(response => response.text())
         .then(html => {
-            document.getElementById('adminPublicationsTable').innerHTML = html;
-            attachDeleteEvents(); // Réattacher les events
+            // Mettre à jour tout le contenu de la table et de la pagination
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            const newContent = doc.querySelector('#publicationsContent');
+            if (newContent) {
+                document.getElementById('publicationsContent').innerHTML = newContent.innerHTML;
+            }
+            attachDeleteEvents();
+            attachPaginationEvents(); // Re-attach pagination events after updating content
+        })
+        .catch(error => {
+            console.error('Error fetching publications:', error);
+        });
+    }
+
+    function attachPaginationEvents() {
+        document.querySelectorAll('.pagination a').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const url = new URL(this.href);
+                const page = url.searchParams.get('page') || 1;
+                fetchPublications(searchInput.value, currentFilter, page);
+            });
         });
     }
 
@@ -111,58 +162,61 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     function attachDeleteEvents() {
-    document.querySelectorAll('.delete-btn').forEach(button => {
-        button.addEventListener('click', function (e) {
-            e.preventDefault();
-            e.stopImmediatePropagation(); // Utilisez stopImmediatePropagation au lieu de stopPropagation
+        document.querySelectorAll('.delete-btn').forEach(button => {
+            button.addEventListener('click', function (e) {
+                e.preventDefault();
+                e.stopImmediatePropagation();
 
-            const id = this.dataset.id;
-            const csrfToken = this.dataset.token;
+                const id = this.dataset.id;
+                const csrfToken = this.dataset.token;
 
-            Swal.fire({
-                title: 'Are you sure?',
-                text: 'This publication will be deleted!',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonText: 'Yes, delete it!',
-                cancelButtonText: 'Cancel',
-                focusCancel: true
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    fetch(`/admin/publication/delete/${id}`, {
-                        method: 'POST',
-                        headers: {
-                            'X-Requested-With': 'XMLHttpRequest',
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            _token: csrfToken
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: 'This publication will be deleted!',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Yes, delete it!',
+                    cancelButtonText: 'Cancel',
+                    focusCancel: true
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        fetch(`/admin/publication/delete/${id}`, {
+                            method: 'POST',
+                            headers: {
+                                'X-Requested-With': 'XMLHttpRequest',
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                _token: csrfToken
+                            })
                         })
-                    })
-                    .then(response => {
-                        if (!response.ok) throw new Error('Network response was not ok');
-                        return response.json();
-                    })
-                    .then(data => {
-                        if (data.success) {
-                            return Swal.fire('Deleted!', '', 'success');
-                        } else {
-                            throw new Error(data.message || 'Failed to delete');
-                        }
-                    })
-                    .then(() => {
-                        fetchPublications(searchInput.value, currentFilter);
-                    })
-                    .catch(error => {
-                        Swal.fire('Error', error.message, 'error');
-                        console.error('Error:', error);
-                    });
-                }
+                        .then(response => {
+                            if (!response.ok) throw new Error('Network response was not ok');
+                            return response.json();
+                        })
+                        .then(data => {
+                            if (data.success) {
+                                return Swal.fire('Deleted!', '', 'success');
+                            } else {
+                                throw new Error(data.message || 'Failed to delete');
+                            }
+                        })
+                        .then(() => {
+                            fetchPublications(searchInput.value, currentFilter);
+                        })
+                        .catch(error => {
+                            Swal.fire('Error', error.message, 'error');
+                            console.error('Error:', error);
+                        });
+                    }
+                });
             });
         });
-    });
-}
+    }
+
+    // Initial attachment of events
     attachDeleteEvents();
+    attachPaginationEvents();
 });
 </script>
 {% endblock %}
