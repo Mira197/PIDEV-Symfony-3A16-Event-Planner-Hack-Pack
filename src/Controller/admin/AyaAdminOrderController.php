@@ -17,7 +17,7 @@ use Knp\Component\Pager\PaginatorInterface;
 #[Route('/admin/orders')]
 class AyaAdminOrderController extends AbstractController
 {
-    #[Route('/all', name: 'admin_orders')]
+    #[Route('/all', name: 'admin_orders_all')]
 public function index(Request $request, OrderRepository $orderRepository, PaginatorInterface $paginator): Response
 {
     $query = $orderRepository->createQueryBuilder('o')

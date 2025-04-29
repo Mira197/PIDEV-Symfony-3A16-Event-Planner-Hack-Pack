@@ -25,4 +25,11 @@ return [
     '@hotwired/turbo' => [
         'version' => '7.3.0',
     ],
+    'chart.js/auto' => [
+        'version' => '4.4.1',
+    ],
+    '@symfony/ux-chartjs' => [
+        'path' => './assets/controllers/chartjs_controller.js',
+    ],
+
 ];

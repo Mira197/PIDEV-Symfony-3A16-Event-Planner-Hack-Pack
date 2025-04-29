@@ -34,7 +34,7 @@ class WalletTransactionRepository extends ServiceEntityRepository
 
         return (float) $qb->getQuery()->getSingleScalarResult();
     }
-    
+
     public function getAvailableCredit(User $user): float
     {
         $qb = $this->createQueryBuilder('w')
@@ -47,20 +47,32 @@ class WalletTransactionRepository extends ServiceEntityRepository
         return $result ? (float) $result : 0.0;
     }
     public function calculateWalletBalance(User $user): float
-{
-    $qb = $this->createQueryBuilder('w')
-        ->select('
-            SUM(CASE WHEN w.type = :deposit THEN w.amount ELSE 0 END) -
-            SUM(CASE WHEN w.type = :payment THEN w.amount ELSE 0 END)
-        ')
-        ->where('w.user = :user')
-        ->setParameter('user', $user)
-        ->setParameter('deposit', 'deposit')
-        ->setParameter('payment', 'payment');
-
-    $result = $qb->getQuery()->getSingleScalarResult();
-
-    return (float) ($result ?? 0.0);
-}
-
+    {
+        // Récupérer les dépôts
+        $deposits = $this->createQueryBuilder('w')
+            ->select('SUM(w.amount)')
+            ->where('w.user = :user AND w.type = :type')
+            ->setParameter('user', $user)
+            ->setParameter('type', 'deposit')
+            ->getQuery()
+            ->getSingleScalarResult();
+    
+        // Récupérer les paiements
+        $payments = $this->createQueryBuilder('w')
+            ->select('SUM(w.amount)')
+            ->where('w.user = :user AND w.type = :type')
+            ->setParameter('user', $user)
+            ->setParameter('type', 'payment')
+            ->getQuery()
+            ->getSingleScalarResult();
+    
+        $deposits = (float) ($deposits ?? 0.0);
+        $payments = (float) ($payments ?? 0.0);
+        $balance = $deposits - $payments;
+    
+        // Afficher dans la console
+        // echo "User {$user->getId()} - Deposits: $deposits, Payments: $payments, Balance: $balance\n";
+    
+        return $balance;
+    }
 }

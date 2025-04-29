@@ -27,8 +27,6 @@ class AyaOrderType extends AbstractType
             ->add('payment_method', ChoiceType::class, [
                 'label' => 'Payment Method',
                 'choices' => [
-                    'Credit Card' => 'Credit Card',
-                    'Cash on Delivery' => 'Cash on Delivery',
                     'Stripe' => 'Stripe',
                     'Wallet Only' => 'Wallet Only', // 🔥 Ajout en interne
                 ],

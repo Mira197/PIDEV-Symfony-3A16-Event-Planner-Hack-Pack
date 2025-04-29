@@ -117,26 +117,29 @@ class AyaCodePromoAdminController extends AbstractController
     //     ]);
     // }
 
-    
-    #[Route('/add', name: 'create', methods: ['POST'])]
-public function create(Request $request, EntityManagerInterface $em, TexterInterface $texter): JsonResponse
+
+    #[Route('/add', name: 'create', methods: ['GET', 'POST'])]
+public function create(Request $request, EntityManagerInterface $em, TexterInterface $texter): Response
 {
     $promo = new CodePromo();
     $form = $this->createForm(AyaCodePromoType::class, $promo);
 
+    // Vérifie si la requête est une soumission JSON (pour une API)
     if (str_contains($request->headers->get('Content-Type'), 'application/json')) {
         $data = json_decode($request->getContent(), true);
         $form->submit($data);
     } else {
+        // Sinon, traite la requête classique du formulaire
         $form->handleRequest($request);
     }
 
+    // Si le formulaire est soumis et valide
     if ($form->isSubmitted() && $form->isValid()) {
         $promo->setDateCreation(new \DateTime());
         $em->persist($promo);
         $em->flush();
 
-        // ✅ Message texte
+        // Construction du message texte pour l'envoi par SMS
         $messageText = sprintf(
             "🎁 Nouveau code promo 3alaKifi : %s\n💸 %d%% de réduction\n📅 Valable jusqu'au %s",
             $promo->getCodePromo(),
@@ -144,48 +147,50 @@ public function create(Request $request, EntityManagerInterface $em, TexterInter
             $promo->getDateExpiration()?->format('d/m/Y') ?? 'non définie'
         );
 
-        // ✅ Création du message
+        // Création du message SMS avec Twilio
         $sms = new SmsMessage($_ENV['TWILIO_TO_NUMBER'], $messageText);
 
-        // ✅ Ajout des options Twilio (MessagingServiceSid requis)
+        // Ajout des options Twilio (MessagingServiceSid requis)
         $sms->options(new TwilioOptions([
-            'MessagingServiceSid' => $_ENV['TWILIO_SERVICE_SID'] // ⚠️ Ne pas utiliser $sms->messagingServiceSid() — n'existe pas
+            'MessagingServiceSid' => $_ENV['TWILIO_SERVICE_SID']
         ]));
 
-        // ✅ Envoi
+        // Envoi du SMS
         $texter->send($sms);
 
-        return new JsonResponse([
-            'success' => true,
-            'message' => 'Code promo ajouté et SMS envoyé.'
-        ]);
+        // Réponse JSON si appel AJAX (API)
+        if ($request->isXmlHttpRequest() || $request->headers->get('Content-Type') === 'application/json') {
+            return new JsonResponse([
+                'success' => true,
+                'message' => 'Code promo ajouté et SMS envoyé.'
+            ]);
+        }
+
+        // Flash message et redirection pour les soumissions classiques
+        $this->addFlash('success', 'Code promo ajouté avec succès!');
+        return $this->redirectToRoute('aya_admin_code_promo_index');
     }
 
-    // ❌ Gestion des erreurs
-    $errors = [];
-    foreach ($form->getErrors(true) as $error) {
-        $errors[$error->getOrigin()->getName()] = $error->getMessage();
-    }
-
-    return new JsonResponse([
-        'success' => false,
-        'errors' => $errors
-    ], 400);
+    // Si la requête est GET ou si le formulaire n'est pas valide, on affiche la vue
+    return $this->render('admin/aya_code_promo/aya_add_promo.html.twig', [
+        'form' => $form->createView()
+    ]);
 }
+
 
 
     #[Route('/test-sms', name: 'test_sms')]
-public function testSMS(TexterInterface $texter): JsonResponse
-{
-    $message = new SmsMessage('+21695513380', 'Test SMS via Symfony Notifier');
-    $message->options(new TwilioOptions([
-        'MessagingServiceSid' => $_ENV['TWILIO_SERVICE_SID']
-    ]));
+    public function testSMS(TexterInterface $texter): JsonResponse
+    {
+        $message = new SmsMessage('+21695513380', 'Test SMS via Symfony Notifier');
+        $message->options(new TwilioOptions([
+            'MessagingServiceSid' => $_ENV['TWILIO_SERVICE_SID']
+        ]));
 
-    $texter->send($message);
+        $texter->send($message);
 
-    return new JsonResponse(['status' => 'SMS sent']);
-}
+        return new JsonResponse(['status' => 'SMS sent']);
+    }
 
 
 

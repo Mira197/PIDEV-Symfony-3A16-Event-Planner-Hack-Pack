@@ -1,7 +1,7 @@
 {
     "controllers": {
-        "@symfony/ux-turbo": {
-            "turbo-core": {
+        "@symfony/ux-chartjs": {
+            "chartjs": {
                 "enabled": true,
                 "fetch": "eager"
             },
