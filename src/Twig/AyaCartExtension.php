@@ -4,28 +4,31 @@ namespace App\Twig;
 
 use App\Repository\CartRepository;
 use App\Repository\CartProductRepository;
+use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Bundle\SecurityBundle\Security;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFunction;
+use Twig\Extension\GlobalsInterface;
 
-class AyaCartExtension extends AbstractExtension
+
+class AyaCartExtension extends AbstractExtension implements GlobalsInterface
 {
-    private Security $security;
+    private RequestStack $requestStack;
     private CartRepository $cartRepository;
     private CartProductRepository $cartProductRepository;
-    private EntityManagerInterface $em;
+    private UserRepository $userRepository;
 
     public function __construct(
-        Security $security,
+        RequestStack $requestStack,
         CartRepository $cartRepository,
         CartProductRepository $cartProductRepository,
-        EntityManagerInterface $em
+        UserRepository $userRepository
     ) {
-        $this->security = $security;
+        $this->requestStack = $requestStack;
         $this->cartRepository = $cartRepository;
         $this->cartProductRepository = $cartProductRepository;
-        $this->em = $em;
+        $this->userRepository = $userRepository;
     }
 
     public function getFunctions(): array
@@ -37,23 +40,46 @@ class AyaCartExtension extends AbstractExtension
 
     public function getCartSummary(): array
     {
-        $user = $this->security->getUser() ?? $this->em->getRepository(\App\Entity\User::class)->find(49);
+        $session = $this->requestStack->getSession();
+        $userId = $session->get('user_id');
+
+        // Gérer explicitement si aucun utilisateur connecté
+        if (!$userId) {
+            return [
+                'cartProducts' => [],
+                'total' => 0,
+            ];
+        }
+
+        $user = $this->userRepository->find($userId);
+
+        if (!$user) {
+            return [
+                'cartProducts' => [],
+                'total' => 0,
+            ];
+        }
+
+        $cart = $this->cartRepository->findOneBy(['user' => $user]);
         $cartProducts = [];
         $total = 0;
 
-        if ($user) {
-            $cart = $this->cartRepository->findOneBy(['user' => $user]);
-            if ($cart) {
-                $cartProducts = $this->cartProductRepository->findBy(['cart' => $cart]);
-                foreach ($cartProducts as $item) {
-                    $total += $item->getTotalPrice();
-                }
+        if ($cart) {
+            $cartProducts = $this->cartProductRepository->findBy(['cart' => $cart]);
+            foreach ($cartProducts as $item) {
+                $total += $item->getTotalPrice();
             }
         }
 
         return [
             'cartProducts' => $cartProducts,
             'total' => $total,
+        ];
+    }
+    public function getGlobals(): array
+    {
+        return [
+            'aya_user_connected' => $this->requestStack->getSession()->has('user_id'),
         ];
     }
 }

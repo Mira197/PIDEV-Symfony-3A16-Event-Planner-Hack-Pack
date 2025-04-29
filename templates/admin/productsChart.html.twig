@@ -1,0 +1,64 @@
+{{ importmap() }}
+
+{% block stylesheets %}
+    <style>
+        body {
+            background-color: #ffffff !important; /* Blanc */
+        }
+        section {
+            background-color: #ffffff !important; /* Blanc */
+        }
+    </style>
+{% endblock %}
+
+{% block section %}
+
+<section style="background-color: white; min-height: 100vh; padding-top: 50px;">
+    <div class="menu-toggle-btn" style="margin: 15px;">
+        <a href="javascript:history.back()" class="btn btn-primary" style="
+            background-color: #5A426E;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 12px;
+            font-size: 16px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+        ">
+            ← Back
+        </a>
+    </div>
+    </div>
+    <div class="container">
+        <div class="card shadow-sm p-4" style="max-width: 800px; margin: auto;">
+            <h2 class="text-center mb-4">📊 Products per Category</h2>
+            <div style="position: relative; width: 100%; height: 400px;">
+                <div data-controller="symfony--ux-chartjs--chart" style="width: 100%; height: 400px;">
+                    {{ render_chart(chart) }}
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Chart 2: Products by Price Range -->
+    <div class="card shadow-sm p-4 mb-5" style="max-width: 800px; margin: auto;">
+        <h2 class="text-center mb-4">💲 Products by Price Range</h2>
+        <div style="position: relative; width: 100%; height: 400px;">
+            {{ render_chart(priceChart) }}
+        </div>
+    </div>
+<!-- Chart 3: Supplier Stock Available vs Minimum -->
+<div class="card shadow-sm p-4 mb-5" style="max-width: 1000px; margin: auto;">
+    <h2 class="text-center mb-4">🏢 Supplier Stock Comparison</h2>
+    <div style="position: relative; width: 100%; height: 400px;">
+        {{ render_chart(supplierChart) }}
+    </div>
+</div>
+<!-- Chart 4: Stock Available per Product -->
+<div class="card shadow-sm p-4 mb-5" style="max-width: 1000px; margin: auto;">
+    <h2 class="text-center mb-4">📦 Stock Available per Product</h2>
+    <div style="position: relative; width: 100%; height: 400px;">
+        {{ render_chart(stockPerProductChart) }}
+    </div>
+</div>
+</section>
+{% endblock %}

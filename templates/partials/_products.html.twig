@@ -1,9 +1,41 @@
-{% for category, products in groupedProducts %}
+<style>
+    .pagination {
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .page-item .page-link {
+        color: #6b336e;
+        border-radius: 6px;
+        transition: all 0.2s ease;
+        padding: 6px 12px;
+        border: 1px solid #ddd;
+    }
+
+    .page-item .page-link:hover {
+        background-color: #f2f2f2;
+    }
+
+    .page-item.active .page-link {
+        background-color: #6b336e;
+        border-color: #6b336e;
+        color: white;
+        font-weight: bold;
+    }
+
+    .page-item.disabled .page-link {
+        color: #999;
+        background-color: #f0f0f0;
+        border-color: #ddd;
+    }
+</style>
+{% for group in groupedProducts %}
+
     <div class="col-12 mt-5 mb-3">
-        <h2 class="text-center">{{ category }}</h2>
+        <h2 class="text-center">{{ group.category }}</h2>
     </div>
     <div class="row">
-        {% for product in products %}
+        {% for product in group.pagination %}
             <div class="col-xl-4 col-lg-4 col-md-6 col-sm-6">
                 <div class="card-style-2 mb-30">
                     <div class="card-image">
@@ -14,6 +46,17 @@
                     </div>
                     <div class="card-content">
                         <h4>{{ product.name }}</h4>
+                        {# Prix converti #}
+                        {% if selectedCurrency != 'TND' %}
+                        <p>{{ (product.price * conversionRate)|number_format(2) }} {{ selectedCurrency }}</p>
+                        {% else %}
+                            <p>{{ product.price|number_format(2) }} TND</p>
+                        {% endif %}
+                    
+
+
+
+                        
                         <p>{{ product.description|length > 120 ? product.description|slice(0, 120) ~ '...' : product.description }}</p>
                         <form action="{{ path('aya_cart_add', {'id': product.product_id}) }}" method="post">
                             <button type="submit" class="btn btn-primary">Add to Cart</button>
@@ -22,9 +65,18 @@
                 </div>
             </div>
         {% endfor %}
+        {# Ajouter la pagination pour chaque catégorie #}
+        <div class="pagination d-flex justify-content-center mt-4">
+            {{ knp_pagination_render(group.pagination, '@KnpPaginator/Pagination/bootstrap_v5_pagination.html.twig', {
+                'pageParameterName': group.hash
+            }) }}
+        </div>
+        
     </div>
 {% endfor %}
 
 {% if groupedProducts is empty %}
     <p class="text-center">No products available.</p>
 {% endif %}
+
+

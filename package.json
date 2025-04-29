@@ -17,5 +17,12 @@
         "dev": "encore dev",
         "watch": "encore dev --watch",
         "build": "encore production --progress"
+    },
+    "dependencies": {
+        "@symfony/stimulus-bridge": "^4.0.1",
+        "@symfony/ux-chartjs": "^2.24.0",
+        "chart.js": "^4.4.9",
+        "chartisan": "^0.0.0",
+        "echarts": "^5.6.0"
     }
 }

@@ -1,0 +1,68 @@
+{% extends 'admin/baseFournisseur.html.twig' %}
+
+
+{% block title %}Products{% endblock %}
+
+{% block section %}
+<link rel="stylesheet" href="{{ asset('assetsAya/css/adminOrder.css') }}">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+	<div class="admin-mui-wrapper">
+		<h2> Manage Products</h2>
+
+		<!-- Barre de recherche + actions -->
+		<div class="title mt-30 mb-30">
+            
+            <a href="{{ path('product_add_four') }}" class="main-btn primary-btn btn-hover">
+                ajouter product
+              </a>
+              
+        </div>
+
+		<table class="admin-mui-table">
+			<thead>
+				<tr>
+					<th>             </th>
+					<th>name</th>
+					<th>category</th>
+					<th>price</th>
+					<th>stock</th>
+					<th>Actions</th>
+				</tr>
+			</thead>
+
+			<tbody id="eventsTable">
+				 {% for product in products %}
+					<tr>
+						<td>
+							{% set base64 = product.getBase64Image() %}
+                    {% if base64 %}
+                    <img src="data:image/jpeg;base64,{{ base64 }}" alt="Image"
+                    style="width: 50px; height: 50px; object-fit: cover; border-radius: 8px; box-shadow: 0 3px 10px rgba(0,0,0,0.08);">
+                                   {% endif %}
+						</td>
+						<td>{{ product.name }}</td>
+						<td>{{ product.category }}</td>
+						<td>${{ product.price }}</td>
+						<td>{{ product.stock.stock_id }}</td>
+						
+						<td>
+							<a href="{{ path('product_delete', {'id': product.product_id}) }}" class="main-btn danger-btn-outline btn-hover px-3 py-2">
+								<i class="fa-solid fa-trash" style="font-size: 18px;color: #533C56;"></i>
+							</a>
+							<a href="{{ path('product_edit', {'id': product.product_id}) }}" class="btn btn-outline-warning btn-sm">
+								<i class="fa-solid fa-pen" style="font-size: 14px;color: #533C56;"></i>
+							</a>
+						</td>
+					</tr>
+				{% else %}
+					<tr>
+						<td colspan="7" class="empty-row">No products found.</td>
+					</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+		
+</div>
+
+	</div>
+{% endblock %}

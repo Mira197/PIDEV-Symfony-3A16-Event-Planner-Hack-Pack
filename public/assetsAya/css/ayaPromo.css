@@ -1,3 +1,29 @@
+.table-hover tbody tr:hover {
+    background-color: #f9f2f9;
+}
+
+.table thead.table-dark {
+    background-color: #5e2a75 !important;
+    color: #fff;
+}
+
+.table td, .table th {
+    text-align: center;
+    vertical-align: middle;
+    padding: 12px;
+}
+
+.table .badge {
+    font-size: 0.85rem;
+    padding: 6px 12px;
+    border-radius: 20px;
+}
+
+.table .btn {
+    padding: 5px 10px;
+    font-size: 0.85rem;
+}
+
 .admin-mui-wrapper {
     margin: 100px auto;
     max-width: 1100px;
@@ -104,4 +130,47 @@ table.admin-mui-table th {
   }
   .hidden-column {
     display: none;
+}
+.btn-delete {
+    background: transparent;
+    border: 1px solid #dc3545;
+    color: #dc3545;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 14px;
+    cursor: pointer;
+  }
+
+  .pagination {
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.pagination .page-link {
+    color: #6b336e; /* couleur violet foncé */
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    padding: 6px 12px;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.pagination .page-link:hover {
+    background-color: #f2e6f4; /* mauve clair au survol */
+    color: #6b336e;
+    border-color: #6b336e;
+}
+
+.pagination .page-item.active .page-link {
+    background-color: #6b336e; /* violet foncé pour l'actif */
+    color: #fff;
+    border-color: #6b336e;
+    font-weight: bold;
+}
+
+.pagination .page-item.disabled .page-link {
+    color: #999;
+    background-color: #f7f7f7;
+    border-color: #ddd;
+    cursor: not-allowed;
 }

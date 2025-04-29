@@ -1,0 +1,72 @@
+{% extends 'admin/baseFournisseur.html.twig' %}
+
+
+{% block title %}Stocks{% endblock %}
+
+{% block section %}
+<link rel="stylesheet" href="{{ asset('assetsAya/css/adminOrder.css') }}">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+	<div class="admin-mui-wrapper">
+		<h2> Manage Stocks</h2>
+
+		<!-- Barre de recherche + actions -->
+		<div class="title mt-30 mb-30">
+<a href="{{ path('stock_add_four') }}" class="main-btn primary-btn btn-hover">
+                    ajouter stock
+                  </a>
+                  
+                  </div>
+		<table class="admin-mui-table">
+			<thead>
+				<tr>
+					
+					<th>Reference</th>
+					<th>Available Quantity</th>
+					<th>Minimum Quantity</th>
+					<th>Last Update</th>
+					<th>State</th> {# 👈 Nouvelle colonne ajoutée #}
+					<th>Actions</th>
+				</tr>
+			</thead>
+
+			<tbody id="eventsTable">
+				 {% for stock in stocks %}
+					<tr>
+						<td>
+							{{ stock.stock_id }}
+						</td>
+						<td>{{ stock.available_quantity }}</td>
+						<td>{{ stock.minimum_quantity }}</td>
+						<td>{{ stock.last_update ? stock.last_update|date('Y-m-d H:i') : '—' }}</td>
+						{# 🟢🟡🔴 Etat de stock ici #}
+						<td>
+							{% if stock.available_quantity == 0 %}
+								<span style="color: red; font-weight: bold;">Épuisé</span>
+							{% elseif stock.available_quantity <= stock.minimum_quantity %}
+								<span style="color: orange; font-weight: bold;">Proche</span>
+							{% else %}
+								<span style="color: green; font-weight: bold;">Bien</span>
+							{% endif %}
+						</td>
+						
+						<td>
+							<a href="{{ path('stock_delete_four', {id: stock.stock_id}) }}" class="main-btn danger-btn-outline btn-hover px-3 py-2">
+								<i class="fa-solid fa-trash" style="font-size: 18px;color: #533C56;"></i>
+							</a>
+							<a href="{{ path('stock_edit_four', {id: stock.stock_id}) }}" class="btn btn-outline-warning btn-sm">
+								<i class="fa-solid fa-pen" style="font-size: 14px;color: #533C56;"></i>
+							</a>
+						</td>
+					</tr>
+				{% else %}
+					<tr>
+						<td colspan="7" class="empty-row">No Stocks found.</td>
+					</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+		
+</div>
+
+	</div>
+{% endblock %}
