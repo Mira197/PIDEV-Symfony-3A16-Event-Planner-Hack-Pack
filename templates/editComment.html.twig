@@ -1,189 +1,130 @@
 {% extends 'base.html.twig' %}
 
 {% block stylesheets %}
-	{{ parent() }}
-	<style>
-		nav.fh5co-nav {
-			background-color: #cebec9 !important;
-			padding: 1px 0 !important;
-			max-height: 130px !important;
-			z-index: 9999;
-		}
+    {{ parent() }}
+    <style>
+        nav.fh5co-nav {
+            background-color: #cebec9 !important;
+            padding: 1px 0 !important;
+            max-height: 130px !important;
+            z-index: 9999;
+        }
 
-		.comment-form-container {
-			margin-top: 140px; /* Pour laisser la place à la navbar */
-		}
+        .comment-form-container {
+            margin-top: 140px;
+        }
 
-		.comment-form {
-			max-width: 800px;
-			margin: 0 auto;
-			padding: 2rem;
-			background-color: #ffffff;
-			border-radius: 10px;
-			box-shadow: 0 4px 15px rgba(83, 60, 86, 0.1);
-		}
+        .comment-form {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(83, 60, 86, 0.1);
+        }
 
-		.form-title {
-			color: #533C56;
-			text-align: center;
-			margin-bottom: 2rem;
-			font-weight: 600;
-		}
+        .form-title {
+            color: #533C56;
+            text-align: center;
+            margin-bottom: 2rem;
+            font-weight: 600;
+        }
 
-		.form-group {
-			margin-bottom: 1.5rem;
-		}
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
 
-		.form-label {
-			display: block;
-			margin-bottom: 0.5rem;
-			color: #533C56;
-			font-weight: 500;
-		}
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #533C56;
+            font-weight: 500;
+        }
 
-		.form-input,
-		.form-textarea {
-			width: 100%;
-			padding: 0.75rem;
-			border: 1px solid #cebec9;
-			border-radius: 5px;
-			font-size: 1rem;
-			background-color: #ffffff;
-		}
+        .form-input,
+        .form-textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #cebec9;
+            border-radius: 5px;
+            font-size: 1rem;
+            background-color: #ffffff;
+        }
 
-		.form-textarea {
-			min-height: 150px;
-			resize: vertical;
-		}
+        .form-textarea {
+            min-height: 150px;
+            resize: vertical;
+        }
 
-		.btn-submit {
-			background-color: #533C56;
-			color: white;
-			border: none;
-			padding: 0.75rem 1.5rem;
-			font-size: 3rem;
-			border-radius: 5px;
-			cursor: pointer;
-			display: block;
-			width: 100%;
-			font-weight: 500;
-		}
+        .btn-submit {
+            background-color: #533C56;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            display: block;
+            width: 100%;
+            font-weight: 500;
+        }
 
-		.btn-submit:hover {
-			background-color: #99707E;
-			transform: translateY(-2px);
-			box-shadow: 0 4px 8px rgba(83, 60, 86, 0.2);
-		}
+        .btn-submit:hover {
+            background-color: #99707E;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(83, 60, 86, 0.2);
+        }
 
-		.form-error {
-			color: #d9534f;
-			font-size: 0.875rem;
-			margin-top: 0.25rem;
-		}
+        .form-error {
+            color: #d9534f;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
 
-		.custom-file-upload {
-			display: flex;
-			align-items: center;
-			gap: 15px;
-		}
+        .form-control:focus {
+            border-color: #99707E;
+            box-shadow: 0 0 0 0.2rem rgba(153, 112, 126, 0.25);
+            outline: none;
+        }
 
-		.custom-upload-label {
-			background-color: #533C56;
-			color: white;
-			padding: 0.5rem 1.2rem;
-			border-radius: 5px;
-			cursor: pointer;
-			font-size: 0.95rem;
-			transition: background-color 0.3s ease;
-		}
+        .btn-primary:hover {
+            background-color: #7a5a6a !important;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(83, 60, 86, 0.2);
+        }
 
-		.custom-upload-label:hover {
-			background-color: #99707E;
-		}
-
-		.form-file-hidden {
-			display: none;
-		}
-
-		.file-name {
-			color: #533C56;
-			font-size: 0.9rem;
-		}
-		.d-flex {
-			display: flex;
-			gap: 10px;
-		}
-		input[type="file"] {
-			appearance: none;
-			-webkit-appearance: none;
-			display: none;
-		}
-	</style>
+        .btn-secondary:hover {
+            background-color: #f0e5f2 !important;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(83, 60, 86, 0.1);
+        }
+    </style>
 {% endblock %}
 
 {% block content %}
-<div class="container" style="max-width: 800px; margin: 40px auto; padding: 0 15px;">
-    <div class="comment-form-container" style="background: white; border-radius: 10px; box-shadow: 0 5px 15px rgba(83, 60, 86, 0.1); padding: 30px;">
-        <h2 style="color: #533C56; margin-bottom: 25px; text-align: center; position: relative; padding-bottom: 15px;">
-            Edit your comment
-            <span style="position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: 80px; height: 3px; background: #99707E;"></span>
-        </h2>
+<div class="container">
+    <div class="comment-form-container">
+        <h2 class="form-title">Edit your comment</h2>
 
         {{ form_start(form, {'attr': {'novalidate': 'novalidate', 'class': 'comment-form'}}) }}
 
-            <div class="form-group" style="margin-bottom: 20px;">
-                {{ form_label(form.username, null, {'label_attr': {'style': 'display: block; margin-bottom: 8px; color: #533C56; font-weight: 500;'}}) }}
-                {{ form_widget(form.username, {'attr': {
-                    'style': 'width: 100%; padding: 12px 15px; border: 1px solid #d9c7df; border-radius: 6px; font-size: 1rem;',
-                    'class': 'form-control'
-                }}) }}
-                <div style="color: #e74c3c; font-size: 0.85rem; margin-top: 5px;">
-                    {{ form_errors(form.username) }}
-                </div>
-            </div>
+        <div class="form-group">
+            <label class="form-label">Username</label>
+            <input type="text" class="form-input" value="{{ username }}" readonly />
+        </div>
 
-            <div class="form-group" style="margin-bottom: 25px;">
-                {{ form_label(form.content, null, {'label_attr': {'style': 'display: block; margin-bottom: 8px; color: #533C56; font-weight: 500;'}}) }}
-                {{ form_widget(form.content, {'attr': {
-                    'style': 'width: 100%; padding: 12px 15px; border: 1px solid #d9c7df; border-radius: 6px; font-size: 1rem; min-height: 150px;',
-                    'class': 'form-control'
-                }}) }}
-                <div style="color: #e74c3c; font-size: 0.85rem; margin-top: 5px;">
-                    {{ form_errors(form.content) }}
-                </div>
-            </div>
+        <div class="form-group">
+            {{ form_label(form.content, null, {'label_attr': {'class': 'form-label'}}) }}
+            {{ form_widget(form.content, {'attr': {'class': 'form-textarea'}}) }}
+            <div class="form-error">{{ form_errors(form.content) }}</div>
+        </div>
 
-            <div style="text-align: center;">
-				<button type="button" onclick="window.location.href='{{ path('app_publication_client') }}'" class="btn btn-primary" style="background-color: #533C56; color: white; border: none; padding: 12px 30px; border-radius: 30px; font-size: 1rem; transition: all 0.3s ease;">
-				Cancel
-				</button>
-                <button type="submit" class="btn btn-primary" style="background-color: #533C56; color: white; border: none; padding: 12px 30px; border-radius: 30px; font-size: 1rem; transition: all 0.3s ease;">
-                    Update 
-                </button>
-               
-            </div>
+        <div class="d-flex" style="justify-content: space-between; margin-top: 2rem;">
+            <button type="button" onclick="window.location.href='{{ path('app_publication_client') }}'" class="btn-submit" style="width: 48%;">Cancel</button>
+            <button type="submit" class="btn-submit" style="width: 48%;">Update</button>
+        </div>
 
         {{ form_end(form) }}
     </div>
 </div>
-
-<style>
-    .form-control:focus {
-        border-color: #99707E;
-        box-shadow: 0 0 0 0.2rem rgba(153, 112, 126, 0.25);
-        outline: none;
-    }
-
-    .btn-primary:hover {
-        background-color: #7a5a6a !important;
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(83, 60, 86, 0.2);
-    }
-
-    .btn-secondary:hover {
-        background-color: #f0e5f2 !important;
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(83, 60, 86, 0.1);
-    }
-</style>
 {% endblock %}

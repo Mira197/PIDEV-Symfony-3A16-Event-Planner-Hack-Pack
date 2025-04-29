@@ -45,6 +45,37 @@
 			<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 			<link
 				rel="stylesheet" href="{{ asset('css/AyaCSS.css') }}">
+				<style>
+					.pagination {
+						justify-content: center;
+						flex-wrap: wrap;
+					}
+			
+					.page-item .page-link {
+						color: #6b336e;
+						border-radius: 6px;
+						transition: all 0.2s ease;
+						padding: 6px 12px;
+						border: 1px solid #ddd;
+					}
+			
+					.page-item .page-link:hover {
+						background-color: #f2f2f2;
+					}
+			
+					.page-item.active .page-link {
+						background-color: #6b336e;
+						border-color: #6b336e;
+						color: white;
+						font-weight: bold;
+					}
+			
+					.page-item.disabled .page-link {
+						color: #999;
+						background-color: #f0f0f0;
+						border-color: #ddd;
+					}
+				</style>
 
 		{% endblock %}
 	</head>
@@ -199,13 +230,26 @@
 										<div class="col-md-4">
 											<select name="category" id="category" class="form-control">
 												<option value="">All Categories</option>
-												{% for category in groupedProducts|keys %}
-													<option value="{{ category }}">{{ category }}</option>
-												{% endfor %}
+												{% for group in groupedProducts %}
+                    <option value="{{ group.category }}">{{ group.category }}</option>
+                {% endfor %}
 											</select>
 										</div>
 									</div>
 								</form>
+								<form id="filter-form" class="mb-4" method="get" action="{{ path('afficheclient') }}">
+									<div class="row justify-content-center">
+										<div class="col-md-4">
+									<select name="currency" onchange="this.form.submit()">
+										<option value="TND" {% if selectedCurrency == 'TND' %}selected{% endif %}>Dinar Tunisien</option>
+										<option value="USD" {% if selectedCurrency == 'USD' %}selected{% endif %}>Dollar US</option>
+										<option value="EUR" {% if selectedCurrency == 'EUR' %}selected{% endif %}>Euro</option>
+									</select>
+								</div>
+							</div>
+								</form>
+								
+								
 								
 								
 							</div>
@@ -220,7 +264,11 @@
 						</div>
 
 						<div id="product-list">
-							{% include 'partials/_products.html.twig' %}
+							{% include 'partials/_products.html.twig' with {
+								'groupedProducts': groupedProducts,
+								'conversionRate': conversionRate,
+								'selectedCurrency': selectedCurrency
+							} %}
 						</div>
 						
 
@@ -965,7 +1013,50 @@ padding: 20
 					border-radius: 5px;
 				}
 			</style>
-
+			<script>
+				function attachPaginationListeners() {
+					document.querySelectorAll('.pagination a.page-link').forEach(link => {
+						link.addEventListener('click', function (e) {
+							e.preventDefault(); // empêcher le comportement normal du lien
+				
+							const url = this.getAttribute('href');
+				
+							fetch(url, {
+								headers: {
+									'X-Requested-With': 'XMLHttpRequest'
+								}
+							})
+							.then(response => response.text())
+							.then(html => {
+								document.getElementById('product-list').innerHTML = html;
+								attachPaginationListeners(); // Re-attach après chargement AJAX
+							});
+						});
+					});
+				}
+				
+				// Premier attachement initial au chargement
+				document.addEventListener('DOMContentLoaded', function () {
+					attachPaginationListeners();
+				});
+				
+				// Filtrage catégorie existant
+				document.getElementById('category').addEventListener('change', function () {
+					const selectedCategory = this.value;
+				
+					fetch('{{ path("ajax_filter_products") }}?category=' + encodeURIComponent(selectedCategory), {
+						headers: {
+							'X-Requested-With': 'XMLHttpRequest'
+						}
+					})
+					.then(response => response.text())
+					.then(html => {
+						document.getElementById('product-list').innerHTML = html;
+						attachPaginationListeners(); // Important pour attacher après filtre
+					});
+				});
+				</script>
+				
 		{% endblock %}
 	</body>
 </html>

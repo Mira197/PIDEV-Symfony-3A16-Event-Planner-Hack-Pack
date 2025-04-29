@@ -1,4 +1,5 @@
-{% extends 'admin/baseAdmin.html.twig' %}
+{% extends 'admin/baseFournisseur.html.twig' %}
+
 
 {% block title %}Stocks{% endblock %}
 
@@ -10,11 +11,10 @@
 
 		<!-- Barre de recherche + actions -->
 		<div class="title mt-30 mb-30">
-<a href="{{ path('stock_add') }}" class="main-btn primary-btn btn-hover">
+<a href="{{ path('stock_add_four') }}" class="main-btn primary-btn btn-hover">
                     ajouter stock
                   </a>
-                  <a href="{{ path('check_stocks') }}" class="main-btn primary-btn btn-hover">
-                    Vérifier les stocks</a>
+                  
                   </div>
 		<table class="admin-mui-table">
 			<thead>
@@ -24,6 +24,7 @@
 					<th>Available Quantity</th>
 					<th>Minimum Quantity</th>
 					<th>Last Update</th>
+					<th>State</th> {# 👈 Nouvelle colonne ajoutée #}
 					<th>Actions</th>
 				</tr>
 			</thead>
@@ -37,13 +38,22 @@
 						<td>{{ stock.available_quantity }}</td>
 						<td>{{ stock.minimum_quantity }}</td>
 						<td>{{ stock.last_update ? stock.last_update|date('Y-m-d H:i') : '—' }}</td>
-						
+						{# 🟢🟡🔴 Etat de stock ici #}
+						<td>
+							{% if stock.available_quantity == 0 %}
+								<span style="color: red; font-weight: bold;">Épuisé</span>
+							{% elseif stock.available_quantity <= stock.minimum_quantity %}
+								<span style="color: orange; font-weight: bold;">Proche</span>
+							{% else %}
+								<span style="color: green; font-weight: bold;">Bien</span>
+							{% endif %}
+						</td>
 						
 						<td>
-							<a href="{{ path('stock_delete', {id: stock.stock_id}) }}" class="main-btn danger-btn-outline btn-hover px-3 py-2">
+							<a href="{{ path('stock_delete_four', {id: stock.stock_id}) }}" class="main-btn danger-btn-outline btn-hover px-3 py-2">
 								<i class="fa-solid fa-trash" style="font-size: 18px;color: #533C56;"></i>
 							</a>
-							<a href="{{ path('stock_edit', {id: stock.stock_id}) }}" class="btn btn-outline-warning btn-sm">
+							<a href="{{ path('stock_edit_four', {id: stock.stock_id}) }}" class="btn btn-outline-warning btn-sm">
 								<i class="fa-solid fa-pen" style="font-size: 14px;color: #533C56;"></i>
 							</a>
 						</td>

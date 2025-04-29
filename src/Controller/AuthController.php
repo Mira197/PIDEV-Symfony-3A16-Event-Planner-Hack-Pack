@@ -182,9 +182,9 @@ public function login(
                 case 'ADMIN':
                     return $this->redirectToRoute('app_user_index');
                 case 'CLIENT':
-                    return $this->redirectToRoute('prof');
+                    return $this->redirectToRoute('app_home');
                 case 'FOURNISSEUR':
-                    return $this->redirectToRoute('prof');
+                    return $this->redirectToRoute('baseFournisseur');
                 default:
                     return $this->redirectToRoute('homepage');
             }
