@@ -49,6 +49,12 @@
 		.is-invalid:focus {
 			box-shadow: 0 0 5px rgba(220, 53, 69, 0.4);
 		}
+		select:disabled {
+			opacity: 0.5;
+			cursor: not-allowed;
+			pointer-events: none; /* 🔥 important */
+			transition: opacity 0.5s ease;
+		}
 	</style>
 {% endblock %}
 
@@ -60,24 +66,36 @@
 			<div class="col-md-7">
 				<div class="order-form-container">
 					<h2 class="mb-4 text-center">🧾 Validate Your Order</h2>
-					{{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+					{{ form_start(form, {'attr': {'novalidate': 'novalidate', 'id': 'order_form'}}) }}
 					<div class="form-group">
 						{{ form_label(form.exact_address) }}
-						{{ form_widget(form.exact_address, {'attr': {'class': 'form-control' ~ (form_errors(form.exact_address) ? ' is-invalid' : ''),'placeholder': 'Enter exact delivery address'}}) }}
+						{{ form_widget(form.exact_address, {'attr': {'class': 'form-control' ~ (form_errors(form.exact_address) ? ' is-invalid' : ''), 'placeholder': 'Enter exact delivery address'}}) }}
 						{{ form_errors(form.exact_address) }}
 					</div>
+
 					<div class="form-group mt-3">
 						{{ form_label(form.event_date) }}
 						{{ form_widget(form.event_date, {'attr': {'class': 'form-control' ~ (form_errors(form.event_date) ? ' is-invalid' : '')}}) }}
 						{{ form_errors(form.event_date) }}
 					</div>
+
 					<div class="form-group mt-3">
 						{{ form_label(form.payment_method) }}
-						{{ form_widget(form.payment_method, {'attr': {'class': 'form-control' ~ (form_errors(form.payment_method) ? ' is-invalid' : '')}}) }}
+						{{ form_widget(form.payment_method, {'attr': {'class': 'form-control' ~ (form_errors(form.payment_method) ? ' is-invalid' : ''), 'id': 'order_payment_method'}}) }}
 						{{ form_errors(form.payment_method) }}
 					</div>
+
+					{# 🔥 🔥 Champ hidden final_total et payment_method_hidden doivent venir ici avant la fermeture du form #}
+					<input type="hidden" id="final_total_field" name="aya_order[final_total]" value="{{ total }}">
+					<input type="hidden" id="payment_method_hidden" name="aya_order[payment_method_hidden]" value="">
+
 					<button type="submit" class="btn btn-success mt-4 w-100">Confirm Order</button>
+					{% if app.session.get('last_order_id') %}
+						<input type="hidden" id="order_id" value="{{ app.session.get('last_order_id') }}">
+					{% endif %}
+
 					{{ form_end(form) }}
+
 				</div>
 			</div>
 
@@ -88,48 +106,379 @@
 						<label>Coupon Code</label>
 						<div class="input-apply-group">
 							<input type="text" class="form-control coupon-input" placeholder="Enter coupon">
-							<button class="btn btn-secondary apply-btn">Apply</button>
+							<button class="btn btn-secondary apply-btn" id="apply-coupon">Apply</button>
 						</div>
 
 					</div>
 
+					{# 
+																										<div class="form-group mt-4">
+																											<label>Gift Card</label>
+																											<div class="d-flex giftcard-row align-items-center">
+																												<input type="text" class="form-control card-input me-2" placeholder="Card Number">
+																												<input type="text" class="form-control pin-input me-2" placeholder="PIN">
+																												<button class="btn btn-secondary apply-btn" id="apply-giftcard">Apply</button>
+																											</div>
+																										</div> #}
+
 
 					<div class="form-group mt-4">
-						<label>Gift Card</label>
-						<div class="d-flex giftcard-row align-items-center">
-							<input type="text" class="form-control card-input me-2" placeholder="Card Number">
-							<input type="text" class="form-control pin-input me-2" placeholder="PIN">
-							<button class="btn btn-secondary apply-btn">Apply</button>
-						</div>
-					</div>
-
-
-					<div class="form-group mt-4">
-						<label>Wallet Credit</label>
+						<label>Wallet Credit
+							<small>(Available:
+								{{ wallet_credit|number_format(2, '.', '') }}
+								TND)</small>
+						</label>
 						<div class="input-apply-group">
 							<input type="text" class="form-control wallet-input" placeholder="Enter amount">
-							<button class="btn btn-secondary apply-btn">Apply</button>
+							<button class="btn btn-secondary apply-btn" id="apply-wallet">Apply</button>
 						</div>
 					</div>
 
 
 					<div class="form-group mt-4">
 						<label>3alakifi Points
-							<small>(Total: 0)</small>
+							<small>(Total:
+								{{ points }})</small>
 						</label>
-						<div class="input-apply-group">
-							<input type="text" class="form-control alakifi-input" placeholder="Enter points">
-							<button class="btn btn-secondary apply-btn">Apply</button>
-						</div>
 					</div>
-
-
-					<button class="btn btn-dark w-100 mt-4">CONTINUE</button>
+					<div class="line d-flex justify-content-between" style="font-size: 1.3em; font-weight: bold; color: #6b336e;">
+						<span>🏁 Total</span>
+						<span id="final-total">{{ total|number_format(2, '.', ' ') }}
+							TND</span>
+					</div>
 				</div>
 			</div>
+
 		</div>
+
+
 	</div>
-{% endblock %}
-{% block javascripts %}
-	{{ parent() }}
-{% endblock %}
+</div>{% endblock %}{% block javascripts %}
+{{ parent() }}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://js.stripe.com/v3/"></script>
+<script>
+	// Log the wallet credit to the browser console
+console.log('Wallet Credit:  {{ wallet_credit|number_format(2, ".", "") }}TND');
+</script>
+<script>
+	document.addEventListener('DOMContentLoaded', function () {
+const stripe = Stripe('{{ STRIPE_PUBLIC_KEY }}');
+const confirmButton = document.querySelector('.btn-success');
+const paymentMethodSelect = document.getElementById('order_payment_method');
+
+const initialTotal = parseFloat('{{ total|default(0)|replace({",": "."}) }}') || 0;
+sessionStorage.setItem('initial_total', initialTotal);
+sessionStorage.setItem('current_total', initialTotal);
+console.log('Initial Total Loaded:', initialTotal);
+
+togglePaymentMethod(initialTotal);
+
+confirmButton.addEventListener('click', function (event) {
+event.preventDefault(); // 🔥 Bloquer tout au clic sur "Confirm Order"
+
+const finalTotal = parseFloat(document.getElementById('final_total_field').value) || 0;
+const initialTotal = parseFloat(sessionStorage.getItem('initial_total') || 0) || 0; // Original total before reductions
+const walletUsed = parseFloat(sessionStorage.getItem('wallet_used') || 0) || 0; // Use the applied wallet credit
+
+if (walletUsed >= finalTotal) {
+Swal.fire({icon: 'success', title: 'Wallet Payment!', text: 'Your order will be fully paid with your Wallet Credit.', confirmButtonColor: '#6b336e'}).then(() => {
+sessionStorage.setItem('payment_mode', 'wallet_only');
+
+// Prepare form data
+const form = document.getElementById('order_form');
+const formData = new FormData(form);
+formData.append('aya_order[payment_method_hidden]', 'wallet_only');
+// Ensure payment method is set
+
+// Submit form data via fetch
+fetch('/aya/order/new', {
+method: 'POST',
+body: formData,
+headers: {
+'X-Requested-With': 'XMLHttpRequest' // Indicate this is an AJAX request
+}
+}).then(response => response.json()).then(data => {
+if (data.success && data.order_id) { // Redirect to the confirmation page with the order ID
+window.location.href = `/aya/order/confirm/${
+data.order_id
+}`;
+} else { // Handle errors (e.g., form validation errors)
+const errorMessage = data.errors ? data.errors.join(' ') : 'Failed to place order.';
+showAlert('error', 'Error', errorMessage);
+}
+}).catch(error => {
+console.error('Form submission error:', error);
+showAlert('error', 'Error', 'An error occurred while placing the order.');
+});
+});
+} else {
+Swal.fire({
+title: 'Partial Wallet Payment',
+text: "Your Wallet Credit is not enough. Choose how you want to pay:",
+icon: 'warning',
+showCancelButton: true,
+confirmButtonText: 'Wallet + Stripe',
+cancelButtonText: 'Pay All with Stripe',
+confirmButtonColor: '#6b336e',
+cancelButtonColor: '#6b336e'
+}).then((result) => {
+if (result.isConfirmed) { // Wallet + Stripe: Use the final total (after reductions)
+const amountToPay = finalTotal;
+
+fetch('/aya/order/confirm-wallet-stripe', {
+method: 'POST',
+headers: {
+'Content-Type': 'application/json'
+},
+body: JSON.stringify(
+{
+amount: amountToPay,
+address: document.querySelector('#aya_order_exact_address').value,
+event_date: document.querySelector('#aya_order_event_date').value,
+payment_method: 'Stripe',
+use_wallet: true // Indicate wallet credit should be used
+}
+)
+}).then(response => response.json()).then(data => {
+if (data.success && data.order_id) {
+fetch('/create-checkout-session', {
+method: 'POST',
+headers: {
+'Content-Type': 'application/x-www-form-urlencoded'
+},
+body: new URLSearchParams(
+{amount: amountToPay, order_id: data.order_id}
+)
+}).then(response => response.json()).then(session => {
+if (session.id) {
+stripe.redirectToCheckout({sessionId: session.id});
+} else {
+showAlert('error', 'Error', 'Stripe session creation failed. Please try again.');
+}
+}).catch(error => {
+console.error('Stripe session error:', error);
+showAlert('error', 'Error', 'An error occurred with Stripe. Please try again.');
+});
+} else {
+showAlert('error', 'Error', data.message || 'Failed to create order with Wallet + Stripe.');
+}
+}).catch(error => {
+console.error('Order creation error:', error);
+showAlert('error', 'Error', 'An error occurred while creating the order.');
+});
+} else if (result.dismiss === Swal.DismissReason.cancel) { // Pay All with Stripe: Use the initial total (before reductions)
+const amountToPay = initialTotal;
+
+// Create an order first
+fetch('/aya/order/confirm-wallet-stripe', {
+method: 'POST',
+headers: {
+'Content-Type': 'application/json'
+},
+body: JSON.stringify(
+{
+amount: amountToPay,
+address: document.querySelector('#aya_order_exact_address').value,
+event_date: document.querySelector('#aya_order_event_date').value,
+payment_method: 'Stripe',
+use_wallet: false // No wallet credit should be used
+}
+)
+}).then(response => response.json()).then(data => {
+if (data.success && data.order_id) {
+fetch('/create-checkout-session', {
+method: 'POST',
+headers: {
+'Content-Type': 'application/x-www-form-urlencoded'
+},
+body: new URLSearchParams(
+{amount: amountToPay, order_id: data.order_id}
+)
+}).then(response => response.json()).then(session => {
+if (session.id) {
+stripe.redirectToCheckout({sessionId: session.id});
+} else {
+showAlert('error', 'Error', 'Stripe session creation failed. Please try again.');
+}
+}).catch(error => {
+console.error('Stripe session error:', error);
+showAlert('error', 'Error', 'An error occurred with Stripe. Please try again.');
+});
+} else {
+showAlert('error', 'Error', data.message || 'Failed to create order with Stripe.');
+}
+}).catch(error => {
+console.error('Order creation error:', error);
+showAlert('error', 'Error', 'An error occurred while creating the order.');
+});
+}
+});
+}
+});
+});
+
+// 🔥 Fonctions utilitaires
+
+function showAlert(icon, title, text, useToast = false) {
+if (useToast) {
+return Swal.fire({
+toast: true,
+position: 'top-end',
+icon: icon,
+title: title,
+showConfirmButton: false,
+timer: 2500,
+timerProgressBar: true,
+background: '#fff',
+color: '#333',
+didOpen: (toast) => {
+toast.addEventListener('mouseenter', Swal.stopTimer)
+toast.addEventListener('mouseleave', Swal.resumeTimer)
+}
+});
+} else {
+return Swal.fire({
+icon: icon,
+title: title,
+text: text,
+confirmButtonColor: '#6b336e',
+backdrop: `rgba(107, 51, 110, 0.2)`
+});
+}
+}
+
+function togglePaymentMethod(newTotal) {
+const paymentMethodSelect = document.getElementById('aya_order_payment_method');
+const paymentHiddenInput = document.getElementById('payment_method_hidden');
+
+if (paymentMethodSelect) {
+const walletOption = [... paymentMethodSelect.options].find(opt => opt.value.toLowerCase() === 'wallet only');
+
+if (newTotal <= 0) {
+if (walletOption) {
+walletOption.disabled = false;
+walletOption.hidden = false;
+walletOption.selected = true;
+}
+paymentMethodSelect.disabled = true;
+paymentMethodSelect.style.opacity = '0.5';
+paymentMethodSelect.style.cursor = 'not-allowed';
+paymentHiddenInput.value = 'wallet_only';
+} else {
+if (walletOption) {
+walletOption.disabled = true;
+walletOption.hidden = true;
+}
+paymentMethodSelect.disabled = false;
+paymentMethodSelect.style.opacity = '1';
+paymentMethodSelect.style.cursor = 'default';
+paymentHiddenInput.value = '';
+}
+}
+}
+
+function updateTotal() {
+let initialTotal = parseFloat(sessionStorage.getItem('initial_total') || 0) || 0;
+const couponDiscount = parseFloat(sessionStorage.getItem('coupon_discount') || 0) || 0;
+const walletUsed = parseFloat(sessionStorage.getItem('wallet_used') || 0) || 0;
+const giftCardAmount = parseFloat(sessionStorage.getItem('gift_card_amount') || 0) || 0;
+const pointsUsed = parseFloat(sessionStorage.getItem('points_used') || 0) || 0;
+
+let newTotal = initialTotal - couponDiscount - walletUsed - giftCardAmount - pointsUsed;
+if (newTotal < 0) 
+newTotal = 0;
+
+
+console.log('Initial Total:', initialTotal, 'Wallet Used:', walletUsed, 'New Total:', newTotal); // Debug log
+
+$('#final-total').text(newTotal.toFixed(2) + ' TND');
+document.getElementById('final_total_field').value = newTotal.toFixed(2);
+
+sessionStorage.setItem('current_total', newTotal);
+
+togglePaymentMethod(newTotal);
+
+return newTotal;
+}
+
+// 🔥 Coupons / Wallet / Points
+document.addEventListener('DOMContentLoaded', function () {
+document.getElementById('apply-coupon').addEventListener('click', function () {
+const coupon = document.querySelector('.coupon-input').value;
+if (! coupon.trim()) 
+return showAlert('error', 'Error', 'Please enter a coupon code.');
+
+
+fetch('/aya/order/apply-coupon', {
+method: 'POST',
+body: new URLSearchParams(
+{coupon_code: coupon}
+)
+}).then(response => response.json()).then(data => {
+if (data.success) {
+sessionStorage.setItem('coupon_discount', data.discount);
+updateTotal();
+showAlert('success', 'Coupon Applied!', 'Your discount has been applied.');
+} else {
+showAlert('error', 'Invalid Coupon', data.message);
+}
+});
+});
+
+document.getElementById('apply-wallet').addEventListener('click', function () {
+const amount = parseFloat(document.querySelector('.wallet-input').value);
+const availableCredit = parseFloat('{{ wallet_credit }}'); // Wallet credit available from server
+
+if (! amount || amount <= 0) {
+return showAlert('error', 'Error', 'Please enter a valid amount.');
+}
+
+if (amount > availableCredit) { // Display an alert if the amount exceeds the available wallet credit
+return showAlert('error', 'Insufficient Funds', 'Your wallet credit is insufficient to cover this amount.');
+}
+
+fetch('/aya/order/apply-wallet', {
+method: 'POST',
+body: new URLSearchParams(
+{amount: amount}
+)
+}).then(response => response.json()).then(data => {
+if (data.success) {
+sessionStorage.setItem('wallet_used', data.applied);
+console.log('Wallet Applied:', data.applied); // Debug log
+updateTotal();
+showAlert('success', 'Wallet Credit Applied!', 'You used ' + data.applied + ' TND.');
+} else {
+showAlert('error', 'Wallet Error', data.message);
+}
+});
+});
+
+document.getElementById('apply-points').addEventListener('click', function () {
+const points = document.querySelector('.alakifi-input').value;
+if (! points.trim() || isNaN(points) || parseFloat(points) <= 0) {
+return showAlert('error', 'Erreur', 'Veuillez entrer un nombre de points valide.');
+}
+
+fetch('/aya/order/apply-points', {
+method: 'POST',
+body: new URLSearchParams(
+{points: points}
+)
+}).then(response => response.json()).then(data => {
+if (data.success) {
+const appliedPoints = parseFloat(data.applied) || 0;
+sessionStorage.setItem('points_used', appliedPoints);
+updateTotal();
+showAlert('success', 'Points appliqués !', 'Vous avez utilisé ' + points + ' points.');
+} else {
+showAlert('error', 'Erreur points', data.message);
+}
+}).catch(error => {
+console.error('Erreur lors de l\'application des points:', error);
+showAlert('error', 'Erreur', 'Une erreur est survenue lors de l\'application des points.');
+});
+});
+});
+</script>{% endblock %}

@@ -9,15 +9,19 @@
         "ext-iconv": "*",
         "amphp/http-client": "4.2.1",
         "beberlei/doctrineextensions": "^1.5",
+        "chartisan/chartisan": "*",
         "doctrine/dbal": "^3",
         "doctrine/doctrine-bundle": "^2.13",
         "doctrine/doctrine-migrations-bundle": "^3.4",
         "doctrine/orm": "^3.3",
         "dompdf/dompdf": "^3.1",
+        "endroid/qr-code-bundle": "^5.0",
         "knplabs/knp-paginator-bundle": "^6.8",
+        "league/csv": "^9.23",
         "phpdocumentor/reflection-docblock": "^5.6",
         "phpoffice/phpspreadsheet": "^4.1",
         "phpstan/phpdoc-parser": "^2.1",
+        "stripe/stripe-php": "*",
         "symfony/asset": "6.4.*",
         "symfony/asset-mapper": "6.4.*",
         "symfony/console": "6.4.*",
@@ -39,12 +43,16 @@
         "symfony/runtime": "6.4.*",
         "symfony/security-bundle": "6.4.*",
         "symfony/serializer": "6.4.*",
-        "symfony/stimulus-bundle": "^2.23",
+        "symfony/stimulus-bundle": "*",
         "symfony/string": "6.4.*",
         "symfony/translation": "6.4.*",
         "symfony/twig-bridge": "6.4.*",
         "symfony/twig-bundle": "6.4.*",
+
+        "symfony/twilio-notifier": "6.4.*",
+
         "symfony/ux-chartjs": "^2.24",
+
         "symfony/ux-turbo": "^2.23",
         "symfony/validator": "6.4.*",
         "symfony/web-link": "6.4.*",
@@ -53,13 +61,15 @@
         "symfonycasts/reset-password-bundle": "^1.23",
         "twig/extra-bundle": "^2.12|^3.0",
         "twig/twig": "*",
+        "twilio/sdk": "^8.5",
         "vich/uploader-bundle": "*"
     },
     "config": {
         "allow-plugins": {
             "php-http/discovery": true,
             "symfony/flex": true,
-            "symfony/runtime": true
+            "symfony/runtime": true,
+            "endroid/installer": true
         },
         "sort-packages": true
     },

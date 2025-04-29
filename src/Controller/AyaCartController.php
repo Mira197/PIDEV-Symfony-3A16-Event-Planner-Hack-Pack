@@ -18,6 +18,8 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Symfony\Component\Security\Core\Security;
+use App\Repository\UserRepository;
 
 class AyaCartController extends AbstractController
 {
@@ -32,10 +34,20 @@ class AyaCartController extends AbstractController
     public function index(
         CartRepository $cartRepository,
         CartProductRepository $cartProductRepository,
-        EntityManagerInterface $em // 👈 injecte ici
+        EntityManagerInterface $em,
+        SessionInterface $session,
+        UserRepository $userRepository
     ): Response {
         //$user = $this->getUser();
-        $user = $this->getUser() ?? $em->getRepository(User::class)->find(49);
+        //$user = $this->getUser() ?? $em->getRepository(User::class)->find(X100);
+
+        $userId = $session->get('user_id');
+        $user = $userRepository->find($userId);
+
+        if (!$user) {
+            $this->addFlash('error', 'You must be logged in.');
+            return $this->redirectToRoute('app_login');
+        }
         $cartProducts = [];
         $total = 0;
 
@@ -82,49 +94,59 @@ class AyaCartController extends AbstractController
         ];
     }
     #[Route('/aya/cart/add/{id}', name: 'aya_cart_add', methods: ['POST'])]
-public function addToCart(
-    int $id,
-    ProductRepository $productRepository,
-    EntityManagerInterface $em,
-    CartRepository $cartRepository,
-    CartProductRepository $cartProductRepository
-): Response {
-    $user = $this->getUser() ?? $em->getRepository(User::class)->find(49);
-    $product = $productRepository->find($id);
+    public function addToCart(
+        int $id,
+        ProductRepository $productRepository,
+        EntityManagerInterface $em,
+        CartRepository $cartRepository,
+        CartProductRepository $cartProductRepository,
+        SessionInterface $session,
+        UserRepository $userRepository
+    ): Response {
+        //$user = $this->getUser() ?? $em->getRepository(User::class)->find(x);
+        $userId = $session->get('user_id');
+        $user = $userRepository->find($userId);
 
-    if (!$product) {
-        $this->addFlash('error', 'Product not found');
-        return $this->redirectToRoute('aya_cart');
+        if (!$user) {
+            $this->addFlash('error', 'Please log in first.');
+            return $this->redirectToRoute('app_login');
+        }
+
+        $product = $productRepository->find($id);
+
+        if (!$product) {
+            $this->addFlash('error', 'Product not found');
+            return $this->redirectToRoute('aya_cart');
+        }
+
+        $cart = $cartRepository->findOneBy(['user' => $user]);
+        if (!$cart) {
+            $cart = new Cart();
+            $cart->setUser($user);
+            $em->persist($cart);
+            $em->flush(); // Pour obtenir un cart_id valide
+        }
+
+        $cartProduct = $cartProductRepository->findOneBy(['cart' => $cart, 'product' => $product]);
+
+        if ($cartProduct) {
+            $cartProduct->setQuantity($cartProduct->getQuantity() + 1);
+        } else {
+            $cartProduct = new CartProduct();
+            $cartProduct->setCart($cart);
+            $cartProduct->setProduct($product);
+            $cartProduct->setQuantity(1); // ← initialise ici aussi !
+            $em->persist($cartProduct);
+        }
+
+        $em->flush();
+
+        // Ajout d'un message Flash
+        $this->addFlash('success', 'Product added to cart');
+
+        // Redirige vers le panier ou affiche une vue HTML avec les détails
+        return $this->redirectToRoute('aya_cart'); // Ou vous pouvez aussi rendre un template Twig avec les détails du produit ajouté
     }
-
-    $cart = $cartRepository->findOneBy(['user' => $user]);
-    if (!$cart) {
-        $cart = new Cart();
-        $cart->setUser($user);
-        $em->persist($cart);
-        $em->flush(); // Pour obtenir un cart_id valide
-    }
-
-    $cartProduct = $cartProductRepository->findOneBy(['cart' => $cart, 'product' => $product]);
-
-    if ($cartProduct) {
-        $cartProduct->setQuantity($cartProduct->getQuantity() + 1);
-    } else {
-        $cartProduct = new CartProduct();
-        $cartProduct->setCart($cart);
-        $cartProduct->setProduct($product);
-        $cartProduct->setQuantity(1); // ← initialise ici aussi !
-        $em->persist($cartProduct);
-    }
-
-    $em->flush();
-
-    // Ajout d'un message Flash
-    $this->addFlash('success', 'Product added to cart');
-
-    // Redirige vers le panier ou affiche une vue HTML avec les détails
-    return $this->redirectToRoute('aya_cart'); // Ou vous pouvez aussi rendre un template Twig avec les détails du produit ajouté
-}
 
 
 
@@ -133,9 +155,18 @@ public function addToCart(
     public function getCartJson(
         EntityManagerInterface $em,
         CartRepository $cartRepository,
-        CartProductRepository $cartProductRepository
+        CartProductRepository $cartProductRepository,
+        SessionInterface $session,
+        UserRepository $userRepository
     ): JsonResponse {
-        $user = $this->getUser() ?? $em->getRepository(User::class)->find(49);
+        //$user = $this->getUser() ?? $em->getRepository(User::class)->find(x100);
+        $userId = $session->get('user_id');
+        $user = $userRepository->find($userId);
+
+        if (!$user) {
+            return new JsonResponse(['error' => 'Please log in first'], 401);
+        }
+
         $cart = $cartRepository->findOneBy(['user' => $user]);
         $items = [];
         $total = 0;
@@ -167,9 +198,18 @@ public function addToCart(
         EntityManagerInterface $em,
         CartRepository $cartRepository,
         CartProductRepository $cartProductRepository,
-        ValidatorInterface $validator
+        ValidatorInterface $validator,
+        SessionInterface $session,
+        UserRepository $userRepository
     ): JsonResponse {
-        $user = $this->getUser() ?? $em->getRepository(User::class)->find(49);
+        //$user = $this->getUser() ?? $em->getRepository(User::class)->find(x100);
+        $userId = $session->get('user_id');
+        $user = $userRepository->find($userId);
+
+        if (!$user) {
+            return new JsonResponse(['error' => 'Please log in first'], 401);
+        }
+
         $cart = $cartRepository->findOneBy(['user' => $user]);
         $data = json_decode($request->getContent(), true);
         $quantity = $data['quantity'] ?? null;
@@ -224,9 +264,18 @@ public function addToCart(
         int $id,
         EntityManagerInterface $em,
         CartRepository $cartRepository,
-        CartProductRepository $cartProductRepository
+        CartProductRepository $cartProductRepository,
+        SessionInterface $session,
+        UserRepository $userRepository
     ): JsonResponse {
-        $user = $this->getUser() ?? $em->getRepository(User::class)->find(49);
+        //$user = $this->getUser() ?? $em->getRepository(User::class)->find(x);
+        $userId = $session->get('user_id');
+        $user = $userRepository->find($userId);
+
+        if (!$user) {
+            return new JsonResponse(['error' => 'Please log in first'], 401);
+        }
+
         $cart = $cartRepository->findOneBy(['user' => $user]);
 
         if (!$cart) {
@@ -249,9 +298,18 @@ public function addToCart(
     public function clearCart(
         EntityManagerInterface $em,
         CartRepository $cartRepository,
-        CartProductRepository $cartProductRepository
+        CartProductRepository $cartProductRepository,
+        SessionInterface $session,
+        UserRepository $userRepository
     ): JsonResponse {
-        $user = $this->getUser() ?? $em->getRepository(User::class)->find(49);
+        //$user = $this->getUser() ?? $em->getRepository(User::class)->find(x100);
+        $userId = $session->get('user_id');
+        $user = $userRepository->find($userId);
+
+        if (!$user) {
+            return new JsonResponse(['error' => 'Please log in first'], 401);
+        }
+
         $cart = $cartRepository->findOneBy(['user' => $user]);
 
         if (!$cart) {
@@ -272,9 +330,17 @@ public function addToCart(
         int $id,
         EntityManagerInterface $em,
         CartRepository $cartRepository,
-        CartProductRepository $cartProductRepository
+        CartProductRepository $cartProductRepository,
+        SessionInterface $session,
+        UserRepository $userRepository
     ): JsonResponse {
-        $user = $this->getUser() ?? $em->getRepository(User::class)->find(49);
+        //$user = $this->getUser() ?? $em->getRepository(User::class)->find(x100);
+        $userId = $session->get('user_id');
+        $user = $userRepository->find($userId);
+
+        if (!$user) {
+            return new JsonResponse(['error' => 'Please log in first'], 401);
+        }
         $cart = $cartRepository->findOneBy(['user' => $user]);
         $cartProduct = $cartProductRepository->findOneBy(['cart' => $cart, 'product' => $id]);
 
@@ -311,9 +377,18 @@ public function addToCart(
         int $id,
         EntityManagerInterface $em,
         CartRepository $cartRepository,
-        CartProductRepository $cartProductRepository
+        CartProductRepository $cartProductRepository,
+        SessionInterface $session,
+        UserRepository $userRepository
     ): JsonResponse {
-        $user = $this->getUser() ?? $em->getRepository(User::class)->find(49);
+        //$user = $this->getUser() ?? $em->getRepository(User::class)->find(x100);
+        $userId = $session->get('user_id');
+        $user = $userRepository->find($userId);
+
+        if (!$user) {
+            return new JsonResponse(['error' => 'Please log in first'], 401);
+        }
+
         $cart = $cartRepository->findOneBy(['user' => $user]);
         $cartProduct = $cartProductRepository->findOneBy(['cart' => $cart, 'product' => $id]);
 
@@ -344,4 +419,6 @@ public function addToCart(
             'total_price' => $cartProduct->getTotalPrice()
         ]);
     }
+
+    
 }

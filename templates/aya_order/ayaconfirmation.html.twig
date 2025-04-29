@@ -52,8 +52,14 @@
 		<div class="confirmation-container">
 			<div class="confirmation-icon">✅</div>
 			<h2>Thank you for your order!</h2>
+
+			<p><img src="{{ path('aya_order_qr_code', {'id': order.orderId}) }}" alt="QR Code to download" style="margin: 20px auto; display: block;"></p>
+
+			<p>📲 Scan this QR code to download your order summary!</p>
+
 			<p>Your order has been successfully placed and is being processed.</p>
 			<p>You will receive a confirmation email shortly.</p>
+
 			<a href="{{ path('aya_cart') }}" class="btn btn-outline-secondary">Back to Cart</a>
 			<a href="{{ path('afficheclient') }}" class="btn btn-primary">Continue Shopping</a>
 		</div>

@@ -34,4 +34,11 @@ class BaseAdminController extends AbstractController
             'reportedPosts' => $reportRepo->count(['status' => 'Pending']),
         ]);
     }
+    
+    #[Route('/admin/orders', name: 'admin_orders')]
+    public function adminOrders(): Response
+    {
+        return $this->render('admin/AyaDashboardOrders.html.twig', [
+        ]);
+    }
 }

@@ -13,19 +13,28 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 use Symfony\Component\Security\Csrf\CsrfToken;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
-
+use Knp\Component\Pager\PaginatorInterface;
 #[Route('/admin/orders')]
 class AyaAdminOrderController extends AbstractController
 {
-    #[Route('/all', name: 'admin_orders')]
-    public function index(OrderRepository $orderRepository): Response
-    {
-        $orders = $orderRepository->findAll();
+    #[Route('/all', name: 'admin_orders_all')]
+public function index(Request $request, OrderRepository $orderRepository, PaginatorInterface $paginator): Response
+{
+    $query = $orderRepository->createQueryBuilder('o')
+        ->join('o.user', 'u')->addSelect('u')
+        ->orderBy('o.ordered_at', 'DESC')
+        ->getQuery();
 
-        return $this->render('admin/aya_orders_admin.html.twig', [
-            'orders' => $orders,
-        ]);
-    }
+    $orders = $paginator->paginate(
+        $query,
+        $request->query->getInt('page', 1),
+        6
+    );
+
+    return $this->render('admin/aya_orders_admin.html.twig', [
+        'orders' => $orders,
+    ]);
+}
     #[Route('/update-status/{id}', name: 'admin_order_update_status', methods: ['POST'])]
     public function updateStatus(Order $order, Request $request, EntityManagerInterface $em): JsonResponse
     {

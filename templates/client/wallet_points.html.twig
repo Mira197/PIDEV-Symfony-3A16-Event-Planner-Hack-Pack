@@ -1,0 +1,178 @@
+{% extends 'base.html.twig' %}
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('assetsAya/css/ordercss.css') }}">
+    <style>
+        /* 🔥 Navbar style léger */
+        nav.fh5co-nav {
+            background-color: #cebec9 !important;
+            padding: 1px 0 !important;
+            max-height: 130px !important;
+        }
+
+        /* 🔥 Background général */
+        body {
+            background-color: #f7f7f7;
+        }
+
+        /* 🔥 Conteneur général */
+        .wallet-page-container {
+            padding: 150px 15px 80px;
+        }
+
+        /* 🔥 Cartes Wallet et Points */
+        .wallet-box, .points-box {
+            background: #ffffff;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0px 6px 20px rgba(0, 0, 0, 0.08);
+            text-align: center;
+            margin-bottom: 30px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        /* 🔥 Hover animation sur les cartes */
+        .wallet-box:hover, .points-box:hover {
+            transform: translateY(-8px);
+            box-shadow: 0px 12px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        /* 🔥 Titres dans les cartes */
+        .wallet-box h2, .points-box h2 {
+            font-size: 26px;
+            color: #6b336e;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        /* 🔥 Valeurs Wallet et Points */
+        .wallet-box p, .points-box p {
+            font-size: 22px;
+            font-weight: bold;
+            color: #333;
+            margin: 0;
+        }
+
+        /* 🔥 Bouton "Convert" */
+        .btn-convert {
+            width: 100%;
+            margin-top: 20px;
+            font-size: 18px;
+            padding: 10px 0;
+            background: #6b336e;
+            border: none;
+            color: white;
+            border-radius: 10px;
+            transition: background 0.3s ease;
+        }
+
+        .btn-convert:hover {
+            background: #532650;
+        }
+
+        /* 🔥 Bouton désactivé */
+        .btn-convert[disabled] {
+            background: #cccccc;
+            cursor: not-allowed;
+        }
+
+        /* 🔥 Historique transactions */
+        table.table {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0px 4px 15px rgba(0,0,0,0.08);
+        }
+
+        table.table th {
+            background-color: #6b336e;
+            color: white;
+            text-align: center;
+        }
+
+        table.table td {
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        /* 🔥 Petite animation fadeIn au scroll */
+        .animate-fadeIn {
+            animation: fadeIn 1s ease forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+{% endblock %}
+
+
+{% block title %}Wallet & Points{% endblock %}
+
+{% block content %}
+<div class="wallet-page-container">
+    <div class="container animate-fadeIn">
+        <div class="row">
+            <!-- 💰 Wallet Card -->
+            <div class="col-md-6">
+                <div class="wallet-box">
+                    <h2>💰 Wallet Balance</h2>
+                    <p><strong>{{ walletCredit|number_format(2, '.', ',') }} TND</strong></p>
+                </div>
+            </div>
+
+            <!-- 🎯 Points Card -->
+            <div class="col-md-6">
+                <div class="points-box">
+                    <h2>🎯 Loyalty Points</h2>
+                    <p><strong>{{ totalPoints }} points</strong></p>
+
+                    {% if totalPoints >= 100 %}
+                        <form method="post" action="{{ path('client_convert_points_to_wallet') }}">
+                            <button class="btn btn-convert" type="submit">
+                                Convert 100 Points ➔ 10 TND
+                            </button>
+                        </form>
+                    {% else %}
+                        <button class="btn btn-convert" type="button" disabled>
+                            Need at least 100 points to convert
+                        </button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <hr>
+
+        <!-- 📜 Points Transaction History -->
+        <h3 class="text-center mt-5 animate-fadeIn">📜 Points Transaction History</h3>
+        <div class="table-responsive">
+            <table class="table table-striped mt-3">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Points</th>
+                        <th>Type</th>
+                        <th>Reason</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for point in points %}
+                        <tr>
+                            <td>{{ point.date|date('Y-m-d H:i') }}</td>
+                            <td>{{ point.points }}</td>
+                            <td>{{ point.type|capitalize }}</td>
+                            <td>{{ point.reason }}</td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="4" class="text-center">No transactions found.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
