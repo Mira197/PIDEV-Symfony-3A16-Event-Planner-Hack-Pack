@@ -279,6 +279,13 @@ HttpClientInterface $httpClient): Response
 
 
     }
+    if ($request->isXmlHttpRequest()) {
+        return $this->render('partials/_products.html.twig', [
+            'groupedProducts' => $paginatedGroups,
+            'selectedCurrency' => $selectedCurrency,
+            'conversionRate' => $conversionRate,
+        ]);
+    }
 
     return $this->render('afficheProduct.html.twig', [
         'groupedProducts' => $paginatedGroups,
