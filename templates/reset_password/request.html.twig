@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Reset Password | PlainAdmin</title>
+
+    <!-- CSS Links -->
+    <link rel="stylesheet" href="{{ asset('admin/css/bootstrap.min.css') }}" />
+    <link rel="stylesheet" href="{{ asset('admin/css/lineicons.css') }}" />
+    <link rel="stylesheet" href="{{ asset('admin/css/materialdesignicons.min.css') }}" />
+    <link rel="stylesheet" href="{{ asset('admin/css/main.css') }}" />
+</head>
+
+<body style="background-image: url('{{ asset('img/output-onlinepngtools.png') }}'); background-size: cover; background-position: center; min-height: 100vh;">
+    
+    <main class="main-wrapper d-flex justify-content-center align-items-center" style="min-height: 100vh;">
+        <div class="card-style p-5" style="max-width: 500px; width: 100%; background: white; border-radius: 15px; box-shadow: 0 0 15px rgba(0,0,0,0.1);">
+
+            <div class="text-center mb-4">
+                <img src="{{ asset('img/1.jpg') }}" alt="Reset Image" style="width: 150px; border-radius: 10px; margin-bottom: 20px;">
+                <h3 class="mb-3">🔒 Reset Your Password</h3>
+            </div>
+
+            {% for flash_error in app.flashes('reset_password_error') %}
+                <div class="alert alert-danger" role="alert">{{ flash_error }}</div>
+            {% endfor %}
+
+            {{ form_start(requestForm, {'attr': {'novalidate': 'novalidate'}}) }}
+
+            <div class="input-style-1 mb-4">
+                {{ form_label(requestForm.email, 'Email Address', {'label_attr': {'class': 'form-label'}}) }}
+                {{ form_widget(requestForm.email, {'attr': {'class': 'form-control', 'placeholder': 'Enter your email address'}}) }}
+                {{ form_errors(requestForm.email) }}
+            </div>
+
+            <p class="text-muted mb-4" style="font-size: 14px;">
+                Enter your email address below, and we'll send you a link to reset your password.
+            </p>
+
+            <div class="d-grid gap-2">
+                <button type="submit" class="btn btn-primary btn-lg w-100">
+                    Send Password Reset Email
+                </button>
+
+                <!-- Bouton "Back" -->
+            <a href="{{ path('login') }}" class="btn btn-outline-secondary btn-lg w-100">
+                    ← Back to Login
+                </a>
+            </div>
+
+            {{ form_end(requestForm) }}
+
+        </div>
+    </main>
+
+    <!-- JS Links -->
+    <script src="{{ asset('admin/js/bootstrap.bundle.min.js') }}"></script>
+    <script src="{{ asset('admin/js/main.js') }}"></script>
+
+</body>
+</html>

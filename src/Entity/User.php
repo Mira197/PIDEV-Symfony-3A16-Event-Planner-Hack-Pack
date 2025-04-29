@@ -179,7 +179,7 @@ public function setBlockEndDate(?\DateTimeInterface $blockEndDate): self
         return $this;
     }
 
-    #[ORM\Column(name: 'email', type: 'string', length: 255, nullable: true)]
+    #[ORM\Column(name: 'email', type: 'string', length: 255, nullable: false)]
     #[Assert\NotBlank(message: "L'email ne peut pas être vide.")]
     #[Assert\Email(message: "L'email '{{ value }}' n'est pas une adresse valide.")]
  

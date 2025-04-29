@@ -1,66 +1,235 @@
 <!DOCTYPE html>
-<html>
-	<head>
-		<meta charset="utf-8">
-		<title>Login Form</title>
-		<meta
-		name="viewport" content="width=device-width, initial-scale=1.0">
-		<!-- MATERIAL DESIGN ICONIC FONT -->
-		<link
-		rel="stylesheet" href="{{ asset('fonts/material-design-iconic-font/css/material-design-iconic-font.min.css') }}">
-		<!-- STYLE CSS -->
-		<link rel="stylesheet" href="{{ asset('css/cssd/styleh.css') }}">
-		<style>
-			/* Ajouter une marge autour du formulaire */
-			.login-form {
-				margin: 50px;
-			}
+<html lang="fr">
+<head>
+    <meta charset="utf-8">
+    <title>Login Form avec Chatbot</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-			/* Changer la couleur des liens en beige */
-			.forgot-pass a,
-			.signup a {
-				color: #d6d0b8;
-			}
+    <!-- MATERIAL DESIGN ICONIC FONT -->
+    <link rel="stylesheet" href="{{ asset('fonts/material-design-iconic-font/css/material-design-iconic-font.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/cssd/styleh.css') }}">
 
-			.signup {
-				margin-top: 10px;
-				margin-bottom: 20px;
-			}
-		</style>
-		  <script src="https://www.google.com/recaptcha/api.js" async defer></script>
-	</head>
-	<body>
-		<div class="wrapper" style="background-image: url('{{ asset('img/output-onlinepngtools.png') }}');">
-			<div class="inner">
-				<div class="image-holder">
-					<img src="{{ asset('img/sig.png') }}" height="490px">
-				</div>
+    <style>
+        .login-form {
+            margin: 50px;
+        }
+        .forgot-pass a, .signup a {
+            color: #d6d0b8;
+        }
+        .signup {
+            margin-top: 10px;
+            margin-bottom: 20px;
+        }
 
-				<!-- Intégration du formulaire Symfony ici -->
-				<form class="login-form" {{ form_start(form, {'attr': {'novalidate': 'novalidate'}} ) }}
-                    <h3>bienvenue a 3ala Kifi
-					</h3>
+        /* Chatbot Styling */
+        #chatbot-window {
+            background: white;
+            color: #333;
+            border-radius: 12px;
+            display: none;
+            flex-direction: column;
+            height: 450px; /* ✅ Hauteur réduite */
+            width: 350px;  /* ✅ Largeur réduite */
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            overflow: hidden;
+            border: 2px solid #6c5ce7;
+            position: fixed;
+            bottom: 90px;
+            right: 20px;
+        }
+
+        #chatbot-messages {
+            flex: 1;
+            padding: 10px;
+            overflow-y: auto;
+            scroll-behavior: smooth;
+            background: white;
+        }
+
+        #chatbot-input {
+            flex: 1;
+            padding: 6px 8px;
+            border: 1px solid #6c5ce7;
+            border-radius: 6px;
+            background: white;
+            margin-right: 5px;
+            font-size: 13px;
+            color: #333;
+        }
+
+        #chatbot-send {
+            background: #6c5ce7;
+            color: white;
+            border: none;
+            padding: 6px 10px; /* ✅ Plus petit */
+            border-radius: 6px;
+            font-size: 13px;
+            cursor: pointer;
+            margin-top: 1px; /* ✅ Aligné verticalement */
+        }
+
+        #chatbot-input::placeholder {
+            color: #aaa;
+        }
+
+        .chatbot-footer {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            background: white;
+            border-top: 1px solid #ddd;
+        }
+
+        .chatbot-suggestions {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .suggestion-btn {
+            background: #6c5ce7;
+            border: none;
+            padding: 6px 10px;
+            border-radius: 8px;
+            font-size: 12px;
+            cursor: pointer;
+            color: white;
+            transition: background 0.3s;
+        }
+
+        .suggestion-btn:hover {
+            background: #5848c2;
+        }
+
+        #chatbot-button {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #6c5ce7;
+            color: white;
+            border-radius: 50%;
+            width: 55px;
+            height: 55px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            cursor: pointer;
+        }
+    </style>
+
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+</head>
+
+<body>
+
+<div class="wrapper" style="background-image: url('{{ asset('img/output-onlinepngtools.png') }}');">
+    <div class="inner">
+        <div class="image-holder">
+            <img src="{{ asset('img/sig.png') }}" height="490px">
+        </div>
+
+        <!-- Login Form -->
+        <form class="login-form" {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}>
+            <h3>Bienvenue à 3ala Kifi</h3>
+
+            {{ form_row(form.email, {'attr': {'placeholder': 'Entrez votre email ici', 'class': 'form-control'}}) }}
+            {{ form_row(form.password, {'attr': {'placeholder': 'Ici votre mot de passe', 'class': 'form-control'}}) }}
+
+            <div class="forgot-pass">
+                <a href="{{ path('app_forgot_password_request') }}">Mot de passe oublié ?</a>
+            </div>
+
+<div class="g-recaptcha" data-sitekey="{{ recaptcha_site_key }}"></div>
 
 
-					{{ form_row(form.email, {'attr': {'placeholder': 'Entrez votre email ici', 'class': 'form-control'}}) }}
 
-					{{ form_row(form.password, {'attr': {'placeholder': 'ici votre Mot de passe ', 'class': 'form-control'}}) }}
-					<div class="forgot-pass">
-						<a href="#">mot de passe oublié ?</a>
-					</div>
-					 <!-- Ajout du widget reCAPTCHA -->
-    <div class="g-recaptcha" data-sitekey="6LcibOYqAAAAAN6gkKprKoPYsQOlIOGF9bBHuN_2"></div>
-					{{ form_row(form.submit, {'attr': {'class': 'button'}}) }}
+            {{ form_row(form.submit, {'attr': {'class': 'button'}}) }}
 
-					<div class="signup">
-						Pas encore membre ?
-						<a href="{{ path('user_register') }}">Inscrivez-vous maintenant</a>
-					</div>
-					{{ form_end(form) }}
+            <div class="signup">
+                Pas encore membre ? <a href="{{ path('user_register') }}">Inscrivez-vous maintenant</a>
+            </div>
 
-				</form>
-				<!-- Fin du formulaire Symfony -->
-			</div>
-		</div>
-	</body>
+            {{ form_end(form) }}
+        </form>
+
+        <!-- Bouton Chatbot -->
+        <div id="chatbot-button">💬</div>
+
+        <!-- Fenêtre Chatbot -->
+        <div id="chatbot-window">
+            
+            <div style="background: #6c5ce7; color: white; padding: 10px; text-align: center; font-weight: bold; display: flex; flex-direction: column;">
+                3alaKifi Bot
+                <div class="chatbot-suggestions">
+                    <button class="suggestion-btn">Comment réserver un événement ?</button>
+                    <button class="suggestion-btn">Quels sont les moyens de paiement acceptés ?</button>
+                    <button class="suggestion-btn">Comment contacter notre équipe ?</button>
+                </div>
+            </div>
+
+            <!-- Messages -->
+            <div id="chatbot-messages"></div>
+
+            <!-- Footer (input + bouton) -->
+            <div class="chatbot-footer">
+                <input id="chatbot-input" type="text" placeholder="Posez votre question...">
+                <button id="chatbot-send">Envoyer</button>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+<!-- Script Chatbot -->
+<script>
+const chatbotButton = document.getElementById('chatbot-button');
+const chatbotWindow = document.getElementById('chatbot-window');
+const chatbotMessages = document.getElementById('chatbot-messages');
+const chatbotInput = document.getElementById('chatbot-input');
+const chatbotSend = document.getElementById('chatbot-send');
+
+// Ouvrir / Fermer le chatbot
+chatbotButton.addEventListener('click', () => {
+    chatbotWindow.style.display = chatbotWindow.style.display === 'none' ? 'flex' : 'none';
+});
+
+// Envoyer un message
+chatbotSend.addEventListener('click', async () => {
+    const message = chatbotInput.value.trim();
+    if (!message) return;
+
+    appendMessage('Vous', message);
+    chatbotInput.value = '';
+
+    const response = await fetch('{{ path('chatbot_ask') }}', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: message })
+    });
+
+    const data = await response.json();
+    appendMessage('Bot', data.response);
+});
+
+// Ajouter un message dans l'interface
+function appendMessage(sender, text) {
+    const messageDiv = document.createElement('div');
+    messageDiv.innerHTML = `<strong>${sender}:</strong> ${text}`;
+    chatbotMessages.appendChild(messageDiv);
+    chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+}
+
+// Gestion des boutons de suggestion
+document.querySelectorAll('.suggestion-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        chatbotInput.value = btn.textContent;
+        chatbotSend.click();
+    });
+});
+</script>
+
+</body>
 </html>

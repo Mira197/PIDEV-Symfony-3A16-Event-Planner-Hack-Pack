@@ -396,11 +396,7 @@ public function saisirDuree(
 
 
 
-    #[Route('/baseFournisseur', name: 'baseFournisseur')]
-    public function afficheFournisseur(): Response
-    {
-        return $this->render('admin/baseFournisseur.html.twig');
-    }
+
 
 
 
@@ -445,7 +441,7 @@ public function saisirDuree(
     
         if ($imageFile && in_array($imageFile->getMimeType(), ['image/jpeg', 'image/png', 'image/webp'])) {
             $fileName = uniqid() . '.' . $imageFile->guessExtension();
-            $imageFile->move($this->getParameter('uploads_directory'), $fileName);
+            $imageFile->move($this->getParameter('profile_uploads_directory'), $fileName);
     
             $user->setImgPath($fileName);
             $em->flush();
