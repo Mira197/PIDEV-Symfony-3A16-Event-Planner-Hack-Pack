@@ -1,0 +1,207 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Suggested Venues
+{% endblock %}
+{% block stylesheets %}
+	{{ parent() }}
+	<link rel="stylesheet" href="{{ asset('css/suggested_venues.css') }}">
+	<style>
+		nav.fh5co-nav {
+			background-color: #cebec9 !important;
+			padding: 1px 0 !important;
+			max-height: 170px !important;
+		}
+		.aya-cart-wrapper {
+			padding: 30px;
+			margin-top: 120px;
+		}
+	</style>
+{% endblock %}
+
+{% block content %}
+
+	<div class="container aya-cart-wrapper">
+		<div class="container">
+			<h2 class="mt-4">
+				<i class="fa-solid fa-location-dot me-2" style="color: #6b336e;"></i>
+				Suggested Venues for
+				{{ event.name }}
+			</h2>
+
+			<form method="get" class="row g-3 my-4 align-items-center position-relative">
+				<div class="col-md-3 position-relative city-filter">
+					<input type="text" name="city" value="{{ queryCity }}" class="filter-input" placeholder="City">
+				</div>
+
+				<!-- Dropdown styled Capacity -->
+				<div class="col-md-3 position-relative" style="position: relative;">
+					<button type="button" class="dropdown-toggle-custom" id="capacityDropdown">
+						Capacity
+					</button>
+					<div class="dropdown-menu-custom d-none" id="capacityMenu">
+						<p class="dropdown-header">Capacity</p>
+						<div class="dropdown-item-custom">
+							<input type="radio" id="c0" name="capacity" value="0" {% if queryCapacity == 0 %} checked {% endif %}>
+							<label for="c0">Any</label>
+						</div>
+						<div class="dropdown-item-custom">
+							<input type="radio" id="c10" name="capacity" value="10" {% if queryCapacity == 10 %} checked {% endif %}>
+							<label for="c10">10 or less</label>
+						</div>
+						<div class="dropdown-item-custom">
+							<input type="radio" id="c25" name="capacity" value="25" {% if queryCapacity == 25 %} checked {% endif %}>
+							<label for="c25">25 or less</label>
+						</div>
+						<div class="dropdown-item-custom">
+							<input type="radio" id="c50" name="capacity" value="50" {% if queryCapacity == 50 %} checked {% endif %}>
+							<label for="c50">50 or less</label>
+						</div>
+						<div class="dropdown-item-custom">
+							<input type="radio" id="c100" name="capacity" value="100" {% if queryCapacity == 100 %} checked {% endif %}>
+							<label for="c100">100 or less</label>
+						</div>
+						<div class="dropdown-item-custom">
+							<input type="radio" id="c101" name="capacity" value="101" {% if queryCapacity == 101 %} checked {% endif %}>
+							<label for="c101">Over 100</label>
+						</div>
+						<div class="dropdown-footer">
+							<button type="submit" class="dropdown-apply">Apply</button>
+							<a href="?city={{ queryCity }}&maxPrice={{ queryMaxPrice }}" class="dropdown-clear">Clear</a>
+						</div>
+					</div>
+				</div>
+
+				<!-- Dropdown styled Price -->
+				<div class="col-md-3 position-relative">
+					<button type="button" class="dropdown-toggle-custom" id="priceDropdown">Price</button>
+					<div class="dropdown-menu-custom d-none" id="priceMenu">
+						<p class="dropdown-header">Price</p>
+
+						<div class="dropdown-item-custom">
+							<label for="minPrice">Minimum price</label>
+							<input type="number" class="filter-input w-100" name="minPrice" id="minPrice" value="{{ queryMinPrice ?? '' }}" min="0">
+						</div>
+
+						<div class="dropdown-item-custom mt-2">
+							<label for="maxPrice">Maximum price</label>
+							<input type="number" class="filter-input w-100" name="maxPrice" id="maxPrice" value="{{ queryMaxPrice ?? '' }}" min="0">
+						</div>
+
+						<div class="dropdown-footer mt-3">
+							<button type="submit" class="dropdown-apply">Apply</button>
+							<a href="?city={{ queryCity }}&capacity={{ queryCapacity }}" class="dropdown-clear">Clear</a>
+						</div>
+					</div>
+				</div>
+
+				{#<div class="col-md-3">
+																																	<input type="number" name="maxPrice" value="{{ queryMaxPrice }}" class="filter-input" placeholder="Max Price">
+																																</div>#}
+
+				<div class="col-md-3">
+					<button class="filter-button w-100">Filter</button>
+				</div>
+			</form>
+
+
+			<div class="row" id="suggested-results">
+				{% include 'location/_suggested_venues_cards.html.twig' %}
+			</div>
+
+		</div>
+	</div>
+{% endblock %}
+{% block javascripts %}
+	{{ parent() }}
+	<script>
+		const toggleDropdown = () => {
+		const toggleBtn = document.getElementById('capacityDropdown');
+		const menu = document.getElementById('capacityMenu');
+
+		if (! toggleBtn || ! menu) 
+		return;
+
+		let isOpen = false;
+
+		// ✅ Toggle dropdown on click
+		toggleBtn.addEventListener('click', function (e) {
+		e.stopPropagation();
+		isOpen = ! isOpen;
+		menu.classList.toggle('d-none', ! isOpen);
+		});
+
+		// ✅ Close on click outside
+		document.addEventListener('click', function (e) {
+		if (isOpen && ! menu.contains(e.target) && ! toggleBtn.contains(e.target)) {
+		isOpen = false;
+		menu.classList.add('d-none');
+			}
+		});
+		};
+
+		// ✅ Exécute quand tout est bien chargé
+		window.addEventListener('load', toggleDropdown);
+
+		// Toggle for Price dropdown
+		const priceBtn = document.getElementById('priceDropdown');
+		const priceMenu = document.getElementById('priceMenu');
+		let priceOpen = false;
+
+		priceBtn.addEventListener('click', (e) => {
+		e.stopPropagation();
+		priceOpen = ! priceOpen;
+		priceMenu.classList.toggle('d-none', ! priceOpen);
+		});
+
+		document.addEventListener('click', (e) => {
+		if (priceOpen && ! priceMenu.contains(e.target) && ! priceBtn.contains(e.target)) {
+		priceOpen = false;
+		priceMenu.classList.add('d-none');
+			}
+		});
+	</script>
+
+	{#filters ajax#}
+	<script>
+		function applyFiltersAjax() {
+		const params = new URLSearchParams(new FormData(document.querySelector("form")));
+		const eventId = {{ event.idEvent }};
+		const url = `/locations/suggested/ajax/${eventId}?${
+		params.toString()
+		}`;
+
+		fetch(url).then(res => res.text()).then(html => {
+		document.querySelector('#suggested-results').innerHTML = html;
+		});
+		}
+
+		document.querySelectorAll('.filter-input, input[name="capacity"], input[name="minPrice"], input[name="maxPrice"]').forEach(input => {
+		input.addEventListener('change', applyFiltersAjax);
+		});
+
+		document.querySelectorAll('.dropdown-apply').forEach(btn => {
+		btn.addEventListener('click', function (e) {
+		e.preventDefault();
+		applyFiltersAjax();
+		});
+		});
+
+		document.querySelector('button.filter-button').addEventListener('click', function (e) {
+		e.preventDefault();
+		applyFiltersAjax();
+		});
+	</script>
+
+	{#heart icon stays in "état actif" after click#}
+	<script>
+	document.addEventListener("DOMContentLoaded", function () {
+		document.addEventListener("click", function (e) {
+			if (e.target.classList.contains("favorite-icon")) {
+				e.target.classList.toggle("active");
+			}
+		});
+	});
+</script>
+
+
+{% endblock %}

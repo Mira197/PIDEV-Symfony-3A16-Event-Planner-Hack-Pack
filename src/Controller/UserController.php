@@ -1,0 +1,474 @@
+<?php
+
+namespace App\Controller;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Symfony\Component\Form\FormError;
+
+use App\Entity\User;
+use App\Form\AdminRegisterFormType;
+use App\Form\UpdateProfileType;
+use App\Form\UserType;
+use App\Repository\UserRepository;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Validator\Constraints\NotBlank;
+use Symfony\Component\Validator\Constraints\Length;
+use Symfony\Component\Security\Core\Security;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\Validator\Constraints\PositiveOrZero;
+use Symfony\Component\Validator\Constraints\Regex;
+use Dompdf\Dompdf;
+use Dompdf\Options;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use Symfony\Component\HttpFoundation\StreamedResponse;
+use Symfony\Bridge\Twig\Mime\TemplatedEmail;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Component\Mime\Email;
+use Symfony\Component\Mime\Address;
+use Symfony\Component\Mailer\Maile;
+use Symfony\Component\Mailer\Transport; 
+use Symfony\Component\Mailer\Mailer;
+use Symfony\Component\Mailer\MailerInterface;
+
+#[Route('/admin')]
+class UserController extends AbstractController
+{
+    #[Route('/', name: 'app_user_index', methods: ['GET'])]
+    public function index(Request $request, UserRepository $userRepository, EntityManagerInterface $entityManager): Response
+{
+    $searchQuery = $request->query->get('query');
+
+    if ($searchQuery) {
+        // Si une requête de recherche est soumise
+        $users = $userRepository->findBySearchQuery($searchQuery);
+    } else {
+        // Si aucune requête de recherche n'est soumise, afficher tous les utilisateurs
+        $users = $userRepository->findAll();
+    }
+
+    // Vérifier si la durée de blocage est dépassée pour chaque utilisateur et le débloquer si nécessaire
+    foreach ($users as $user) {
+        if ($user->isBlocked() && $user->getBlockEndDate() < new \DateTime()) {
+            $user->setBlocked(false);
+            $user->setBlockEndDate(null);
+            $entityManager->flush();
+        }
+    }
+    $form = $this->createForm(AdminRegisterFormType::class, new User());
+
+    return $this->render('admin/listAdmins.html.twig', [
+        'users' => $users,
+        'adminForm' => $form->createView(), // ⬅️ très important !
+    ]);
+    
+}
+
+    #[Route('/export-pdf', name: 'app_user_export_pdf', methods: ['GET'])]
+    public function exportPdf(UserRepository $userRepository): Response
+    {
+        // Récupérer tous les utilisateurs
+        $users = $userRepository->findAll();
+
+        // Rendre la vue avec la liste des utilisateurs en HTML
+        $html = $this->renderView('admin/print.html.twig', [
+            'users' => $users,
+        ]);
+
+        // Configuration de Dompdf
+        $options = new Options();
+        $options->set('isHtml5ParserEnabled', true);
+
+        // Instanciation de Dompdf
+        $dompdf = new Dompdf($options);
+
+        // Chargement du HTML dans Dompdf
+        $dompdf->loadHtml($html);
+
+        // Rendu du PDF
+        $dompdf->render();
+
+        // Renvoyer le PDF en tant que réponse
+        return new Response($dompdf->output(), Response::HTTP_OK, [
+            'Content-Type' => 'application/pdf',
+        ]);
+    }
+
+
+    #[Route('/export-excel', name: 'app_user_export_excel', methods: ['GET'])]
+    public function exportExcel(UserRepository $userRepository): Response
+    {
+        // Récupérer tous les utilisateurs
+        $users = $userRepository->findAll();
+
+        // Initialiser une instance de Spreadsheet (fichier Excel)
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        // Entêtes de colonne
+        $sheet->setCellValue('A1', 'Last Name');
+        $sheet->setCellValue('B1', 'First Name');
+        $sheet->setCellValue('C1', 'Username');
+        $sheet->setCellValue('D1', 'Role');
+        $sheet->setCellValue('E1', 'Phone Number');
+        $sheet->setCellValue('F1', 'Blocked');
+
+        // Ajouter les données des utilisateurs au fichier Excel
+        $row = 2; // Commencer à la deuxième ligne
+        foreach ($users as $user) {
+            $sheet->setCellValue('A' . $row, $user->getLastName());
+            $sheet->setCellValue('B' . $row, $user->getFirstName());
+            $sheet->setCellValue('C' . $row, $user->getUsername());
+            $sheet->setCellValue('D' . $row, $user->getRole());
+            $sheet->setCellValue('E' . $row, $user->getNumtel());
+            $sheet->setCellValue('F' . $row, $user->isBlocked() ? 'Oui' : 'Non');
+            $row++;
+        }
+
+        // Créer un objet Writer pour écrire le fichier Excel
+        $writer = new Xlsx($spreadsheet);
+
+        // Nom du fichier Excel à télécharger
+        $excelFileName = 'users.xlsx';
+
+        // Configurer la réponse HTTP pour le téléchargement du fichier Excel
+        $response = new StreamedResponse(function () use ($writer) {
+            $writer->save('php://output');
+        });
+
+        $response->headers->set('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        $response->headers->set('Content-Disposition', 'attachment;filename="' . $excelFileName . '"');
+        $response->headers->set('Cache-Control', 'max-age=0');
+
+        return $response;
+    }
+
+    #[Route('/new', name: 'app_user_new', methods: ['GET', 'POST'])]
+    public function new(Request $request, EntityManagerInterface $entityManager): Response
+    {
+        $user = new User();
+        $form = $this->createForm(UserType::class, $user);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $entityManager->persist($user);
+            $entityManager->flush();
+
+            return $this->redirectToRoute('app_user_index', [], Response::HTTP_SEE_OTHER);
+        }
+
+        return $this->renderForm('user/new.html.twig', [
+            'user' => $user,
+            'form' => $form,
+        ]);
+    }
+
+
+    private $security;
+
+    public function __construct(Security $security)
+    {
+        $this->security = $security;
+    }
+
+    #[Route('/{idUser}/edit', name: 'app_user_edit', methods: ['GET', 'POST'])]
+    public function edit(Request $request, User $user, EntityManagerInterface $entityManager): Response
+    {
+        // Récupérer le rôle de l'utilisateur actuel
+        $role = $user->getRole();
+
+        // Déterminer le template à utiliser en fonction du rôle de l'utilisateur
+        switch ($role) {
+            case 'CLIENT':
+                $editTemplate = 'user/edit.html.twig';
+                break;
+            case 'FOURNISSEUR':
+                $editTemplate = 'user/editArtist.html.twig';
+                break;
+            case 'ADMIN':
+                $editTemplate = 'user/editAdmin.html.twig';
+                break;
+            default:
+                // Rediriger vers une page d'erreur ou la page d'accueil si le rôle n'est pas reconnu
+                return $this->redirectToRoute('homepage');
+        }
+
+        $form = $this->createForm(UserType::class, $user);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $entityManager->flush();
+
+            // Rediriger l'utilisateur vers la page appropriée après l'édition
+            switch ($role) {
+                case 'CLIENT':
+                    return $this->redirectToRoute('userpage');
+                case 'ARTIST':
+                    return $this->redirectToRoute('Artistpage');
+                case 'ADMIN':
+                    return $this->redirectToRoute('Adminpage');
+                default:
+                    // Rediriger vers une page d'erreur ou la page d'accueil si le rôle n'est pas reconnu
+                    return $this->redirectToRoute('homepage');
+            }
+        }
+
+        return $this->renderForm($editTemplate, [
+            'user' => $user,
+            'form' => $form,
+        ]);
+    }
+
+
+
+
+
+
+
+/*
+ * @Route("/saisir-duree/{id}", name="saisir_duree")
+ *
+ * Cette méthode permet de bloquer temporairement un utilisateur.
+ * L'admin saisit une durée en minutes, et l'utilisateur est marqué comme "bloqué" jusqu'à cette échéance.
+ * Un email lui est envoyé pour l'en informer.
+ */
+/*
+public function saisirDuree(
+    MailerInterface $mailer,         // Service d'envoi d'email
+    Request $request,                // Requête HTTP entrante
+    $id,                             // ID de l'utilisateur à bloquer
+    EntityManagerInterface $entityManager // Pour accéder à la base de données
+): Response {
+    // Récupération de l'utilisateur à partir de l'ID fourni
+    $utilisateur = $entityManager->getRepository(User::class)->find($id);
+
+    if (!$utilisateur) {
+        // Si aucun utilisateur n'est trouvé, on affiche une erreur 404
+        throw $this->createNotFoundException('Utilisateur non trouvé');
+    }
+
+    // Création dynamique d’un petit formulaire pour saisir la durée
+    $form = $this->createFormBuilder()
+        ->add('duree', TextType::class, [
+            'label' => 'Durée en minutes',
+            'attr' => ['placeholder' => 'Entrez la durée en minutes'],
+            'constraints' => [
+                new NotBlank(['message' => 'La durée est requise']),
+                new PositiveOrZero(['message' => 'La durée doit être un nombre positif ou zéro']),
+                new Regex([
+                    'pattern' => '/^\d+$/',
+                    'message' => 'La durée doit être un nombre entier positif',
+                ]),
+            ],
+        ])
+        ->add('save', SubmitType::class, ['label' => 'Valider'])
+        ->getForm();
+
+    // Gestion de la soumission du formulaire
+    $form->handleRequest($request);
+
+    if ($form->isSubmitted() && $form->isValid()) {
+        // Si le formulaire est valide, on récupère la durée saisie
+        $data = $form->getData();
+        $duree = $data['duree'];
+
+        // Blocage de l'utilisateur pour la durée spécifiée
+        $utilisateur->setBlocked(true);
+        $dateFinBlocage = new \DateTime();
+        $dateFinBlocage->modify("+{$duree} minutes");
+        $utilisateur->setBlockEndDate($dateFinBlocage);
+
+        // Enregistrement en base
+        $entityManager->flush();
+
+        // Création d’un transport SMTP manuellement (⚠️ doublon inutile si MailerInterface est injecté)
+        $transport = Transport::fromDsn('smtp://hhajer09@gmail.com:ixysoqoqqfylbgoa@smtp.gmail.com:587');
+        $mailer = new Mailer($transport);
+
+        // Création de l'email à envoyer à l'utilisateur bloqué
+        $email = (new TemplatedEmail())
+            ->from('hhajer09@gmail.com')
+            ->to($utilisateur->getEmail())
+            ->subject('votre compte est Bloqué')
+            ->html('
+                <h1 style="color: red;">Compte Bloqué</h1>
+                <p>Votre compte a été bloqué pour une durée de ' . $duree . ' minutes.</p>
+            ');
+
+        // Envoi du mail
+        $mailer->send($email);
+
+        // Redirection vers la liste des utilisateurs
+        return $this->redirectToRoute('app_user_index');
+    }
+
+    // Si le formulaire n'est pas soumis ou invalide, on l'affiche
+    return $this->render('user/bloquer.html.twig', [
+        'form' => $form->createView(),
+    ]);
+}
+*/
+
+
+
+
+
+
+
+   /**
+     * @Route("/debloquer-utilisateur/{id}", name="debloquer_utilisateur")
+     */
+    public function debloquerUtilisateur($id,EntityManagerInterface $entityManager): Response
+    {
+        // Récupérer l'utilisateur en fonction de l'ID
+        $utilisateur = $entityManager->getRepository(User::class)->find($id);
+     
+
+        if (!$utilisateur) {
+            throw $this->createNotFoundException('Utilisateur non trouvé');
+        }
+
+        // Débloquer l'utilisateur
+        $utilisateur->setBlocked(false);
+        $utilisateur->setBlockEndDate(null);
+
+        $entityManager->flush();
+
+        // Rediriger vers une autre page ou afficher un message de confirmation
+        return $this->redirectToRoute('app_user_index');
+    }
+ 
+
+   
+
+
+
+
+
+    /* #[Route('/prof', name: 'prof')]
+    public function profileAdmin(): Response
+    {
+        return $this->render('admin/pAdmin.html.twig'); // Ton template statique
+    }                                                       
+    * */
+
+
+    #[Route('/edit-profile', name: 'edit_profile')]
+    public function editProfile(SessionInterface $session, Request $request, EntityManagerInterface $em): Response
+    {
+        $user = $em->getRepository(User::class)->find($session->get('user_id'));
+    
+        if (!$user) {
+            throw $this->createNotFoundException("Utilisateur introuvable.");
+        }
+    
+        $form = $this->createForm(UpdateProfileType::class, $user);
+        $form->handleRequest($request);
+    
+        if ($form->isSubmitted()) {
+            // Manually check address field validation
+            $address = $user->getAddress();
+            if (!$address) {
+                $form->get('address')->addError(new FormError('L\'adresse ne peut pas être vide.'));
+            } elseif (strlen($address) < 4) {
+                $form->get('address')->addError(new FormError('L\'adresse doit contenir au moins 4 caractères.'));
+            }
+    
+            if ($form->isValid()) {
+                $em->flush();
+                $this->addFlash('success', 'Profil mis à jour avec succès.');
+                return $this->redirectToRoute('prof'); 
+            }
+        }
+    
+        return $this->render('admin/edit_profile.html.twig', [
+            'form' => $form->createView(),
+            'user' => $user,
+        ]);
+    }
+    
+    
+
+
+
+
+
+
+
+    #[Route('/prof', name: 'prof')]
+    public function profile(SessionInterface $session, EntityManagerInterface $em): Response
+    {
+        $user = $em->getRepository(User::class)->find($session->get('user_id'));
+    
+        if (!$user) {
+            throw $this->createNotFoundException("Utilisateur introuvable");
+        }
+    
+        // Calcul du pourcentage de complétion
+        $fields = ['firstName', 'lastName', 'email', 'username', 'address', 'numTel', 'imgPath'];
+        $filled = 0;
+        foreach ($fields as $field) {
+            $getter = 'get' . ucfirst($field);
+            if (!empty($user->$getter())) {
+                $filled++;
+            }
+        }
+        $completion = round(($filled / count($fields)) * 100);
+    
+        return $this->render('admin/pAdmin.html.twig', [
+            'user' => $user,
+            'completion' => $completion
+        ]);
+    }
+    
+    
+    #[Route('/profile/upload-image', name: 'change_profile_picture', methods: ['POST'])]
+    public function changeProfilePicture(Request $request, SessionInterface $session, EntityManagerInterface $em): Response
+    {
+        $userId = $session->get('user_id');
+        $user = $em->getRepository(User::class)->find($userId);
+    
+        if (!$user) {
+            throw $this->createNotFoundException("Utilisateur non trouvé.");
+        }
+    
+        $imageFile = $request->files->get('profile_image');
+    
+        if ($imageFile && in_array($imageFile->getMimeType(), ['image/jpeg', 'image/png', 'image/webp'])) {
+            $fileName = uniqid() . '.' . $imageFile->guessExtension();
+            $imageFile->move($this->getParameter('uploads_directory'), $fileName);
+    
+            $user->setImgPath($fileName);
+            $em->flush();
+    
+            $session->set('img', $fileName); // Met à jour l'image de session aussi
+    
+            $this->addFlash('success', 'Photo de profil mise à jour avec succès.');
+        } else {
+            $this->addFlash('error', 'Veuillez uploader une image valide.');
+        }
+    
+        return $this->redirectToRoute('prof'); // ou une autre page
+    }
+    #[Route('/admin/delete/{idUser}', name: 'app_user_delete', methods: ['POST'])]
+public function deleteUser(int $idUser, EntityManagerInterface $em): Response
+{
+    $user = $em->getRepository(User::class)->find($idUser);
+
+    if (!$user) {
+        throw $this->createNotFoundException("User not found");
+    }
+
+    $em->remove($user);
+    $em->flush();
+
+    $this->addFlash('success', 'User deleted successfully.');
+    return $this->redirectToRoute('app_user_index');
+}
+
+}

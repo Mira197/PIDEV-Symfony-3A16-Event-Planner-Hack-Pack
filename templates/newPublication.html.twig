@@ -1,0 +1,201 @@
+{% extends 'base.html.twig' %}
+
+{% block stylesheets %}
+	{{ parent() }}
+	<style>
+		nav.fh5co-nav {
+			background-color: #cebec9 !important;
+			padding: 1px 0 !important;
+			max-height: 130px !important;
+			z-index: 9999;
+		}
+
+		.publication-form-container {
+			margin-top: 140px; /* Pour laisser la place à la navbar */
+		}
+
+		.publication-form {
+			max-width: 800px;
+			margin: 0 auto;
+			padding: 2rem;
+			background-color: #ffffff;
+			border-radius: 10px;
+			box-shadow: 0 4px 15px rgba(83, 60, 86, 0.1);
+		}
+
+		.form-title {
+			color: #533C56;
+			text-align: center;
+			margin-bottom: 2rem;
+			font-weight: 600;
+		}
+
+		.form-group {
+			margin-bottom: 1.5rem;
+		}
+
+		.form-label {
+			display: block;
+			margin-bottom: 0.5rem;
+			color: #533C56;
+			font-weight: 500;
+		}
+
+		.form-input,
+		.form-textarea {
+			width: 100%;
+			padding: 0.75rem;
+			border: 1px solid #cebec9;
+			border-radius: 5px;
+			font-size: 1rem;
+			background-color: #ffffff;
+		}
+
+		.form-textarea {
+			min-height: 150px;
+			resize: vertical;
+		}
+
+		.btn-submit {
+			background-color: #533C56;
+			color: white;
+			border: none;
+			padding: 0.75rem 1.5rem;
+			font-size: 2rem;
+			border-radius: 5px;
+			cursor: pointer;
+			display: block;
+			width: 100%;
+			font-weight: 500;
+		}
+
+		.btn-submit:hover {
+			background-color: #99707E;
+			transform: translateY(-2px);
+			box-shadow: 0 4px 8px rgba(83, 60, 86, 0.2);
+		}
+
+		.form-error {
+			color: #d9534f;
+			font-size: 0.875rem;
+			margin-top: 0.25rem;
+		}
+
+		.custom-file-upload {
+			display: flex;
+			align-items: center;
+			gap: 15px;
+		}
+
+		.custom-upload-label {
+			background-color: #533C56;
+			color: white;
+			padding: 0.5rem 1.2rem;
+			border-radius: 5px;
+			cursor: pointer;
+			font-size: 0.95rem;
+			transition: background-color 0.3s ease;
+		}
+
+		.custom-upload-label:hover {
+			background-color: #99707E;
+		}
+
+		.form-file-hidden {
+			display: none;
+		}
+
+		.file-name {
+			color: #533C56;
+			font-size: 0.9rem;
+		}
+		.d-flex {
+			display: flex;
+			gap: 10px;
+		}
+	</style>
+{% endblock %}
+
+{% block content %}
+	<div class="container publication-form-container">
+		<div class="publication-form">
+			<h1 class="form-title">Create Your Post</h1>
+			{{ form_start(form, {
+                'attr': {
+                    'novalidate': 'novalidate',
+                    'enctype': 'multipart/form-data'
+                }
+            }) }}
+
+			{{ form_row(form._token) }}
+
+			<div class="form-group">
+				{{ form_label(form.username, null, {'label_attr': {'class': 'form-label'}}) }}
+				{{ form_widget(form.username, {'attr': {'class': 'form-input'}}) }}
+				<div class="form-error">{{ form_errors(form.username) }}</div>
+			</div>
+
+			<div class="form-group">
+				{{ form_label(form.title, null, {'label_attr': {'class': 'form-label'}}) }}
+				{{ form_widget(form.title, {'attr': {'class': 'form-input'}}) }}
+				<div class="form-error">{{ form_errors(form.title) }}</div>
+			</div>
+
+			<div class="form-group">
+				{{ form_label(form.description, null, {'label_attr': {'class': 'form-label'}}) }}
+				{{ form_widget(form.description, {'attr': {'class': 'form-textarea'}}) }}
+				<div class="form-error">{{ form_errors(form.description) }}</div>
+			</div>
+
+			<div class="form-group">
+				<label class="form-label">Image Selected</label>
+				<img id="image-preview" src="#" alt="Image preview" style="display: none; max-width: 200px; margin-bottom: 1rem;">
+			</div>
+
+			<div class="form-group">
+				<label class="form-label">Upload an image</label>
+				<div class="custom-file-upload">
+					<label for="file-upload" class="custom-upload-label">📁 Select Image</label>
+					<input type="file" id="file-upload" name="image_file" accept="image/*" style="display: none;"/>
+					<span id="file-name" class="file-name">No file selected</span>
+
+				</div>
+			</div>
+
+			<div class="d-flex justify-content-between mt-4">
+				<button type="button" onclick="window.location.href='{{ path('app_publication_client') }}'" class="btn-submit" style="width: 48%;">Cancel</button>
+				<button type="submit" class="btn-submit" style="width: 48%;" onclick="window.location.href='{{ path('app_publication_client') }}'">Post</button>
+			</div>
+			{{ form_end(form) }}
+
+		</div>
+	</div>
+{% endblock %}
+
+{% block javascripts %}
+	{{ parent() }}
+	<script>
+		document.addEventListener('DOMContentLoaded', function () {
+const input = document.getElementById('file-upload');
+const preview = document.getElementById('image-preview');
+const fileName = document.getElementById('file-name');
+
+input.addEventListener('change', function () {
+const file = this.files[0];
+if (file && file.type.startsWith('image/')) {
+const reader = new FileReader();
+reader.onload = function (e) {
+preview.src = e.target.result;
+preview.style.display = 'block';
+};
+reader.readAsDataURL(file);
+fileName.textContent = file.name;
+} else {
+preview.src = '#';
+preview.style.display = 'none';
+fileName.textContent = 'No file selected';
+}
+});
+});
+	</script>
+{% endblock %}

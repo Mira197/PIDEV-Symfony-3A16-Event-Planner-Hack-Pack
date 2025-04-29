@@ -1,0 +1,22 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verification</title>
+</head>
+<body>
+    <h1>Entrez le code de vérification</h1>
+
+    {% if error %}
+        <p>{{ error }}</p>
+    {% endif %}
+
+    <form action="{{ path('verify_code') }}" method="post">
+        <input type="text" name="verification_code" placeholder="Code de vérification">
+        <button type="submit">Vérifier</button>
+    </form>
+</body>
+</html>
+sy

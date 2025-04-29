@@ -1,0 +1,77 @@
+{# templates/publication/success.html.twig #}
+{% extends 'base.html.twig' %}
+
+{% block title %}Post Created{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .confirmation-wrapper {
+            background: #fff;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 600px;
+            margin: 100px auto;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .confirmation-wrapper img {
+            width: 80px;
+            margin-bottom: 20px;
+        }
+
+        .confirmation-wrapper h2 {
+            color: #533C56;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .confirmation-wrapper p {
+            color: #333;
+            font-size: 16px;
+        }
+
+        .confirmation-wrapper .btn {
+            margin: 20px 10px 0 10px;
+            padding: 10px 25px;
+            font-weight: 500;
+            border-radius: 8px;
+        }
+
+        .btn-purple {
+            background-color: #533C56;
+            color: white;
+            border: none;
+        }
+
+        .btn-purple:hover {
+            background-color: #99707E;
+        }
+
+        .btn-outline-purple {
+            border: 1px solid #533C56;
+            color: #533C56;
+            background-color: transparent;
+        }
+
+        .btn-outline-purple:hover {
+            background-color: #533C56;
+            color: white;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class="confirmation-wrapper">
+        <img src="{{ asset('images/check.png') }}" alt="Success Icon">
+        <h2>Thank you for your post!</h2>
+        <p>Your publication has been successfully created.</p>
+        <p>We appreciate your contribution to the forum!</p>
+
+        <div>
+            <a href="{{ path('app_publication_new') }}" class="btn btn-outline-purple">Add Another</a>
+            <a href="{{ path('app_publication_client') }}" class="btn btn-purple">Back to Forum</a>
+        </div>
+    </div>
+{% endblock %}

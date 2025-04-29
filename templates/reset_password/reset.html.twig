@@ -1,0 +1,215 @@
+<form method="POST" novalidate id="resetForm" style="max-width: 400px; margin: auto; margin-top: 60px; background: #fff; padding: 40px 30px; border-radius: 20px; box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);">
+    <h2 style="text-align: center; margin-bottom: 25px; font-weight: 700; color: #6c5ce7;">🔐 Reset Password</h2>
+
+    <div style="margin-bottom: 25px; text-align: center;">
+        <label style="display: block; margin-bottom: 12px; font-weight: 600; color: #555;">Verification Code</label>
+        <div style="display: flex; justify-content: center; gap: 12px;">
+            <input type="text" maxlength="1" class="otp-input" required pattern="\d" />
+            <input type="text" maxlength="1" class="otp-input" required pattern="\d" />
+            <input type="text" maxlength="1" class="otp-input" required pattern="\d" />
+            <input type="text" maxlength="1" class="otp-input" required pattern="\d" />
+            <input type="text" maxlength="1" class="otp-input" required pattern="\d" />
+            <input type="text" maxlength="1" class="otp-input" required pattern="\d" />
+            <input type="hidden" name="verificationCode" id="verificationCode" />
+        </div>
+    </div>
+
+    <div class="input-group">
+        <label>New Password</label>
+        <input type="password" id="newPassword" name="newPassword" placeholder="Enter new password" required minlength="6" />
+        <div id="newPasswordError" class="error-message"></div>
+    </div>
+
+    <div class="input-group">
+        <label>Confirm Password</label>
+        <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Confirm new password" required minlength="6" />
+        <div id="confirmPasswordError" class="error-message"></div>
+    </div>
+
+    <button type="submit" class="submit-btn">Reset Password</button>
+</form>
+
+<!-- Injecter ici le vrai code de vérification depuis Symfony -->
+<script>
+    const expectedVerificationCode = "{{ verificationCodeFromSession }}"; // à ajouter côté Controller render()
+</script>
+
+<!-- 🌟 CSS moderne -->
+<style>
+    body {
+        background: #f5f7fa;
+    }
+
+    .otp-input {
+        width: 50px;
+        height: 50px;
+        font-size: 22px;
+        border: 2px solid #ddd;
+        border-radius: 12px;
+        background: #f0f2f5;
+        transition: all 0.3s;
+        text-align: center;
+        font-weight: bold;
+        color: #6c5ce7;
+    }
+
+    .otp-input.valid {
+        border-color: #2ecc71 !important;
+        background: #eafaf1;
+    }
+
+    .otp-input.invalid {
+        border-color: #e74c3c !important;
+        background: #fdecea;
+    }
+
+    .input-group {
+        margin-bottom: 20px;
+    }
+
+    .input-group label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 8px;
+        color: #444;
+    }
+
+    .input-group input {
+        width: 100%;
+        padding: 12px 15px;
+        border: 2px solid #e0e0e0;
+        border-radius: 12px;
+        background: #f9f9f9;
+        font-size: 16px;
+        transition: all 0.3s;
+    }
+
+    .input-group input:focus {
+        border-color: #6c5ce7;
+        background: #fff;
+        box-shadow: 0 0 8px rgba(108, 92, 231, 0.3);
+        outline: none;
+    }
+
+    .submit-btn {
+        width: 100%;
+        background: linear-gradient(90deg, #6c5ce7 0%, #a29bfe 100%);
+        color: white;
+        padding: 14px;
+        font-size: 16px;
+        font-weight: 600;
+        border: none;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: background 0.3s ease;
+        margin-top: 10px;
+    }
+
+    .submit-btn:hover {
+        background: linear-gradient(90deg, #5b4be7 0%, #8e82fe 100%);
+    }
+
+    .error-message {
+        color: #e74c3c;
+        font-size: 14px;
+        margin-top: 5px;
+    }
+</style>
+
+<!-- 🚀 JavaScript avancé -->
+<script>
+    const inputs = document.querySelectorAll('.otp-input');
+    const hiddenInput = document.getElementById('verificationCode');
+    const form = document.getElementById('resetForm');
+    const newPassword = document.getElementById('newPassword');
+    const confirmPassword = document.getElementById('confirmPassword');
+    const newPasswordError = document.getElementById('newPasswordError');
+    const confirmPasswordError = document.getElementById('confirmPasswordError');
+
+    inputs.forEach((input, index) => {
+        input.addEventListener('input', (e) => {
+            const value = e.target.value;
+            if (!/^\d$/.test(value)) {
+                input.value = '';
+                input.classList.remove('valid');
+                input.classList.add('invalid');
+                return;
+            }
+
+            input.classList.remove('invalid');
+            input.classList.add('valid');
+
+            if (value.length === 1 && index < inputs.length - 1) {
+                inputs[index + 1].focus();
+            }
+
+            let code = '';
+            inputs.forEach(inp => code += inp.value);
+            hiddenInput.value = code;
+        });
+
+        input.addEventListener('keydown', (e) => {
+            if (e.key === "Backspace" && !input.value && index > 0) {
+                inputs[index - 1].focus();
+            }
+        });
+
+        input.addEventListener('blur', () => {
+            if (!input.value) {
+                input.classList.remove('valid');
+                input.classList.add('invalid');
+            }
+        });
+    });
+
+    form.addEventListener('submit', function(e) {
+        let isValid = true;
+        newPasswordError.textContent = '';
+        confirmPasswordError.textContent = '';
+
+        let code = '';
+        inputs.forEach(inp => code += inp.value);
+
+        // Vérifier si tous les champs de code sont remplis
+        if (code.length < 6) {
+            alert('⚠️ Please fill all verification code digits!');
+            isValid = false;
+            inputs.forEach(inp => {
+                if (!inp.value) {
+                    inp.classList.add('invalid');
+                }
+            });
+            e.preventDefault();
+            return;
+        }
+
+        // 🔥 Comparer avec le code envoyé par email
+        if (code !== expectedVerificationCode) {
+            alert('❌ Incorrect verification code. Please check your email.');
+            isValid = false;
+            inputs.forEach(inp => inp.classList.add('invalid'));
+            e.preventDefault();
+            return;
+        }
+
+        // Vérifications mot de passe
+        if (newPassword.value.length < 6) {
+            newPasswordError.textContent = 'Password must be at least 6 characters.';
+            isValid = false;
+        }
+
+        if (confirmPassword.value.length < 6) {
+            confirmPasswordError.textContent = 'Confirm password must be at least 6 characters.';
+            isValid = false;
+        }
+
+        if (newPassword.value !== confirmPassword.value) {
+            confirmPasswordError.textContent = 'Passwords do not match.';
+            isValid = false;
+        }
+
+        if (!isValid) {
+            e.preventDefault();
+        }
+    });
+</script>

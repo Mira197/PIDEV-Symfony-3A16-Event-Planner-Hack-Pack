@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>Login Form</title>
+		<meta
+		name="viewport" content="width=device-width, initial-scale=1.0">
+		<!-- MATERIAL DESIGN ICONIC FONT -->
+		<link
+		rel="stylesheet" href="{{ asset('fonts/material-design-iconic-font/css/material-design-iconic-font.min.css') }}">
+		<!-- STYLE CSS -->
+		<link rel="stylesheet" href="{{ asset('css/styleh.css') }}">
+		<style>
+			/* Ajouter une marge autour du formulaire */
+			.login-form {
+				margin: 50px;
+			}
+
+			/* Changer la couleur des liens en beige */
+			.forgot-pass a,
+			.signup a {
+				color: #d6d0b8;
+			}
+
+			.signup {
+				margin-top: 10px;
+				margin-bottom: 20px;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="wrapper" style="background-image: url('{{ asset('img/output-onlinepngtools.png') }}');">
+			<div class="inner">
+				<div class="image-holder">
+					<img src="{{ asset('img/1.jpg') }}" height="650px">
+				</div>
+
+				<!-- Intégration du formulaire Symfony ici -->
+				<form method="post" class="login-form">
+
+
+					<h3>Password Reset Email Sent
+					</h3>
+
+
+					<p>
+						If an account matching your email exists, then an email was just sent that contains a link that you can use to reset your password.
+												    This link will expire in
+						{{ resetToken.expirationMessageKey|trans(resetToken.expirationMessageData, 'ResetPasswordBundle') }}.
+					</p>
+					<p>If you don't receive an email please check your spam folder or
+						<a href="{{ path('app_forgot_password_request') }}">try again</a>.</p>
+				</div>
+
+			</form>
+			<!-- Fin du formulaire Symfony -->
+		</div>
+	</body>
+</html></div></body></html>

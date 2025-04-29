@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Formulaire d'inscription</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+	<!-- MATERIAL DESIGN ICONIC FONT -->
+	<link rel="stylesheet" href="{{ asset('fonts/material-design-iconic-font/css/material-design-iconic-font.min.css') }}">
+
+	<!-- STYLE CSS -->
+	<link rel="stylesheet" href="{{ asset('css/cssd/styleh.css') }}">
+
+	<style>
+		.form-wrapper {
+			margin: -400px;
+		}
+		.password-input {
+			position: relative;
+		}
+		.password-input input[type="password"] {
+			padding-right: 40px;
+		}
+		.password-input i {
+			position: absolute;
+			right: 10px;
+			top: 50%;
+			transform: translateY(-50%);
+			cursor: pointer;
+		}
+	</style>
+</head>
+
+<body>
+	<div class="wrapper" style="background-image: url('{{ asset('img/output-onlinepngtools.png') }}');">
+		<div class="inner">
+			<div class="image-holder">
+				<img src="{{ asset('img/sig.png') }}" height="750px">
+			</div>
+
+			<form {{ form_start(form, {'attr': {'novalidate': 'novalidate'}} ) }}>
+				<h3>Formulaire d'inscription</h3>
+
+				{{ form_row(form.lastName, {'attr': {'placeholder': 'tapez ici votre prénom', 'class': 'form-control'}, 'label': 'Prénom'}) }}
+				{{ form_row(form.firstName, {'attr': {'placeholder': 'tapez ici votre nom', 'class': 'form-control'}, 'label': 'Nom'}) }}
+				{{ form_row(form.username, {'attr': {'placeholder': 'tapez ici votre nom d\'utilisateur', 'class': 'form-control'}, 'label': 'Nom d\'utilisateur'}) }}
+
+				<div class="password-input">
+					{{ form_row(form.password, {'attr': {'placeholder': 'Mot de passe', 'class': 'form-control'}, 'label': 'Mot de passe'}) }}
+					<i class="zmdi zmdi-eye"></i>
+				</div>
+
+				<div class="password-input">
+					{{ form_row(form.passwordConfirmation, {'attr': {'placeholder': 'Confirmer le mot de passe', 'class': 'form-control'}, 'label': 'Confirmation'}) }}
+					<i class="zmdi zmdi-eye"></i>
+				</div>
+
+				{{ form_row(form.email, {'attr': {'placeholder': 'Adresse Email', 'class': 'form-control'}, 'label': 'Adresse Email'}) }}
+				{{ form_row(form.numtel, {'attr': {'placeholder': 'Numéro de téléphone', 'class': 'form-control'}, 'label': 'Numéro de téléphone'}) }}
+				{{ form_row(form.role, {'attr': {'class': 'form-control'}, 'label': 'Rôle'}) }}
+
+				<hr>
+				<!-- Bouton d'enregistrement facial -->
+				<div style="text-align:center; margin-top: 20px;">
+				
+
+					
+
+				</div>
+
+				{{ form_row(form.submit, {'attr': {'class': 'button'}, 'label': 'Soumettre'}) }}
+				{{ form_end(form) }}
+			</form>
+		</div>
+	</div>
+
+	<!-- Password visibility toggle -->
+	<script>
+		document.addEventListener('DOMContentLoaded', function () {
+			const passwordInputs = document.querySelectorAll('.password-input input[type="password"]');
+			const passwordIcons = document.querySelectorAll('.password-input i');
+
+			passwordIcons.forEach((icon, index) => {
+				icon.addEventListener('click', function () {
+					const type = passwordInputs[index].getAttribute('type') === 'password' ? 'text' : 'password';
+					passwordInputs[index].setAttribute('type', type);
+					icon.classList.toggle('zmdi-eye');
+					icon.classList.toggle('zmdi-eye-off');
+				});
+			});
+		});
+	</script>
+
+	
+</body>
+</html>

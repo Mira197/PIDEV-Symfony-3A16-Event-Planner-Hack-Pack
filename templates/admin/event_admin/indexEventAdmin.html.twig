@@ -1,0 +1,167 @@
+{% extends 'admin/baseAdmin.html.twig' %}
+{% block head %}
+	<link rel="stylesheet" href="{{ asset('assetsAya/css/adminOrder.css') }}">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+	{{ parent() }}
+	<style>
+		.pagination {
+			justify-content: center;
+			flex-wrap: wrap;
+		}
+
+		.page-item .page-link {
+			color: #6b336e;
+			border-radius: 6px;
+			transition: all 0.2s ease;
+			padding: 6px 12px;
+			border: 1px solid #ddd;
+		}
+
+		.page-item .page-link:hover {
+			background-color: #f2f2f2;
+		}
+
+		.page-item.active .page-link {
+			background-color: #6b336e;
+			border-color: #6b336e;
+			color: white;
+			font-weight: bold;
+		}
+
+		.page-item.disabled .page-link {
+			color: #999;
+			background-color: #f0f0f0;
+			border-color: #ddd;
+		}
+	</style>
+{% endblock %}
+
+
+{% block section %}
+	<div class="admin-mui-wrapper">
+		<h2>🎉 Manage Events</h2>
+
+		<!-- Barre de recherche + actions -->
+		<div class="admin-filters">
+			<div class="left-search">
+				<input type="text" id="eventSearchInput" placeholder="🔍 Search events..." class="form-control">
+			</div>
+			
+		</div>
+
+		<table class="admin-mui-table">
+			<thead>
+				<tr>
+					<th>Image</th>
+					<th>Name</th>
+					<th>City</th>
+					<th>Start Date</th>
+					<th>End Date</th>
+					<th>Capacity</th>
+					<th>Actions</th>
+				</tr>
+			</thead>
+
+			<tbody id="eventsTable">
+				{% for event in events %}
+					<tr>
+						<td>
+							{#{% if event.imageFilename %}
+								<img src="{{ asset('uploads/' ~ event.imageFilename) }}" alt="{{ event.name }}" width="70" height="50" style="object-fit: cover; border-radius: 6px;">
+							{% elseif event.base64Image is defined %}
+								<img src="data:image/jpeg;base64,{{ event.base64Image }}" alt="{{ event.name }}" width="70" height="50" style="object-fit: cover; border-radius: 6px;">
+							{% else %}
+								<em>No image</em>
+							{% endif %}#}
+							{% if event.base64Image is defined %}
+    							<img src="data:image/jpeg;base64,{{ event.base64Image }}" alt="{{ event.name }}" width="70" height="50" style="object-fit: cover; border-radius: 6px;">
+							{% else %}
+    							<img src="{{ asset('images/default.jpg') }}" alt="Default image">
+							{% endif %}
+						</td>
+						<td>{{ event.name }}</td>
+						<td>{{ event.city }}</td>
+						<td>{{ event.startDate|date('Y-m-d H:i') }}</td>
+						<td>{{ event.endDate|date('Y-m-d H:i') }}</td>
+						<td>{{ event.capacity }}</td>
+						<td>
+							<a href="{{ path('event_admin_show', {'id': event.idEvent}) }}" class="btn btn-outline-info btn-sm">
+								<i class="fa-solid fa-circle-info" style="color: #533C56;"></i>
+							</a>
+							<a href="{{ path('event_admin_edit', {'id': event.idEvent}) }}" class="btn btn-outline-warning btn-sm">
+								<i class="fa-solid fa-pen" style="font-size: 14px;color: #533C56;"></i>
+							</a>
+						</td>
+					</tr>
+				{% else %}
+					<tr>
+						<td colspan="7" class="empty-row">No events found.</td>
+					</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+		<div class="pagination d-flex justify-content-center mt-4">
+	{{ knp_pagination_render(events, '@KnpPaginator/Pagination/bootstrap_v5_pagination.html.twig') }}
+</div>
+
+	</div>
+{% endblock %}
+{% block javascripts %}
+{{ parent() }}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script>
+    $(document).ready(function () {
+        $('#eventSearchInput').on('keyup', function () {
+            let query = $(this).val();
+
+            if (query.trim() === '') {
+                window.location.reload();
+                return;
+            }
+
+            $.ajax({
+                url: "{{ path('event_ajax_search') }}",
+                type: 'GET',
+                data: { q: query },
+                success: function (data) {
+                    let tbody = $('#eventsTable');
+                    tbody.empty();
+
+                    if (data.length === 0) {
+                        tbody.append('<tr><td colspan="7">No events found.</td></tr>');
+                        return;
+                    }
+
+                    data.forEach(function (event) {
+                        const imageCell = event.imageFilename
+                            ? `<img src="/uploads/${event.imageFilename}" width="70" height="50" style="object-fit:cover; border-radius:6px;">`
+                            : (event.base64Image
+                                ? `<img src="data:image/jpeg;base64,${event.base64Image}" width="70" height="50" style="object-fit:cover; border-radius:6px;">`
+                                : '<em>No image</em>');
+
+                        tbody.append(`
+                            <tr>
+                                <td>${imageCell}</td>
+                                <td>${event.name}</td>
+                                <td>${event.city}</td>
+                                <td>${event.startDate}</td>
+                                <td>${event.endDate}</td>
+                                <td>${event.capacity}</td>
+                                <td>
+                                    <a href="/admin/event/${event.idEvent}" class="btn btn-outline-info btn-sm">👁️</a>
+                                    <a href="/admin/event/${event.idEvent}/edit" class="btn btn-outline-warning btn-sm">🖊️</a>
+                                </td>
+                            </tr>
+                        `);
+                    });
+                },
+                error: function () {
+                    alert("Error fetching event results.");
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}
+

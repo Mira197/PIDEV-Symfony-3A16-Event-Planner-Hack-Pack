@@ -1,0 +1,135 @@
+{# templates/aya_order/aya_order.html.twig #}
+{% extends 'base.html.twig' %}
+
+{% block stylesheets %}
+
+	<link rel="stylesheet" href="{{ asset('assetsAya/css/ordercss.css') }}">
+	{{ parent() }}
+	<style>
+		nav.fh5co-nav {
+			background-color: #cebec9 !important;
+			padding: 1px 0 !important;
+			max-height: 130px !important;
+		}
+
+		body {
+			background-color: #f7f7f7;
+		}
+
+		.order-form-container {
+			max-width: 600px;
+			margin: 150px auto 60px; /* ← top éloigné */
+			padding: 40px;
+			background: #fff;
+			box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+			border-radius: 20px;
+		}
+
+		.order-form-container h2 {
+			font-weight: bold;
+			margin-bottom: 25px;
+			text-align: center;
+			color: #6b336e;
+		}
+
+		.form-group label {
+			font-weight: 600;
+		}
+
+		.btn-success {
+			width: 100%;
+		}
+		/* Appliquer une bordure rouge nette aux champs invalides */
+		.is-invalid {
+			border: 2px solid #dc3545 !important;
+			background-color: #fff6f6 !important;
+			border-radius: 5px;
+		}
+
+		.is-invalid:focus {
+			box-shadow: 0 0 5px rgba(220, 53, 69, 0.4);
+		}
+	</style>
+{% endblock %}
+
+{% block content %}
+	<div class="container mt-5">
+		<div
+			class="row aya-order-wrapper justify-content-center">
+			<!-- 🧾 Formulaire commande -->
+			<div class="col-md-7">
+				<div class="order-form-container">
+					<h2 class="mb-4 text-center">🧾 Validate Your Order</h2>
+					{{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+					<div class="form-group">
+						{{ form_label(form.exact_address) }}
+						{{ form_widget(form.exact_address, {'attr': {'class': 'form-control' ~ (form_errors(form.exact_address) ? ' is-invalid' : ''),'placeholder': 'Enter exact delivery address'}}) }}
+						{{ form_errors(form.exact_address) }}
+					</div>
+					<div class="form-group mt-3">
+						{{ form_label(form.event_date) }}
+						{{ form_widget(form.event_date, {'attr': {'class': 'form-control' ~ (form_errors(form.event_date) ? ' is-invalid' : '')}}) }}
+						{{ form_errors(form.event_date) }}
+					</div>
+					<div class="form-group mt-3">
+						{{ form_label(form.payment_method) }}
+						{{ form_widget(form.payment_method, {'attr': {'class': 'form-control' ~ (form_errors(form.payment_method) ? ' is-invalid' : '')}}) }}
+						{{ form_errors(form.payment_method) }}
+					</div>
+					<button type="submit" class="btn btn-success mt-4 w-100">Confirm Order</button>
+					{{ form_end(form) }}
+				</div>
+			</div>
+
+			<!-- 💳 Section coupon & options -->
+			<div class="col-md-5 ">
+				<div class="order-summary-box">
+					<div class="form-group">
+						<label>Coupon Code</label>
+						<div class="input-apply-group">
+							<input type="text" class="form-control coupon-input" placeholder="Enter coupon">
+							<button class="btn btn-secondary apply-btn">Apply</button>
+						</div>
+
+					</div>
+
+
+					<div class="form-group mt-4">
+						<label>Gift Card</label>
+						<div class="d-flex giftcard-row align-items-center">
+							<input type="text" class="form-control card-input me-2" placeholder="Card Number">
+							<input type="text" class="form-control pin-input me-2" placeholder="PIN">
+							<button class="btn btn-secondary apply-btn">Apply</button>
+						</div>
+					</div>
+
+
+					<div class="form-group mt-4">
+						<label>Wallet Credit</label>
+						<div class="input-apply-group">
+							<input type="text" class="form-control wallet-input" placeholder="Enter amount">
+							<button class="btn btn-secondary apply-btn">Apply</button>
+						</div>
+					</div>
+
+
+					<div class="form-group mt-4">
+						<label>3alakifi Points
+							<small>(Total: 0)</small>
+						</label>
+						<div class="input-apply-group">
+							<input type="text" class="form-control alakifi-input" placeholder="Enter points">
+							<button class="btn btn-secondary apply-btn">Apply</button>
+						</div>
+					</div>
+
+
+					<button class="btn btn-dark w-100 mt-4">CONTINUE</button>
+				</div>
+			</div>
+		</div>
+	</div>
+{% endblock %}
+{% block javascripts %}
+	{{ parent() }}
+{% endblock %}

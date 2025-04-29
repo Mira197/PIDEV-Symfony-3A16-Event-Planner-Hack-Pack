@@ -1,0 +1,208 @@
+{% extends 'admin/baseAdmin.html.twig' %}
+
+{% block title %}Ajouter un administrateur{% endblock %}
+
+{% block head %}
+  {{ parent() }}
+  <style>
+    /* Invalid feedback message styling */
+    .invalid-feedback {
+      color: blue; /* Change error message color to blue */
+      font-size: 0.875rem;
+      display: none;
+    }
+
+    /* Show blue border when the input is invalid */
+    .form-control.is-invalid {
+      border-color: blue; /* Change border color to blue */
+    }
+
+    /* Show error message when validation fails */
+    .form-control.is-invalid ~ .invalid-feedback {
+      display: block;
+    }
+
+    /* Remove the green color if you don't want to show success feedback */
+    .form-control.is-valid {
+      border-color: initial; /* Keep the default border color */
+    }
+
+    /* Display valid feedback (green color or a different styling) */
+    .form-control.is-valid ~ .valid-feedback {
+      display: block;
+      color: green; /* Leave the success message as green */
+      font-size: 0.875rem;
+    }
+  </style>
+{% endblock %}
+
+{% block section %}
+<section class="tab-components">
+  <div class="container-fluid">
+    <div class="title-wrapper pt-30 mb-20">
+      <div class="row align-items-center">
+        <div class="col-md-6">
+          <div class="title">
+            <h2>
+              <i class="lni lni-user-plus"></i>
+              Ajouter un administrateur
+            </h2>
+          </div>
+        </div>
+        <div class="col-md-6 text-end">
+          <a href="{{ path('app_user_index') }}" class="main-btn danger-btn btn-hover">
+            ← Retour
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-elements-wrapper">
+      <div class="row justify-content-center">
+        <div class="col-lg-10">
+          <div class="card-style mb-30">
+            <h6 class="mb-25">Informations de l'administrateur</h6>
+
+            {{ form_start(adminForm, {
+              'attr': {
+                'action': path('admin_register'),
+                'class': 'row g-3',
+                'novalidate': 'novalidate'
+              },
+              'method': 'POST'
+            }) }}
+
+            <!-- Nom -->
+            <div class="col-md-6 input-style-1">
+              <label>Nom</label>
+              {{ form_widget(adminForm.lastName, {
+                'attr': {
+                  'class': 'form-control' ~ (adminForm.lastName.vars.errors ? ' is-invalid' : '') ~ (adminForm.lastName.vars.valid ? ' is-valid' : '')
+                }
+              }) }}
+              {% if adminForm.lastName.vars.errors %}
+                <div class="invalid-feedback d-block">
+                  {% for error in adminForm.lastName.vars.errors %}
+                    {{ error.message }}
+                  {% endfor %}
+                </div>
+              {% endif %}
+            </div>
+
+            <!-- Prénom -->
+            <div class="col-md-6 input-style-1">
+              <label>Prénom</label>
+              {{ form_widget(adminForm.firstName, {
+                'attr': {
+                  'class': 'form-control' ~ (adminForm.firstName.vars.errors ? ' is-invalid' : '') ~ (adminForm.firstName.vars.valid ? ' is-valid' : '')
+                }
+              }) }}
+              {% if adminForm.firstName.vars.errors %}
+                <div class="invalid-feedback d-block">
+                  {% for error in adminForm.firstName.vars.errors %}
+                    {{ error.message }}
+                  {% endfor %}
+                </div>
+              {% endif %}
+            </div>
+
+            <!-- Nom d'utilisateur -->
+            <div class="col-md-6 input-style-1">
+              <label>Nom d'utilisateur</label>
+              {{ form_widget(adminForm.username, {
+                'attr': {
+                  'class': 'form-control' ~ (adminForm.username.vars.errors ? ' is-invalid' : '') ~ (adminForm.username.vars.valid ? ' is-valid' : '')
+                }
+              }) }}
+              {% if adminForm.username.vars.errors %}
+                <div class="invalid-feedback d-block">
+                  {% for error in adminForm.username.vars.errors %}
+                    {{ error.message }}
+                  {% endfor %}
+                </div>
+              {% endif %}
+            </div>
+
+               <!-- Email -->
+            <div class="col-md-6 input-style-1">
+              <label>Email</label>
+              {{ form_widget(adminForm.email, {
+                'attr': {
+                  'class': 'form-control' ~ (adminForm.email.vars.errors ? ' is-invalid' : '') ~ (adminForm.email.vars.valid ? ' is-valid' : '')
+                }
+              }) }}
+              {% if adminForm.email.vars.errors %}
+                <div class="invalid-feedback d-block">
+                  {% for error in adminForm.email.vars.errors %}
+                    {{ error.message }}
+                  {% endfor %}
+                </div>
+              {% endif %}
+              </div>
+
+            <!-- Numéro de téléphone -->
+            <div class="col-md-6 input-style-1">
+              <label>Numéro de téléphone</label>
+              {{ form_widget(adminForm.numtel, {
+                'attr': {
+                  'class': 'form-control' ~ (adminForm.numtel.vars.errors ? ' is-invalid' : '') ~ (adminForm.numtel.vars.valid ? ' is-valid' : '')
+                }
+              }) }}
+              {% if adminForm.numtel.vars.errors %}
+                <div class="invalid-feedback d-block">
+                  {% for error in adminForm.numtel.vars.errors %}
+                    {{ error.message }}
+                  {% endfor %}
+                </div>
+              {% endif %}
+            </div>
+
+            <!-- Mot de passe -->
+            <div class="col-md-6 input-style-1">
+              <label>Mot de passe</label>
+              {{ form_widget(adminForm.password, {
+                'attr': {
+                  'class': 'form-control' ~ (adminForm.password.vars.errors ? ' is-invalid' : '') ~ (adminForm.password.vars.valid ? ' is-valid' : '')
+                }
+              }) }}
+              {% if adminForm.password.vars.errors %}
+                <div class="invalid-feedback d-block">
+                  {% for error in adminForm.password.vars.errors %}
+                    {{ error.message }}
+                  {% endfor %}
+                </div>
+              {% endif %}
+            </div>
+
+            <!-- Confirmation mot de passe -->
+            <div class="col-md-6 input-style-1">
+              <label>Confirmation mot de passe</label>
+              {{ form_widget(adminForm.passwordConfirmation, {
+                'attr': {
+                  'class': 'form-control' ~ (adminForm.passwordConfirmation.vars.errors ? ' is-invalid' : '') ~ (adminForm.passwordConfirmation.vars.valid ? ' is-valid' : '')
+                }
+              }) }}
+              {% if adminForm.passwordConfirmation.vars.errors %}
+                <div class="invalid-feedback d-block">
+                  {% for error in adminForm.passwordConfirmation.vars.errors %}
+                    {{ error.message }}
+                  {% endfor %}
+                </div>
+              {% endif %}
+            </div>
+
+            <div class="col-12">
+              <button type="submit" class="main-btn primary-btn btn-hover w-100">
+                <i class="lni lni-user-plus"></i>
+                Créer l'administrateur
+              </button>
+            </div>
+
+            {{ form_end(adminForm) }}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

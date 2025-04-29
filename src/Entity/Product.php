@@ -6,6 +6,7 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Symfony\Component\Validator\Constraints as Assert;
 
 use App\Repository\ProductRepository;
 
@@ -30,6 +31,7 @@ class Product
     }
 
     #[ORM\Column(type: 'string', nullable: false)]
+    #[Assert\NotBlank(message: "You must enter the name")]
     private ?string $name = null;
 
     public function getName(): ?string
@@ -44,6 +46,7 @@ class Product
     }
 
     #[ORM\Column(type: 'text', nullable: true)]
+    #[Assert\NotBlank(message: "Description is required")]
     private ?string $description = null;
 
     public function getDescription(): ?string
@@ -58,6 +61,8 @@ class Product
     }
 
     #[ORM\Column(type: 'float', nullable: true)]
+    #[Assert\NotBlank(message: "Price is necessary")]
+    #[Assert\PositiveOrZero(message: "Price must be positif.")]
     private ?float $price = null;
 
     public function getPrice(): ?float
@@ -71,36 +76,63 @@ class Product
         return $this;
     }
 
-    #[ORM\ManyToOne(targetEntity: Stock::class, inversedBy: 'products')]
+    /*#[ORM\ManyToOne(targetEntity: Stock::class, inversedBy: 'products')]
     #[ORM\JoinColumn(name: 'stock_id', referencedColumnName: 'stock_id')]
-    private ?Stock $stock = null;
+    private ?int $stock_id = null;
 
-    public function getStock(): ?Stock
+public function getStockId(): ?int
+{
+    return $this->stock_id;
+}
+
+public function setStockId(?int $stockId): self
+{
+    $this->stock_id = $stockId;
+    return $this;
+}*/
+#[ORM\ManyToOne(targetEntity: Stock::class, inversedBy: 'products')]
+#[ORM\JoinColumn(name: 'stock_id', referencedColumnName: 'stock_id', nullable: false)]
+private ?Stock $stock = null;
+public function getStock(): ?Stock
+{
+    return $this->stock;
+}
+
+public function setStock(?Stock $stock): self
+{
+    $this->stock = $stock;
+    return $this;
+}
+#[ORM\Column(type: 'blob', nullable: true)]
+    private $image;
+
+    public function getImage()
     {
-        return $this->stock;
+    return $this->image;
     }
 
-    public function setStock(?Stock $stock): self
+    public function setImage($image): self
     {
-        $this->stock = $stock;
-        return $this;
+    $this->image = $image;
+    return $this;
     }
 
-    #[ORM\Column(type: 'string', nullable: true)]
-    private ?string $image_url = null;
-
-    public function getImage_url(): ?string
+    public function getBase64Image(): ?string
     {
-        return $this->image_url;
+        if (!$this->image) {
+            return null;
+        }
+    
+        if (is_resource($this->image)) {
+            return base64_encode(stream_get_contents($this->image));
+        }
+    
+        return base64_encode($this->image);
     }
-
-    public function setImage_url(?string $image_url): self
-    {
-        $this->image_url = $image_url;
-        return $this;
-    }
+    
 
     #[ORM\Column(type: 'string', nullable: false)]
+    #[Assert\NotBlank(message: "Category is necessary")]
     private ?string $category = null;
 
     public function getCategory(): ?string
@@ -189,17 +221,6 @@ class Product
     {
         return $this->product_id;
     }
-
-    public function getImageUrl(): ?string
-    {
-        return $this->image_url;
-    }
-
-    public function setImageUrl(?string $image_url): static
-    {
-        $this->image_url = $image_url;
-
-        return $this;
-    }
+    
 
 }

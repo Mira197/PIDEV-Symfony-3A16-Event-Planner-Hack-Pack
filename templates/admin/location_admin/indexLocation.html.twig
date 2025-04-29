@@ -1,0 +1,177 @@
+{% extends 'admin/baseAdmin.html.twig' %}
+{% block head %}
+	<link rel="stylesheet" href="{{ asset('assetsAya/css/adminOrder.css') }}">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+	{{ parent() }}
+	<style>
+		.pagination {
+			justify-content: center;
+			flex-wrap: wrap;
+		}
+
+		.page-item .page-link {
+			color: #6b336e;
+			border-radius: 6px;
+			transition: all 0.2s ease;
+			padding: 6px 12px;
+			border: 1px solid #ddd;
+		}
+
+		.page-item .page-link:hover {
+			background-color: #f2f2f2;
+		}
+
+		.page-item.active .page-link {
+			background-color: #6b336e;
+			border-color: #6b336e;
+			color: white;
+			font-weight: bold;
+		}
+
+		.page-item.disabled .page-link {
+			color: #999;
+			background-color: #f0f0f0;
+			border-color: #ddd;
+		}
+	</style>
+
+{% endblock %}
+
+{% block section %}
+	<div class="admin-mui-wrapper">
+		<h2>🏛️ Manage Locations</h2>
+
+		<!-- Barre de recherche + bouton ajout -->
+		<div class="admin-filters">
+			<div class="left-search">
+				{#<form action="{{ path('location_admin_search') }}" method="get" class="d-flex gap-2">
+					<input type="text" name="q" class="form-control" placeholder="🔍 Search location..." value="{{ query|default('') }}">
+					<button class="btn btn-outline-primary" type="submit">
+						Search
+					</button>
+				</form>#}
+				<input type="text" id="locationSearchInput" class="form-control" placeholder="🔍 Search locations...">
+			</div>
+
+			<div class="right-actions">
+				<a href="{{ path('location_admin_new') }}" class="btn btn-outline-success">➕ Add Location</a>
+			</div>
+		</div>
+
+		<!-- Table -->
+		<table class="admin-mui-table">
+			<thead>
+				<tr>
+					<th>Image</th>
+					<th>Name</th>
+					<th>City</th>
+					<th>Address</th>
+					<th>Capacity</th>
+					<th>Dimension</th>
+					<th>Price</th>
+					<th>Status</th>
+					<th>Actions</th>
+				</tr>
+			</thead>
+
+			<tbody id="locationsTable">
+				{% for location in locations %}
+					<tr>
+						<td>
+							{% if location.imageFilename %}
+								<img src="{{ asset('uploads/' ~ location.imageFilename) }}" alt="{{ location.name }}" width="70" height="50" style="object-fit: cover; border-radius: 6px;">
+							{% else %}
+								<em>No image</em>
+							{% endif %}
+						</td>
+						<td>{{ location.name }}</td>
+						<td>{{ location.city.value }}</td>
+						<td>{{ location.address }}</td>
+						<td>{{ location.capacity }}</td>
+						<td>{{ location.dimension }}</td>
+						<td>{{ location.price }}
+							DT</td>
+						<td>{{ location.status }}</td>
+						<td>
+							<a href="{{ path('location_admin_show', {'id': location.idLocation}) }}" class="btn btn-outline-info btn-sm">
+								<i class="fa-solid fa-circle-info" style="color: #533C56;"></i>
+							</a>
+							<a href="{{ path('location_admin_edit', {'id': location.idLocation}) }}" class="btn btn-outline-warning btn-sm">
+								<i class="fa-solid fa-pen" style="font-size: 14px;color: #533C56;"></i>
+							</a>
+						</td>
+					</tr>
+				{% else %}
+					<tr>
+						<td colspan="9" class="empty-row">No locations found.</td>
+					</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+		<div class="pagination d-flex justify-content-center mt-4">
+			{{ knp_pagination_render(locations, '@KnpPaginator/Pagination/bootstrap_v5_pagination.html.twig') }}
+		</div>
+
+	</div>
+{% endblock %}
+{% block javascripts %}
+{{ parent() }}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script>
+    $(document).ready(function () {
+        $('#locationSearchInput').on('keyup', function () {
+            let query = $(this).val();
+
+            /*if (query.trim() === '') {
+                window.location.reload();
+                return;
+            }*/
+
+            $.ajax({
+                url: "{{ path('location_ajax_search') }}",
+                type: 'GET',
+                data: { q: query },
+                success: function (data) {
+                    let tbody = $('#locationsTable');
+                    tbody.empty();
+
+                    if (data.length === 0) {
+                        tbody.append('<tr><td colspan="9">No locations found.</td></tr>');
+                        return;
+                    }
+
+                    data.forEach(function (location) {
+                        const imageCell = location.imageFilename
+                            ? `<img src="/uploads/${location.imageFilename}" width="70" height="50" style="object-fit:cover; border-radius:6px;">`
+                            : (location.base64Image
+                                ? `<img src="data:image/jpeg;base64,${location.base64Image}" width="70" height="50" style="object-fit:cover; border-radius:6px;">`
+                                : '<em>No image</em>');
+
+                        tbody.append(`
+                            <tr>
+                                <td>${imageCell}</td>
+                                <td>${location.name}</td>
+                                <td>${location.city}</td>
+                                <td>${location.address}</td>
+                                <td>${location.capacity}</td>
+                                <td>${location.dimension}</td>
+                                <td>${location.price} DT</td>
+                                <td>${location.status}</td>
+                                <td>
+                                    <a href="/admin/location/${location.idLocation}" class="btn btn-outline-info btn-sm">👁️</a>
+                                    <a href="/admin/location/${location.idLocation}/edit" class="btn btn-outline-warning btn-sm">🖊️</a>
+                                </td>
+                            </tr>
+                        `);
+                    });
+                },
+                error: function () {
+                    alert("Error fetching location results.");
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}
+
