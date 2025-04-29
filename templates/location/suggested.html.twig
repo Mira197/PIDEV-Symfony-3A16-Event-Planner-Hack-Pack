@@ -16,6 +16,122 @@
 			padding: 30px;
 			margin-top: 120px;
 		}
+		/* Assistant Button */
+		.assistant-btn {
+    		position: fixed;
+    		bottom: 20px;
+    		right: 20px;
+    		background: linear-gradient(135deg, #8e44ad, #6c5ce7);
+    		color: #fff;
+    		border: none;
+    		padding: 12px 24px;
+    		border-radius: 50px;
+    		font-size: 16px;
+    		cursor: pointer;
+    		z-index: 9999;
+    		box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    		transition: background 0.3s;
+		}
+		.assistant-btn:hover {
+    		background: linear-gradient(135deg, #6c5ce7, #8e44ad);
+		}
+
+		/* Assistant Modal */
+		.assistant-modal {
+    		display: none;
+    		position: fixed;
+    		bottom: 90px;
+    		right: 20px;
+    		width: 350px;
+    		height: 480px;
+    		background: #fff;
+    		border: 2px solid #6c5ce7;
+    		border-radius: 12px;
+    		box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    		z-index: 9999;
+    		overflow: hidden;
+    		display: flex;
+    		flex-direction: column;
+		}
+
+		/* Header */
+		.assistant-header {
+    		background: #6c5ce7;
+    		color: #fff;
+    		padding: 10px;
+    		font-weight: bold;
+    		text-align: center;
+    		position: relative;
+		}
+
+		/* Close Button */
+		.assistant-close {
+    		background: none;
+    		border: none;
+    		color: #fff;
+    		font-size: 20px;
+    		position: absolute;
+    		right: 10px;
+    		top: 5px;
+    		cursor: pointer;
+		}
+
+		/* Chat Messages */
+		.assistant-messages {
+    	flex: 1;
+    	padding: 10px;
+    	overflow-y: auto;
+    	font-size: 14px;
+		}
+
+		/* Input Section */
+		.assistant-input-wrapper {
+    	display: flex;
+    	border-top: 1px solid #eee;
+		}
+
+		.assistant-input {
+    	flex: 1;
+    	border: none;
+    	padding: 10px;
+    	outline: none;
+    	font-size: 14px;
+		}
+
+		.assistant-send {
+    	background: #6c5ce7;
+    	color: white;
+    	border: none;
+    	padding: 0 20px;
+    	cursor: pointer;
+    	font-size: 18px;
+		}
+		/**for bubble effect(u can remove if too much**/
+		.chat-bubble {
+    	max-width: 75%;
+    	padding: 10px 14px;
+    	margin-bottom: 8px;
+    	border-radius: 20px;
+    	line-height: 1.4;
+    	font-size: 14px;
+    	display: inline-block;
+    	clear: both;
+		}
+		.chat-user {
+    	background-color: #6c5ce7;
+    	color: white;
+    	float: right;
+    	text-align: right;
+		}
+		.chat-bot {
+    	background-color: #f1f0f0;
+    	float: left;
+    	text-align: left;
+		}
+		.chat-clear {
+    	clear: both;
+		}
+
 	</style>
 {% endblock %}
 
@@ -126,6 +242,26 @@
 		</div>
 
 	</div>
+	<!-- Assistant -->
+	<!-- 🔥 New Assistant Button -->
+	<button id="openAssistant" class="assistant-btn">
+    	💬 Ask our Assistant
+	</button>
+
+	<!-- 🔥 New Assistant Modal -->
+	<div id="assistantModal" class="assistant-modal">
+    	<div class="assistant-header">
+        	🤖 Venue Assistant
+        	<button id="closeAssistant" class="assistant-close">&times;</button>
+    	</div>
+    <div id="chatMessages" class="assistant-messages"></div>
+    <div class="assistant-input-wrapper">
+        <input type="text" id="chatInput" placeholder="Type your question..." class="assistant-input">
+        <button id="sendChat" class="assistant-send">➤</button>
+    </div>
+</div>
+
+
 {% endblock %}
 {% block javascripts %}
 	{{ parent() }}
@@ -344,6 +480,56 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 </script>
+{#Assistant#}
+<script>
+document.getElementById('openAssistant').addEventListener('click', function() {
+    const modal = document.getElementById('assistantModal');
+    modal.style.display = modal.style.display === 'none' ? 'block' : 'none';
+});
+document.getElementById('closeAssistant').addEventListener('click', function() {
+    document.getElementById('assistantModal').style.display = 'none';
+});
+
+document.getElementById('sendChat').addEventListener('click', async function() {
+    const input = document.getElementById('chatInput');
+    const message = input.value.trim();
+    if (!message) return;
+	/*u can uncomment this and the one under if too much*/
+    /*const chatMessages = document.getElementById('chatMessages');
+    chatMessages.innerHTML += `<div><b>Me:</b> ${message}</div>`;
+    input.value = '';*/
+	const chatMessages = document.getElementById('chatMessages');
+    chatMessages.innerHTML += `<div class="chat-bubble chat-user">${message}</div><div class="chat-clear"></div>`;
+    input.value = '';
+
+    const response = await fetch('/assistant/chat', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        body: new URLSearchParams({message})
+    });
+
+    /*const data = await response.json();
+    chatMessages.innerHTML += `<div><b>Assistant:</b> ${data.reply}</div>`;
+    chatMessages.scrollTop = chatMessages.scrollHeight;*/
+	const data = await response.json();
+    chatMessages.innerHTML += `<div class="chat-bubble chat-bot">${formatBotReply(data.reply)}</div><div class="chat-clear"></div>`;
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+});
+// 🔥 Auto-format assistant reply: convert numbered lines to list (added for bubble effect +lines)
+function formatBotReply(text) {
+    const lines = text.trim().split('\n');
+    if (lines.length >= 2 && lines.every(line => /^\d+\./.test(line))) {
+        let list = '<ul>';
+        lines.forEach(line => {
+            list += `<li>${line.replace(/^\d+\.\s*/, '')}</li>`;
+        });
+        list += '</ul>';
+        return list;
+    }
+    return text.replace(/\n/g, '<br>');
+}
+</script>
+
 
 
 {% endblock %}
