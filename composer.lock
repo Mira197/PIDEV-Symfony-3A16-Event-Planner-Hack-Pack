@@ -4,7 +4,9 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "5acb0dda1ce737021a057c2c91fc20fc",
+
+    "content-hash": "c8fefec95d7ba853b3a5d88c14fbd540",
+
     "packages": [
         {
             "name": "amphp/amp",
@@ -9758,6 +9760,7 @@
             "time": "2024-09-25T14:18:03+00:00"
         },
         {
+
             "name": "symfony/twilio-notifier",
             "version": "v6.4.13",
             "source": {
@@ -9832,6 +9835,7 @@
             "time": "2024-09-25T14:18:03+00:00"
         },
         {
+
             "name": "symfony/ux-chartjs",
             "version": "v2.24.0",
             "source": {

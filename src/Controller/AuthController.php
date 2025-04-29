@@ -184,7 +184,7 @@ public function login(
                 case 'CLIENT':
                     return $this->redirectToRoute('app_home');
                 case 'FOURNISSEUR':
-                    return $this->redirectToRoute('prof');
+                    return $this->redirectToRoute('baseFournisseur');
                 default:
                     return $this->redirectToRoute('homepage');
             }
