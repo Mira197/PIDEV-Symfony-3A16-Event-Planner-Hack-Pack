@@ -477,42 +477,42 @@ class AyaOrderController extends AbstractController
         UserRepository $userRepo,
         CartRepository $cartRepo,
         CartProductRepository $cpRepo,
+        WalletTransactionRepository $walletTransactionRepository, // Add this dependency
         EntityManagerInterface $em,
         SessionInterface $session
     ): JsonResponse {
         // 1) Récupération de l'utilisateur depuis la session
         $userId = $session->get('user_id');
-        $user   = $userRepo->find($userId);
+        $user = $userRepo->find($userId);
         if (!$user) {
             return new JsonResponse(['success' => false, 'message' => 'Unauthorized'], 401);
         }
-
+    
         // 2) On lit le body JSON
         $data = json_decode($request->getContent(), true);
-        $useWallet    = $data['use_wallet']  ?? false;
-        $amountToPay  = floatval($data['amount'] ?? 0);
-        $address      = $data['address']     ?? '';
-        $eventDateStr = $data['event_date']  ?? '';
-
+        $useWallet = $data['use_wallet'] ?? false;
+        $amountToPay = floatval($data['amount'] ?? 0);
+        $address = $data['address'] ?? '';
+        $eventDateStr = $data['event_date'] ?? '';
+    
         // 3) Validation basique
         if (!$address || !$eventDateStr) {
-            return new JsonResponse(['success'=>false, 'message'=>'Address and event date required'], 400);
+            return new JsonResponse(['success' => false, 'message' => 'Address and event date required'], 400);
         }
-
+    
         // 4) Récupérer le panier courant et calculer son total
-        $oldCart      = $cartRepo->findOneBy(['user'=>$user]);
-        $cartProducts = $cpRepo->findBy(['cart'=>$oldCart]);
-        $total        = 0;
+        $oldCart = $cartRepo->findOneBy(['user' => $user]);
+        $cartProducts = $cpRepo->findBy(['cart' => $oldCart]);
+        $total = 0;
         foreach ($cartProducts as $item) {
             $total += $item->getTotalPrice();
         }
-
+    
         // 5) Déduction du wallet si demandé
         $walletDeducted = 0;
         if ($useWallet) {
-            // Calcul de votre crédit sur mesure (exemple)
-            $walletCredit = array_sum(array_map(fn($tx)=> $tx->getType()==='payment'? -$tx->getAmount(): $tx->getAmount(),
-                                  $user->getWalletTransactions()->toArray()));
+            // Use the WalletTransactionRepository to calculate the wallet balance
+            $walletCredit = $walletTransactionRepository->calculateWalletBalance($user);
             $walletDeducted = min($amountToPay, $walletCredit);
             if ($walletDeducted > 0) {
                 $wt = new WalletTransaction();
@@ -524,12 +524,12 @@ class AyaOrderController extends AbstractController
                 $em->persist($wt);
             }
         }
-
+    
         // 6) Création d’un NOUVEAU panier vide
         $newCart = new Cart();
         $newCart->setUser($user);
         $em->persist($newCart);
-
+    
         // 7) Création de la commande
         $order = new Order();
         $order->setUser($user)
@@ -541,13 +541,13 @@ class AyaOrderController extends AbstractController
               ->setStatus('PENDING')
               ->setTotalPrice($amountToPay - $walletDeducted);
         $em->persist($order);
-
+    
         // 8) On supprime l’ancien panier et ses produits
         foreach ($cartProducts as $item) {
             $em->remove($item);
         }
         $em->remove($oldCart);
-
+    
         // 9) CALCUL et ENREGISTREMENT des points de fidélité
         $earnedPoints = floor($order->getTotalPrice() / 10);
         if ($earnedPoints > 0) {
@@ -559,17 +559,17 @@ class AyaOrderController extends AbstractController
                ->setReason('Commande Wallet+Stripe');
             $em->persist($fp);
         }
-
+    
         // 10) Tout persister
         $em->flush();
-
+    
         // 11) Sauvegarde en session pour la confirmation
         $session->set('last_order_id', $order->getOrderId());
-
+    
         // 12) Retour AJAX
         return new JsonResponse([
-            'success'      => true,
-            'order_id'     => $order->getOrderId(),
+            'success' => true,
+            'order_id' => $order->getOrderId(),
             'earnedPoints' => $earnedPoints,
         ]);
     }
