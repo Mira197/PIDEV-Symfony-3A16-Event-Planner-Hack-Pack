@@ -1,0 +1,149 @@
+{% extends 'base.html.twig' %}
+{% block title %}{{ location.name }}{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="https://api.tomtom.com/maps-sdk-for-web/cdn/6.x/6.17.0/maps/maps.css" />
+    <style>
+        nav.fh5co-nav {
+            background-color: #cebec9 !important;
+            padding: 1px 0 !important;
+            max-height: 170px !important;
+        }
+        .location-wrapper {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            gap: 30px;
+            margin-top: 100px;
+            padding: 40px;
+        }
+
+        .location-left {
+            flex: 2;
+            min-width: 300px;
+        }
+
+        .location-right-card {
+            flex: 2;
+            min-width: 350px;
+            border-radius: 16px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+            overflow: hidden;
+            height: fit-content;
+        }
+
+        .map-section {
+            height: 250px !important;
+            width: 100%;
+        }
+
+        .info-section {
+            padding: 20px;
+            background: #fff;
+        }
+
+        .info-section h5 {
+            margin-bottom: 10px;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .info-section .price {
+            font-size: 22px;
+            font-weight: bold;
+            color: #333;
+            margin: 10px 0;
+        }
+
+        .info-section .address {
+            text-decoration: underline;
+            color: #6b336e;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .info-section i {
+            color: #6b336e;
+        }
+
+        .location-image {
+            width: 100%;
+            border-radius: 12px;
+            margin-top: 20px;
+        }
+
+        .back-btn {
+            margin-top: 20px;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+<div class="container location-wrapper">
+
+    <!-- Left Side: Image and Back -->
+    <div class="location-left">
+        <h2>{{ location.name }}</h2>
+        {% if location.base64Image %}
+            <img class="location-image" src="data:image/png;base64,{{ location.base64Image }}" alt="{{ location.name }}">
+        {% endif %}
+        <a href="{{ path('suggested_locations', { eventId: 62 }) }}" class="btn btn-dark back-btn">← Back to Suggestions</a>
+    </div>
+
+    <!-- Right Side: Map + Info Card -->
+    <div class="location-right-card">
+        <!-- 🗺️ Map -->
+        <div id="map" class="map-section"></div>
+
+        <!-- ℹ️ Info below map -->
+        <div class="info-section">
+            <h5>{{ location.name }}</h5>
+            <div class="address">
+                <i class="fa-solid fa-location-dot"></i>
+                <span>{{ location.address }}</span>
+            </div>
+            <p class="mt-2"><strong>City:</strong> {{ location.city.value }}</p>
+            <p><strong>Capacity:</strong> {{ location.capacity }}</p>
+            <p class="price">{{ location.price }} DT</p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="https://api.tomtom.com/maps-sdk-for-web/cdn/6.x/6.17.0/maps/maps-web.min.js"></script>
+    <script>
+        window.onload = function () {
+            tt.setProductInfo('3alaKifi', '1.0');
+
+            const map = tt.map({
+                key: '{{ tomtomApiKey }}',
+                container: 'map',
+                center: [10.1815, 36.8065], // Default center
+                zoom: 11,
+                language: 'fr-FR'
+            });
+
+            fetch(`https://api.tomtom.com/search/2/geocode/{{ location.city.value | url_encode }}, Tunisia.json?key={{ tomtomApiKey }}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.results.length > 0) {
+                        const pos = data.results[0].position;
+                        map.setCenter([pos.lon, pos.lat]);
+
+                        const marker = new tt.Marker().setLngLat([pos.lon, pos.lat]).addTo(map);
+                        const popup = new tt.Popup({ offset: 35 }).setHTML(`
+                            <div style="text-align:center">
+                                <img src="/uploads/{{ location.imageFilename }}" style="width:90px;border-radius:8px;">
+                                <p>{{ location.city.value }}</p>
+                            </div>
+                        `);
+                        marker.setPopup(popup).togglePopup();
+                    }
+                });
+        };
+    </script>
+{% endblock %}
