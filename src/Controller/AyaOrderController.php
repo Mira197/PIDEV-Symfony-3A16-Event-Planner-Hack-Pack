@@ -584,45 +584,59 @@ class AyaOrderController extends AbstractController
         return $this->redirectToRoute('aya_cart');
     }
     #[Route('/create-checkout-session', name: 'create_checkout_session', methods: ['POST'])]
-    public function createCheckoutSession(Request $request, UrlGeneratorInterface $urlGenerator): JsonResponse
-    {
-        $data = $request->request->all();
-        $amount = floatval($data['amount']) * 100; // Convert to cents for Stripe (TND)
-        $orderId = $data['order_id'];
+public function createCheckoutSession(Request $request, UrlGeneratorInterface $urlGenerator, OrderRepository $orderRepository): JsonResponse
+{
+    $data = $request->request->all();
+    $amount = floatval($data['amount']); // Amount in TND
+    $orderId = $data['order_id'];
 
-        // Validate order_id
-        if (!$orderId) {
-            return new JsonResponse(['error' => 'Order ID is required'], 400);
-        }
-
-        // Log the amount for debugging
-        error_log("Creating Stripe session with amount: {$amount} TND (in cents), order_id: {$orderId}");
-
-        // Set Stripe API key
-        \Stripe\Stripe::setApiKey($_ENV['STRIPE_SECRET_KEY']);
-
-        try {
-            $session = \Stripe\Checkout\Session::create([
-                'payment_method_types' => ['card'],
-                'line_items' => [[
-                    'price_data' => [
-                        'currency' => 'tnd',
-                        'product_data' => ['name' => 'Order #' . $orderId],
-                        'unit_amount' => $amount,
-                    ],
-                    'quantity' => 1,
-                ]],
-                'mode' => 'payment',
-                'success_url' => $urlGenerator->generate('aya_order_confirm', ['id' => $orderId], UrlGeneratorInterface::ABSOLUTE_URL),
-                'cancel_url' => $urlGenerator->generate('aya_order_cancelled', [], UrlGeneratorInterface::ABSOLUTE_URL),
-                'client_reference_id' => $orderId,
-            ]);
-
-            return new JsonResponse(['id' => $session->id]);
-        } catch (\Stripe\Exception\ApiErrorException $e) {
-            return new JsonResponse(['error' => $e->getMessage()], 500);
-        }
+    // Validate order_id
+    if (!$orderId) {
+        return new JsonResponse(['error' => 'Order ID is required'], 400);
     }
+
+    // Validate amount against the order's total price
+    $order = $orderRepository->find($orderId);
+    if (!$order) {
+        return new JsonResponse(['error' => 'Order not found'], 404);
+    }
+
+    $expectedAmount = $order->getTotalPrice();
+    if (abs($amount - $expectedAmount) > 0.01) { // Allow for small floating-point differences
+        error_log("Amount mismatch: Expected {$expectedAmount} TND, but got {$amount} TND for order {$orderId}");
+        return new JsonResponse(['error' => 'Amount mismatch'], 400);
+    }
+
+    $amountInCents = $amount * 100; // Convert to cents for Stripe (TND)
+
+    // Log the amount for debugging
+    error_log("Creating Stripe session with amount: {$amountInCents} cents (TND), order_id: {$orderId}");
+
+    // Set Stripe API key
+    \Stripe\Stripe::setApiKey($_ENV['STRIPE_SECRET_KEY']);
+
+    try {
+        $session = \Stripe\Checkout\Session::create([
+            'payment_method_types' => ['card'],
+            'line_items' => [[
+                'price_data' => [
+                    'currency' => 'tnd',
+                    'product_data' => ['name' => 'Order #' . $orderId],
+                    'unit_amount' => $amountInCents,
+                ],
+                'quantity' => 1,
+            ]],
+            'mode' => 'payment',
+            'success_url' => $urlGenerator->generate('aya_order_confirm', ['id' => $orderId], UrlGeneratorInterface::ABSOLUTE_URL),
+            'cancel_url' => $urlGenerator->generate('aya_order_cancelled', [], UrlGeneratorInterface::ABSOLUTE_URL),
+            'client_reference_id' => $orderId,
+        ]);
+
+        return new JsonResponse(['id' => $session->id]);
+    } catch (\Stripe\Exception\ApiErrorException $e) {
+        return new JsonResponse(['error' => $e->getMessage()], 500);
+    }
+}
     #[Route('/webhook/stripe', name: 'stripe_webhook', methods: ['POST'])]
     public function stripeWebhook(
         Request $request,

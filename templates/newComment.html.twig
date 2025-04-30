@@ -64,8 +64,6 @@
             font-size: 1rem;
             border-radius: 5px;
             cursor: pointer;
-            display: block;
-            width: 100%;
             font-weight: 500;
         }
 
@@ -92,6 +90,21 @@
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(83, 60, 86, 0.2);
         }
+
+        /* Ensure buttons stay on the same level */
+        .button-container {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: nowrap; /* Prevent wrapping */
+            gap: 1rem; /* Add spacing between buttons */
+            margin-top: 2rem;
+        }
+
+        .button-container .btn-submit {
+            flex: 1; /* Make buttons take equal space */
+            width: auto; /* Override the fixed width */
+            max-width: 48%; /* Ensure they don't exceed 48% of the container */
+        }
     </style>
 {% endblock %}
 
@@ -113,9 +126,9 @@
             <div class="form-error">{{ form_errors(form.content) }}</div>
         </div>
 
-        <div class="d-flex" style="justify-content: space-between; margin-top: 2rem;">
-            <button type="button" onclick="window.location.href='{{ path('app_publication_client') }}'" class="btn-submit" style="width: 48%;">Cancel</button>
-            <button type="submit" class="btn-submit" style="width: 48%;">Post Comment</button>
+        <div class="button-container">
+            <button type="button" onclick="window.location.href='{{ path('app_publication_client') }}'" class="btn-submit">Cancel</button>
+            <button type="submit" class="btn-submit">Post Comment</button>
         </div>
 
         {{ form_end(form) }}

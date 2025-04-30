@@ -1,172 +1,232 @@
 {% extends 'admin/baseAdmin.html.twig' %}
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        
+        .badge-ia {
+            display: inline-block;
+            background-color: #6b336e;
+            color: white;
+            font-size: 0.75rem;
+            font-weight: bold;
+            padding: 3px 8px;
+            border-radius: 12px;
+            margin-left: 8px;
+            animation: pulseIA 1.5s infinite;
+            box-shadow: 0 0 6px rgba(107, 51, 110, 0.5);
+            transition: background-color 0.3s ease;
+        }
+
+        @keyframes pulseIA {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.85; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+   
+
+    </style>
+{% endblock %}
 
 {% block title %}
-    Orders Dashboard
+	Orders Dashboard
 {% endblock %}
 
 {% block section %}
 
-<section class="section">
-    <div class="container-fluid">
+	<section class="section">
+		<div class="container-fluid">
 
-        <div class="title-wrapper pt-30">
-            <div class="row align-items-center">
-                <div class="col-md-6">
-                    <div class="title">
-                        <h2>Orders Dashboard</h2>
-                    </div>
-                </div>
-            </div>
-        </div>
+			<div class="title-wrapper pt-30">
+				<div class="row align-items-center">
+					<div class="col-md-6">
+						<div class="title">
+							<h2>Orders Dashboard</h2>
+						</div>
+					</div>
+				</div>
+			</div>
 
-        <div class="row mt-4">
-            <!-- Total Orders -->
-            <div class="col-xl-3 col-lg-4 col-sm-6">
-                <div class="icon-card mb-30">
-                    <div class="icon success">
-                        <i class="lni lni-cart"></i>
-                    </div>
-                    <div class="content">
-                        <h6 class="mb-10">Total Orders</h6>
-                        <h3 class="text-bold mb-10">{{ totalOrders }}</h3>
-                    </div>
-                </div>
-            </div>
+			<div
+				class="row mt-4">
+				<!-- Total Orders -->
+				<div class="col-xl-3 col-lg-4 col-sm-6">
+					<div class="icon-card mb-30">
+						<div class="icon success">
+							<i class="lni lni-cart"></i>
+						</div>
+						<div class="content">
+							<h6 class="mb-10">Total Orders</h6>
+							<h3 class="text-bold mb-10">{{ totalOrders }}</h3>
+						</div>
+					</div>
+				</div>
 
-            <!-- Income -->
-            <div class="col-xl-3 col-lg-4 col-sm-6">
-                <div class="icon-card mb-30">
-                    <div class="icon primary">
-                        <i class="lni lni-checkmark-circle"></i>
-                    </div>
-                    <div class="content">
-                        <h6 class="mb-10">Income</h6>
-                        <h3 class="text-bold mb-10">{{ income }} TND</h3>
-                    </div>
-                </div>
-            </div>
+				<!-- Income -->
+				<div class="col-xl-3 col-lg-4 col-sm-6">
+					<div class="icon-card mb-30">
+						<div class="icon primary">
+							<i class="lni lni-checkmark-circle"></i>
+						</div>
+						<div class="content">
+							<h6 class="mb-10">Income</h6>
+							<h3 class="text-bold mb-10">{{ income }}
+								TND</h3>
+						</div>
+					</div>
+				</div>
 
-            <!-- Expense -->
-            <div class="col-xl-3 col-lg-4 col-sm-6">
-                <div class="icon-card mb-30">
-                    <div class="icon warning">
-                        <i class="lni lni-credit-cards"></i>
-                    </div>
-                    <div class="content">
-                        <h6 class="mb-10">Expense</h6>
-                        <h3 class="text-bold mb-10">{{ expense }} TND</h3>
-                    </div>
-                </div>
-            </div>
+				<!-- Expense -->
+				<div class="col-xl-3 col-lg-4 col-sm-6">
+					<div class="icon-card mb-30">
+						<div class="icon warning">
+							<i class="lni lni-credit-cards"></i>
+						</div>
+						<div class="content">
+							<h6 class="mb-10">Expense</h6>
+							<h3 class="text-bold mb-10">{{ expense }}
+								TND</h3>
+						</div>
+					</div>
+				</div>
 
-            <!-- Performance -->
-            <div class="col-xl-3 col-lg-4 col-sm-6">
-                <div class="icon-card mb-30">
-                    <div class="icon orange">
-                        <i class="lni lni-user"></i>
-                    </div>
-                    <div class="content">
-                        <h6 class="mb-10">Performance</h6>
-                        <h3 class="text-bold mb-10">{{ performance }}%</h3>
-                    </div>
-                </div>
-            </div>
-        </div>
+				<!-- Performance -->
+				<div class="col-xl-3 col-lg-4 col-sm-6">
+					<div class="icon-card mb-30">
+						<div class="icon orange">
+							<i class="lni lni-user"></i>
+						</div>
+						<div class="content">
+							<h6 class="mb-10">Performance</h6>
+							<h3 class="text-bold mb-10">{{ performance }}%</h3>
+						</div>
+					</div>
+				</div>
+			</div>
 
-        <!-- Orders Status Chart -->
-        <div class="row mt-4">
-            <div class="col-lg-6">
-                <div class="card-style mb-30">
-                    <div class="title d-flex justify-content-between">
-                        <h6 class="text-medium mb-30">Orders Status</h6>
-                    </div>
-                    <canvas id="ordersStatusChart"></canvas>
-                </div>
-            </div>
-        </div>
+			<!-- Orders Status Chart -->
+			<div class="row mt-4">
+				<div class="col-lg-6">
+					<div class="card-style mb-30">
+						<div class="title d-flex justify-content-between">
+							<h6 class="text-medium mb-30">Orders Status</h6>
+						</div>
+						<canvas id="ordersStatusChart"></canvas>
+					</div>
+				</div>
+			</div>
 
-        <!-- Monthly Orders Chart -->
-        <div class="row mt-4">
-            <div class="col-lg-6">
-                <div class="card-style mb-30">
-                    <div class="title d-flex justify-content-between">
-                        <h6 class="text-medium mb-30">Monthly Orders</h6>
-                    </div>
-                    <canvas id="monthlyOrdersChart"></canvas>
-                </div>
-            </div>
-        </div>
+			<!-- Monthly Orders Chart -->
+			<div class="row mt-4">
+				<div class="col-lg-6">
+					<div class="card-style mb-30">
+						<div class="title d-flex justify-content-between">
+							<h6 class="text-medium mb-30">Monthly Orders</h6>
+						</div>
+						<canvas id="monthlyOrdersChart"></canvas>
+					</div>
+				</div>
+			</div>
 
-        <!-- Predicted Sales for Next Month -->
-        <div class="row mt-4">
-            <div class="col-lg-6">
-                <div class="card-style mb-30">
-                    <div class="title d-flex justify-content-between">
-                        <h6 class="text-medium mb-30">Predicted Sales for Next Month</h6>
-                    </div>
-                    <h3 class="text-bold">{{ nextMonthPrediction }} TND</h3>
-                    <p>Predicted based on historical sales data</p>
-                </div>
-            </div>
-        </div>
+			<!-- Predicted Sales for Next Month -->
+			<div class="row mt-4">
+				<div class="col-lg-6">
+					<div class="card-style mb-30">
+						<div class="title d-flex justify-content-between">
+							<h6 class="text-medium mb-30">Predicted Sales for Next Month</h6>
+						</div>
+						<div class="d-flex align-items-center justify-content-between mb-3">
+    <h2 style="font-size: 2rem; font-weight: bold; color: #6b336e;">
+        {{ nextMonthPrediction|number_format(2, '.', ' ') }} TND
+    </h2>
+    <span class="badge-ia">IA</span>
+</div>
 
-    </div>
-</section>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-    // Orders Status Chart (Doughnut Chart)
-    const ctxStatus = document.getElementById('ordersStatusChart').getContext('2d');
-    const ordersStatusChart = new Chart(ctxStatus, {
-        type: 'doughnut',
-        data: {
-            labels: ['Confirmed', 'Pending', 'Cancelled'],
-            datasets: [{
-                label: 'Orders',
-                data: [{{ ordersConfirmed }}, {{ ordersPending }}, {{ ordersCancelled }}],
-                backgroundColor: ['#4CAF50', '#FFEB3B', '#F44336'],
-                hoverOffset: 4
-            }]
-        }
-    });
+						<p>Predicted based on historical sales data</p>
+					</div>
+				</div>
+			</div>
 
-    // Monthly Orders Chart (Line Chart)
-    const ctxMonthly = document.getElementById('monthlyOrdersChart').getContext('2d');
-    const monthlyOrdersChart = new Chart(ctxMonthly, {
-        type: 'line',
-        data: {
-            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-            datasets: [{
-                label: 'Orders per Month',
-                data: [
-                    {{ ordersPerMonth[1] }},
-                    {{ ordersPerMonth[2] }},
-                    {{ ordersPerMonth[3] }},
-                    {{ ordersPerMonth[4] }},
-                    {{ ordersPerMonth[5] }},
-                    {{ ordersPerMonth[6] }},
-                    {{ ordersPerMonth[7] }},
-                    {{ ordersPerMonth[8] }},
-                    {{ ordersPerMonth[9] }},
-                    {{ ordersPerMonth[10] }},
-                    {{ ordersPerMonth[11] }},
-                    {{ ordersPerMonth[12] }}
-                ],
-                backgroundColor: '#4CAF50',
-                borderColor: '#4CAF50',
-                fill: false,
-                tension: 0.1
-            }]
-        },
-        options: {
-            responsive: true,
-            scales: {
-                y: {
-                    beginAtZero: true
-                }
-            }
-        }
-    });
-</script>
+		</div>
+	</section>
+
+	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+	<script>
+		// Orders Status Chart (Doughnut Chart)
+const ctxStatus = document.getElementById('ordersStatusChart').getContext('2d');
+const ordersStatusChart = new Chart(ctxStatus, {
+type: 'doughnut',
+data: {
+labels: [
+'Confirmed', 'Pending', 'Cancelled'
+],
+datasets: [
+{
+label: 'Orders',
+data: [
+{{ ordersConfirmed }}, {{ ordersPending }}, {{ ordersCancelled }}
+],
+backgroundColor: [
+'#4CAF50', '#FFEB3B', '#F44336'
+],
+hoverOffset: 4
+}
+]
+}
+});
+
+// Monthly Orders Chart (Line Chart)
+const ctxMonthly = document.getElementById('monthlyOrdersChart').getContext('2d');
+const monthlyOrdersChart = new Chart(ctxMonthly, {
+type: 'line',
+data: {
+labels: [
+'Jan',
+'Feb',
+'Mar',
+'Apr',
+'May',
+'Jun',
+'Jul',
+'Aug',
+'Sep',
+'Oct',
+'Nov',
+'Dec'
+],
+datasets: [
+{
+label: 'Orders per Month',
+data: [
+{{ ordersPerMonth[1] }},
+{{ ordersPerMonth[2] }},
+{{ ordersPerMonth[3] }},
+{{ ordersPerMonth[4] }},
+{{ ordersPerMonth[5] }},
+{{ ordersPerMonth[6] }},
+{{ ordersPerMonth[7] }},
+{{ ordersPerMonth[8] }},
+{{ ordersPerMonth[9] }},
+{{ ordersPerMonth[10] }},
+{{ ordersPerMonth[11] }},
+{{ ordersPerMonth[12] }}
+],
+backgroundColor: '#4CAF50',
+borderColor: '#4CAF50',
+fill: false,
+tension: 0.1
+}
+]
+},
+options: {
+responsive: true,
+scales: {
+y: {
+beginAtZero: true
+}
+}
+}
+});
+	</script>
 
 {% endblock %}

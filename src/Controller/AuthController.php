@@ -119,7 +119,7 @@ class AuthController extends AbstractController
                     case 'CLIENT':
                         return $this->redirectToRoute('app_home'); // 🔥 Profil Client
                     case 'FOURNISSEUR':
-                        return $this->redirectToRoute('prof'); // 🔥 Profil Fournisseur
+                        return $this->redirectToRoute('baseFournisseur'); // 🔥 Profil Fournisseur
                     default:
                         return $this->redirectToRoute('homepage'); // 🔥 Page par défaut
                 }

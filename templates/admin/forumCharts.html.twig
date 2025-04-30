@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Forum Statistics</title>
+    {{ importmap() }}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        body {
+            background-color: #ffffff;
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 50px auto;
+            padding: 0 20px;
+        }
+
+        h1, h2 {
+            text-align: center;
+            color: #533C56;
+        }
+
+        .chart-card {
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.07);
+            padding: 25px;
+            margin-bottom: 40px;
+        }
+
+        .chart-card h2 {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #5A426E;
+        }
+
+        .back-btn {
+            display: inline-block;
+            margin: 20px;
+        }
+
+        .back-btn a {
+            background-color: #5A426E;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 15px;
+            text-decoration: none;
+        }
+
+        .back-btn a:hover {
+            background-color: #99707E;
+        }
+
+        .alert {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+
+        .alert-debug {
+            background-color: #e0f7fa;
+            color: #006064;
+        }
+
+        canvas {
+            max-height: 400px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Display flash messages (optional, can be removed if not needed) -->
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="alert alert-{{ label }}">{{ message }}</div>
+        {% endfor %}
+    {% endfor %}
+
+    <div class="back-btn">
+        <a href="javascript:history.back()">← Back</a>
+    </div>
+
+    <div class="container">
+        <h1>📊 Forum Statistics</h1>
+
+        <!-- Chart 1: Reports by Status -->
+        <div class="chart-card">
+            <h2>🚨 Reports by Status</h2>
+            {% set data = statusChart.data.datasets[0].data %}
+            {% set hasData = data|length > 0 and data|reduce((carry, item) => carry + (item|number_format(0)), 0) > 0 %}
+            {% if hasData %}
+                <div class="chart-container">
+                    <canvas id="statusChart"></canvas>
+                </div>
+                <script>
+                    document.addEventListener('DOMContentLoaded', () => {
+                        const ctx = document.getElementById('statusChart').getContext('2d');
+                        new Chart(ctx, {
+                            type: '{{ statusChart.type }}',
+                            data: {{ statusChart.data|json_encode|raw }},
+                            options: {{ statusChart.options|json_encode|raw }}
+                        });
+                    });
+                </script>
+            {% else %}
+                <p class="text-center text-muted">No reports available to display.</p>
+            {% endif %}
+        </div>
+
+        <!-- Chart 2: Sentiment Distribution -->
+        <div class="chart-card">
+            <h2>😊 Sentiment Distribution</h2>
+            {% set data = sentimentChart.data.datasets[0].data %}
+            {% set hasData = data|length > 0 and data|reduce((carry, item) => carry + (item|number_format(0)), 0) > 0 %}
+            {% if hasData %}
+                <div class="chart-container">
+                    <canvas id="sentimentChart"></canvas>
+                </div>
+                <script>
+                    document.addEventListener('DOMContentLoaded', () => {
+                        const ctx = document.getElementById('sentimentChart').getContext('2d');
+                        new Chart(ctx, {
+                            type: '{{ sentimentChart.type }}',
+                            data: {{ sentimentChart.data|json_encode|raw }},
+                            options: {{ sentimentChart.options|json_encode|raw }}
+                        });
+                    });
+                </script>
+            {% else %}
+                <p class="text-center text-muted">No sentiment data available to display.</p>
+            {% endif %}
+        </div>
+
+        <!-- Chart 3: Publications & Comments Over Time -->
+        <div class="chart-card">
+            <h2>📈 Activity Over Time</h2>
+            {% set hasData = activityChart.data.datasets[0].data|length > 0 or activityChart.data.datasets[1].data|length > 0 %}
+            {% if hasData %}
+                <div class="chart-container">
+                    <canvas id="activityChart"></canvas>
+                </div>
+                <script>
+                    document.addEventListener('DOMContentLoaded', () => {
+                        const ctx = document.getElementById('activityChart').getContext('2d');
+                        new Chart(ctx, {
+                            type: '{{ activityChart.type }}',
+                            data: {{ activityChart.data|json_encode|raw }},
+                            options: {{ activityChart.options|json_encode|raw }}
+                        });
+                    });
+                </script>
+            {% else %}
+                <p class="text-center text-muted">No activity data available to display.</p>
+            {% endif %}
+        </div>
+
+        <!-- Chart 4: Most Reported Publications -->
+        <div class="chart-card">
+            <h2>⚠️ Top Reported Publications</h2>
+            {% set data = topReportedChart.data.datasets[0].data %}
+            {% set hasData = data|length > 0 %}
+            {% if hasData %}
+                <div class="chart-container">
+                    <canvas id="topReportedChart"></canvas>
+                </div>
+                <script>
+                    document.addEventListener('DOMContentLoaded', () => {
+                        const ctx = document.getElementById('topReportedChart').getContext('2d');
+                        new Chart(ctx, {
+                            type: '{{ topReportedChart.type }}',
+                            data: {{ topReportedChart.data|json_encode|raw }},
+                            options: {{ topReportedChart.options|json_encode|raw }}
+                        });
+                    });
+                </script>
+            {% else %}
+                <p class="text-center text-muted">No reported publications available to display.</p>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>

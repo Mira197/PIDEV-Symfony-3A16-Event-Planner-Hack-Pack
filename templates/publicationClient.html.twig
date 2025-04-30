@@ -124,14 +124,14 @@
                                             {% endif %}
                                         {% endfor %}
                                         <!-- Translation language select -->
-                                        <select name="publication_{{ publication.publication_id }}" onchange="this.form.submit()" style="padding: 5px; border-radius: 5px; border: 1px solid #99707E; color: #533C56;">
+                                       {#<select name="publication_{{ publication.publication_id }}" onchange="this.form.submit()" style="padding: 5px; border-radius: 5px; border: 1px solid #99707E; color: #533C56;">
                                             <option value="">Translate to...</option>
                                             <option value="en" {% if app.request.query.get('publication_' ~ publication.publication_id) == 'en' %}selected{% endif %}>English</option>
                                             <option value="fr" {% if app.request.query.get('publication_' ~ publication.publication_id) == 'fr' %}selected{% endif %}>French</option>
                                             <option value="es" {% if app.request.query.get('publication_' ~ publication.publication_id) == 'es' %}selected{% endif %}>Spanish</option>
                                             <option value="de" {% if app.request.query.get('publication_' ~ publication.publication_id) == 'de' %}selected{% endif %}>German</option>
                                             <option value="it" {% if app.request.query.get('publication_' ~ publication.publication_id) == 'it' %}selected{% endif %}>Italian</option>
-                                        </select>
+                                        </select> #} 
                                     </form>
                                 </div>
 

@@ -3,6 +3,16 @@
 {% block section %}
     <section class="section">
         <div class="container-fluid">
+            <!-- Debug Flash Message -->
+            {% for label, messages in app.flashes %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ label }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endfor %}
+
             <!-- ========== title-wrapper start ========== -->
             <div class="title-wrapper pt-30">
                 <div class="row align-items-center">
@@ -101,8 +111,9 @@
                         </div>
                     </div>
                 </div>
+            </div>
 
-               <!-- Sentiment Overview -->
+            <!-- Sentiment Overview -->
             <div class="row">
                 <div class="col-xl-3 col-lg-4 col-sm-6">
                     <div class="icon-card mb-30">
@@ -113,163 +124,25 @@
                             <h6 class="mb-10">User Sentiment</h6>
                             <h3 class="text-bold mb-10">Overview</h3>
                             <p class="text-sm">
-                                <span class="text-success">😊 {{ sentimentStats.positive }}% Positive</span><br>
-                                <span class="text-danger">😔 {{ sentimentStats.negative }}% Negative</span><br>
-                                <span class="text-muted">😐 {{ sentimentStats.neutral }}% Neutral</span>
+                                <span class="text-success sentiment-positive">😊 {{ sentimentStats.positive }}% Positive</span><br>
+                                <span class="text-danger sentiment-negative">😔 {{ sentimentStats.negative }}% Negative</span><br>
+                                <span class="text-muted sentiment-neutral">😐 {{ sentimentStats.neutral }}% Neutral</span>
                             </p>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Sentiment Distribution Chart -->
-            <div class="row">
-                <div class="col-lg-6">
-                    <div class="card-style mb-30">
-                        <div class="title d-flex flex-wrap align-items-center justify-content-between">
-                            <div class="left">
-                                <h6 class="text-medium mb-10">Sentiment Distribution</h6>
-                            </div>
-                            <div class="right">
-                                <div class="select-style-1">
-                                    <div class="select-position select-sm">
-                                        <select class="light-bg" id="sentimentFilter">
-                                            <option value="all">All Time</option>
-                                            <option value="month">Last Month</option>
-                                            <option value="week">Last Week</option>
-                                        </select>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="chart">
-                            <canvas id="sentimentChart" style="width: 100%; height: 300px;"></canvas>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Autres sections existantes -->
-            <div class="row">
-                <div class="col-lg-7">
-                    <div class="card-style mb-30">
-                        <div class="title d-flex flex-wrap justify-content-between">
-                            <div class="left">
-                                <h6 class="text-medium mb-10">Yearly Stats</h6>
-                                <h3 class="text-bold">$245,479</h3>
-                            </div>
-                            <div class="right">
-                                <div class="select-style-1">
-                                    <div class="select-position select-sm">
-                                        <select class="light-bg">
-                                            <option value="">Yearly</option>
-                                            <option value="">Monthly</option>
-                                            <option value="">Weekly</option>
-                                        </select>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="chart">
-                            <canvas id="Chart1" style="width: 100%; height: 400px; margin-left: -35px;"></canvas>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-5">
-                    <div class="card-style mb-30">
-                        <div class="title d-flex flex-wrap align-items-center justify-content-between">
-                            <div class="left">
-                                <h6 class="text-medium mb-30">Sales/Revenue</h6>
-                            </div>
-                            <div class="right">
-                                <div class="select-style-1">
-                                    <div class="select-position select-sm">
-                                        <select class="light-bg">
-                                            <option value="">Yearly</option>
-                                            <option value="">Monthly</option>
-                                            <option value="">Weekly</option>
-                                        </select>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="chart">
-                            <canvas id="Chart2" style="width: 100%; height: 400px; margin-left: -45px;"></canvas>
-                        </div>
-                    </div>
+            <!-- Statistics Button -->
+            <div class="row mb-30">
+                <div class="col-12 text-center">
+                    <a href="{{ path('forum_charts') }}" class="btn-mauve">
+                        <i class="lni lni-stats-up"></i> Show Statistics
+                    </a>
                 </div>
             </div>
         </div>
     </section>
-{% endblock %}
-
-{% block javascripts %}
-    {{ parent() }}
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            // Sentiment Chart
-            const sentimentChart = new Chart(document.getElementById('sentimentChart'), {
-                type: 'doughnut',
-                data: {
-                    labels: ['Positive 😊', 'Negative 😔', 'Neutral 😐'],
-                    datasets: [{
-                        data: [{{ sentimentStats.positive }}, {{ sentimentStats.negative }}, {{ sentimentStats.neutral }}],
-                        backgroundColor: ['#28a745', '#dc3545', '#6c757d'],
-                        borderColor: ['#28a745', '#dc3545', '#6c757d'],
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        legend: {
-                            position: 'top',
-                        },
-                        title: {
-                            display: true,
-                            text: 'Sentiment Distribution'
-                        }
-                    }
-                }
-            });
-
-            // Gestion du filtre de période
-            const filterSelect = document.getElementById('sentimentFilter');
-            filterSelect.addEventListener('change', function () {
-                const period = this.value;
-                fetch(`/admin/publication/sentiment-stats?period=${period}`, {
-                    headers: { 'Accept': 'application/json' }
-                })
-                    .then(response => response.json())
-                    .then(data => {
-                        sentimentChart.data.datasets[0].data = [
-                            data.sentimentStats.positive,
-                            data.sentimentStats.negative,
-                            data.sentimentStats.neutral
-                        ];
-                        sentimentChart.update();
-
-                        // Mettre à jour l'aperçu des sentiments
-                        document.querySelector('.sentiment-positive').textContent = `${data.sentimentStats.positive}`;
-                        document.querySelector('.sentiment-negative').textContent = `${data.sentimentStats.negative}`;
-                        document.querySelector('.sentiment-neutral').textContent = `${data.sentimentStats.neutral}`;
-                    })
-                    .catch(error => console.error('Error fetching sentiment stats:', error));
-            });
-
-            // Gestion des checkboxes
-            const checkAll = document.getElementById('checkAll');
-            const checkboxes = document.querySelectorAll('.checkbox-item');
-
-            if (checkAll) {
-                checkAll.addEventListener('change', function () {
-                    checkboxes.forEach(cb => cb.checked = this.checked);
-                });
-            }
-        });
-    </script>
-
     <style>
         .btn-mauve {
             background-color: #533C56;
@@ -289,6 +162,23 @@
 
         .btn-mauve i {
             margin-right: 5px;
+        }
+
+        /* Adjust chart card styling to match dashboard */
+        .card.card-style {
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .card.card-style .title h6 {
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        /* Fix background color */
+        .section, .container-fluid {
+            background-color: #fff !important;
         }
     </style>
 {% endblock %}
