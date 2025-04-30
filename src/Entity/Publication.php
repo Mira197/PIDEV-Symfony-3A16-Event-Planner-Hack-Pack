@@ -7,7 +7,6 @@ use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Symfony\Component\Validator\Constraints as Assert;
-
 use App\Repository\PublicationRepository;
 
 #[ORM\Entity(repositoryClass: PublicationRepository::class)]
@@ -18,17 +17,6 @@ class Publication
     #[ORM\GeneratedValue]
     #[ORM\Column(type: 'integer')]
     private ?int $publication_id = null;
-
-    public function getPublication_id(): ?int
-    {
-        return $this->publication_id;
-    }
-
-    public function setPublication_id(int $publication_id): self
-    {
-        $this->publication_id = $publication_id;
-        return $this;
-    }
 
     #[ORM\Column(type: 'string', nullable: false)]
     #[Assert\NotBlank(message: 'The title is mandatory.')]
@@ -42,6 +30,66 @@ class Publication
     )]    
     private ?string $title = null;
 
+    #[ORM\Column(type: 'blob', nullable: true)]
+    private $image;
+
+    #[ORM\Column(type: 'text', nullable: true)]
+    #[Assert\NotBlank(message: 'Description is required.')]
+    private ?string $description = null;
+
+    #[ORM\Column(type: 'string', nullable: true)]
+    private ?string $image_url = null;
+
+    #[ORM\Column(type: 'datetime', nullable: false)]
+    private ?\DateTimeInterface $publication_date = null;
+
+    #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'publications')]
+    #[ORM\JoinColumn(name: 'id_user', referencedColumnName: 'id_user')]
+    private ?User $user = null;
+
+    #[ORM\Column(type: 'string', nullable: true)]
+    private ?string $statut = null;
+
+    #[ORM\OneToMany(targetEntity: Comment::class, mappedBy: 'publication')]
+    private Collection $comments;
+
+    #[ORM\OneToMany(targetEntity: Report::class, mappedBy: 'publication')]
+    private Collection $reports;
+
+    #[ORM\Column(type: 'string', length: 255, nullable: true)]     
+    private $sentiment;
+
+    #[ORM\Column(type: 'integer', nullable: false)]
+    private ?int $reportCount = 0;
+
+    public function __construct()
+    {
+        $this->comments = new ArrayCollection();
+        $this->reports = new ArrayCollection();
+    }
+
+    public function getPublicationId(): ?int
+    {
+        return $this->publication_id;
+    }
+
+    public function setPublicationId(int $publication_id): self
+    {
+        $this->publication_id = $publication_id;
+        return $this;
+    }
+
+    public function getPublication_id(): ?int
+    {
+        return $this->publication_id;
+    }
+
+    public function setPublication_id(int $publication_id): self
+    {
+        $this->publication_id = $publication_id;
+        return $this;
+    }
+
     public function getTitle(): ?string
     {
         return $this->title;
@@ -52,18 +100,16 @@ class Publication
         $this->title = $title;
         return $this;
     }
-    #[ORM\Column(type: 'blob', nullable: true)]
-    private $image;
 
     public function getImage()
     {
-    return $this->image;
+        return $this->image;
     }
 
     public function setImage($image): self
     {
-    $this->image = $image;
-    return $this;
+        $this->image = $image;
+        return $this;
     }
 
     public function getBase64Image(): ?string
@@ -71,20 +117,11 @@ class Publication
         if (!$this->image) {
             return null;
         }
-    
         if (is_resource($this->image)) {
             return base64_encode(stream_get_contents($this->image));
         }
-    
         return base64_encode($this->image);
     }
-
-
-
-
-    #[ORM\Column(type: 'text', nullable: true)]
-    #[Assert\NotBlank(message: 'Description is required.')]
-    private ?string $description = null;
 
     public function getDescription(): ?string
     {
@@ -97,8 +134,16 @@ class Publication
         return $this;
     }
 
-    #[ORM\Column(type: 'string', nullable: true)]
-    private ?string $image_url = null;
+    public function getImageUrl(): ?string
+    {
+        return $this->image_url;
+    }
+
+    public function setImageUrl(?string $image_url): self
+    {
+        $this->image_url = $image_url;
+        return $this;
+    }
 
     public function getImage_url(): ?string
     {
@@ -111,8 +156,16 @@ class Publication
         return $this;
     }
 
-    #[ORM\Column(type: 'datetime', nullable: false)]
-    private ?\DateTimeInterface $publication_date = null;
+    public function getPublicationDate(): ?\DateTimeInterface
+    {
+        return $this->publication_date;
+    }
+
+    public function setPublicationDate(\DateTimeInterface $publication_date): self
+    {
+        $this->publication_date = $publication_date;
+        return $this;
+    }
 
     public function getPublication_date(): ?\DateTimeInterface
     {
@@ -125,10 +178,6 @@ class Publication
         return $this;
     }
 
-    #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'publications')]
-    #[ORM\JoinColumn(name: 'id_user', referencedColumnName: 'id_user')]
-    private ?User $user = null;
-
     public function getUser(): ?User
     {
         return $this->user;
@@ -140,9 +189,6 @@ class Publication
         return $this;
     }
 
-    #[ORM\Column(type: 'string', nullable: true)]
-    private ?string $statut = null;
-
     public function getStatut(): ?string
     {
         return $this->statut;
@@ -150,12 +196,9 @@ class Publication
 
     public function setStatut(?string $statut): self
     {
-        $this->statut = $statut;
+        $this->statut = $statut; // Correction : utiliser $statut au lieu de $this->statut
         return $this;
     }
-
-    #[ORM\OneToMany(targetEntity: Comment::class, mappedBy: 'publication')]
-    private Collection $comments;
 
     /**
      * @return Collection<int, Comment>
@@ -182,15 +225,6 @@ class Publication
         return $this;
     }
 
-    #[ORM\OneToMany(targetEntity: Report::class, mappedBy: 'publication')]
-    private Collection $reports;
-
-    public function __construct()
-    {
-        $this->comments = new ArrayCollection();
-        $this->reports = new ArrayCollection();
-    }
-
     /**
      * @return Collection<int, Report>
      */
@@ -199,51 +233,49 @@ class Publication
         if (!$this->reports instanceof Collection) {
             $this->reports = new ArrayCollection();
         }
-        return $this->reports;
+        return $this->reports; // Correction : retourner $this->reports au lieu de $this
     }
 
     public function addReport(Report $report): self
     {
         if (!$this->getReports()->contains($report)) {
             $this->getReports()->add($report);
+            $report->setPublication($this);
+            $this->reportCount = $this->getReports()->count();
         }
         return $this;
     }
 
     public function removeReport(Report $report): self
     {
-        $this->getReports()->removeElement($report);
+        if ($this->getReports()->removeElement($report)) {
+            if ($report->getPublication() === $this) {
+                $report->setPublication(null);
+            }
+            $this->reportCount = $this->getReports()->count();
+        }
         return $this;
     }
 
-    public function getPublicationId(): ?int
+    public function getSentiment(): ?string
     {
-        return $this->publication_id;
+        return $this->sentiment;
     }
 
-    public function getImageUrl(): ?string
+    public function setSentiment(?string $sentiment): self
     {
-        return $this->image_url;
-    }
-
-    public function setImageUrl(?string $image_url): static
-    {
-        $this->image_url = $image_url;
-
+        $this->sentiment = $sentiment;
         return $this;
     }
 
-    public function getPublicationDate(): ?\DateTimeInterface
+    public function getReportCount(): ?int
     {
-        return $this->publication_date;
+        return $this->reportCount;
     }
 
-    public function setPublicationDate(\DateTimeInterface $publication_date): static
+    public function setReportCount(int $reportCount): self
     {
-        $this->publication_date = $publication_date;
-
+        $this->reportCount = $reportCount;
         return $this;
     }
-    
-
 }

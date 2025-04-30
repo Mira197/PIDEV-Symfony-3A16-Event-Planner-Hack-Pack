@@ -44,6 +44,18 @@
             "./config/packages/knp_snappy.yaml"
         ]
     },
+    "nyholm/psr7": {
+        "version": "1.8",
+        "recipe": {
+            "repo": "github.com/symfony/recipes",
+            "branch": "main",
+            "version": "1.0",
+            "ref": "4a8c0345442dcca1d8a2c65633dcf0285dd5a5a2"
+        },
+        "files": [
+            "./config/packages/nyholm_psr7.yaml"
+        ]
+    },
     "phpunit/phpunit": {
         "version": "9.6",
         "recipe": {
@@ -267,7 +279,6 @@
             "./templates/base.html.twig"
         ]
     },
-
     "symfony/twilio-notifier": {
         "version": "6.4",
         "recipe": {
@@ -275,11 +286,10 @@
             "branch": "main",
             "version": "5.0",
             "ref": "10af129fcac6d00ffc9bb23d039d997dee35e657"
-        }},
-
+        }
+    },
     "symfony/ux-chartjs": {
         "version": "v2.24.0"
-
     },
     "symfony/ux-turbo": {
         "version": "2.23",

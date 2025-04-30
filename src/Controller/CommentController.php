@@ -105,6 +105,32 @@ class CommentController extends AbstractController
             'publications' => $publications
         ]);
     }
+    #[Route('/admin/comments', name: 'app_comment_list')]
+public function listComments(CommentRepository $repo): Response
+{
+    $comments = $repo->findAll();
+    return $this->render('admin/comments.html.twig', [
+        'comments' => $comments,
+    ]);
+}
+#[Route('/comment/{id}/delete', name: 'app_comment_delete', methods: ['POST'])]
+public function delete(Request $request, Comment $comment, EntityManagerInterface $entityManager): Response
+{
+    // Verify the CSRF token to prevent unauthorized requests
+    if ($this->isCsrfTokenValid('delete_comment'.$comment->getCommentId(), $request->request->get('_token'))) {
+        // Remove the comment from the database
+        $entityManager->remove($comment);
+        $entityManager->flush();
+
+        // Add a flash message to inform the user
+        $this->addFlash('success', 'Comment deleted successfully!');
+    } else {
+        $this->addFlash('error', 'Invalid CSRF token.');
+    }
+
+    // Redirect back to the forum page
+    return $this->redirectToRoute('app_forum');
+}
 
 
     
