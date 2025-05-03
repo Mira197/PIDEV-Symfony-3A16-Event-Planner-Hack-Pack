@@ -471,4 +471,26 @@ public function deleteUser(int $idUser, EntityManagerInterface $em): Response
     return $this->redirectToRoute('app_user_index');
 }
 
+
+
+
+
+#[Route('/search-by-username', name: 'search_by_username')]
+public function searchByUsername(Request $request, UserRepository $userRepository): Response
+{
+    $username = $request->query->get('username');
+
+    // Si aucun nom d'utilisateur n'est soumis, on affiche tous les utilisateurs
+    if ($username) {
+        $users = $userRepository->findByUsernameDQL($username);
+    } else {
+        $users = $userRepository->findAll();
+    }
+
+    return $this->render('admin/listAdmins.html.twig', [
+        'users' => $users,
+    ]);
+}
+
+
 }

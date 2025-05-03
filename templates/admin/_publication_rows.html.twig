@@ -1,16 +1,16 @@
 <div id="publicationsContent">
     <table class="admin-mui-table">
         <thead>
-                        <tr>
-                            <th><input type="checkbox" id="checkAll"></th>
-                            <th>Title</th>
-                            <th>Description</th>
-                            <th>User</th>
-                            <th>Status</th>
-                            <th>Date</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
+            <tr>
+                <th><input type="checkbox" id="checkAll"></th>
+                <th>Title</th>
+                <th>Description</th>
+                <th>User</th>
+                <th>Status</th>
+                <th>Date</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
         <tbody id="adminPublicationsTable">
             {% for publication in pagination %}
                 <tr data-status="{{ publication.statut }}">

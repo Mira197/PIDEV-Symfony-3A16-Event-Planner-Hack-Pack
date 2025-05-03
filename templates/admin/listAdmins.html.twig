@@ -99,7 +99,14 @@
 	<h2>👥 Users Management</h2>
 
 	<div class="admin-filters">
-		<input type="text" id="userSearchInput" class="form-control" placeholder="🔍 Search users...">
+
+<form method="get" action="{{ path('search_by_username') }}" class="d-flex mb-3">
+    <input type="text" name="username" placeholder="Search by username" class="form-control" style="margin-right: 10px;">
+    <button type="submit" class="main-btn info-btn btn-hover">🔍 Search</button>
+</form>
+
+
+
 		<a href="{{ path('app_user_export_pdf') }}" target="_blank" class="main-btn primary-btn btn-hover export-btn">
 			<i class="lni lni-printer"></i> Export PDF
 		</a>
