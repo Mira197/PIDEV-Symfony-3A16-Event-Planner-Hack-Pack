@@ -1,16 +1,22 @@
-# ai_model.py
-import numpy as np
+import os
 import pickle
+import numpy as np
 
-def predict_sales():
+def predict_sales(mois_suivant=13):
     """
-    Simule une prédiction des ventes pour le mois suivant.
-    Remplace cette fonction par ton propre modèle de prédiction.
+    Prédit les ventes pour un mois donné en utilisant un modèle entraîné.
     """
-    # Exemple de prédiction simple : prédiction basée sur des données historiques.
-    predicted_sales = np.random.uniform(100, 1000)  # Valeur aléatoire pour la simulation.
-    return predicted_sales
+
+    # Obtenir le chemin absolu du modèle par rapport à ce script
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    model_path = os.path.join(current_dir, 'model.pkl')
+
+    with open(model_path, "rb") as f:
+        model = pickle.load(f)
+
+    prediction = model.predict(np.array([[mois_suivant]]))
+    return round(prediction[0], 2)
 
 if __name__ == '__main__':
     sales_prediction = predict_sales()
-    print(sales_prediction)  # Retourne la valeur pour l'utiliser dans Symfony
+    print(f"{sales_prediction}")

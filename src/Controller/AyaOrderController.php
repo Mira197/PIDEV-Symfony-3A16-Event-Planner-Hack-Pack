@@ -477,42 +477,42 @@ class AyaOrderController extends AbstractController
         UserRepository $userRepo,
         CartRepository $cartRepo,
         CartProductRepository $cpRepo,
+        WalletTransactionRepository $walletTransactionRepository, // Add this dependency
         EntityManagerInterface $em,
         SessionInterface $session
     ): JsonResponse {
         // 1) Récupération de l'utilisateur depuis la session
         $userId = $session->get('user_id');
-        $user   = $userRepo->find($userId);
+        $user = $userRepo->find($userId);
         if (!$user) {
             return new JsonResponse(['success' => false, 'message' => 'Unauthorized'], 401);
         }
-
+    
         // 2) On lit le body JSON
         $data = json_decode($request->getContent(), true);
-        $useWallet    = $data['use_wallet']  ?? false;
-        $amountToPay  = floatval($data['amount'] ?? 0);
-        $address      = $data['address']     ?? '';
-        $eventDateStr = $data['event_date']  ?? '';
-
+        $useWallet = $data['use_wallet'] ?? false;
+        $amountToPay = floatval($data['amount'] ?? 0);
+        $address = $data['address'] ?? '';
+        $eventDateStr = $data['event_date'] ?? '';
+    
         // 3) Validation basique
         if (!$address || !$eventDateStr) {
-            return new JsonResponse(['success'=>false, 'message'=>'Address and event date required'], 400);
+            return new JsonResponse(['success' => false, 'message' => 'Address and event date required'], 400);
         }
-
+    
         // 4) Récupérer le panier courant et calculer son total
-        $oldCart      = $cartRepo->findOneBy(['user'=>$user]);
-        $cartProducts = $cpRepo->findBy(['cart'=>$oldCart]);
-        $total        = 0;
+        $oldCart = $cartRepo->findOneBy(['user' => $user]);
+        $cartProducts = $cpRepo->findBy(['cart' => $oldCart]);
+        $total = 0;
         foreach ($cartProducts as $item) {
             $total += $item->getTotalPrice();
         }
-
+    
         // 5) Déduction du wallet si demandé
         $walletDeducted = 0;
         if ($useWallet) {
-            // Calcul de votre crédit sur mesure (exemple)
-            $walletCredit = array_sum(array_map(fn($tx)=> $tx->getType()==='payment'? -$tx->getAmount(): $tx->getAmount(),
-                                  $user->getWalletTransactions()->toArray()));
+            // Use the WalletTransactionRepository to calculate the wallet balance
+            $walletCredit = $walletTransactionRepository->calculateWalletBalance($user);
             $walletDeducted = min($amountToPay, $walletCredit);
             if ($walletDeducted > 0) {
                 $wt = new WalletTransaction();
@@ -524,12 +524,12 @@ class AyaOrderController extends AbstractController
                 $em->persist($wt);
             }
         }
-
+    
         // 6) Création d’un NOUVEAU panier vide
         $newCart = new Cart();
         $newCart->setUser($user);
         $em->persist($newCart);
-
+    
         // 7) Création de la commande
         $order = new Order();
         $order->setUser($user)
@@ -541,13 +541,13 @@ class AyaOrderController extends AbstractController
               ->setStatus('PENDING')
               ->setTotalPrice($amountToPay - $walletDeducted);
         $em->persist($order);
-
+    
         // 8) On supprime l’ancien panier et ses produits
         foreach ($cartProducts as $item) {
             $em->remove($item);
         }
         $em->remove($oldCart);
-
+    
         // 9) CALCUL et ENREGISTREMENT des points de fidélité
         $earnedPoints = floor($order->getTotalPrice() / 10);
         if ($earnedPoints > 0) {
@@ -559,17 +559,17 @@ class AyaOrderController extends AbstractController
                ->setReason('Commande Wallet+Stripe');
             $em->persist($fp);
         }
-
+    
         // 10) Tout persister
         $em->flush();
-
+    
         // 11) Sauvegarde en session pour la confirmation
         $session->set('last_order_id', $order->getOrderId());
-
+    
         // 12) Retour AJAX
         return new JsonResponse([
-            'success'      => true,
-            'order_id'     => $order->getOrderId(),
+            'success' => true,
+            'order_id' => $order->getOrderId(),
             'earnedPoints' => $earnedPoints,
         ]);
     }
@@ -584,45 +584,59 @@ class AyaOrderController extends AbstractController
         return $this->redirectToRoute('aya_cart');
     }
     #[Route('/create-checkout-session', name: 'create_checkout_session', methods: ['POST'])]
-    public function createCheckoutSession(Request $request, UrlGeneratorInterface $urlGenerator): JsonResponse
-    {
-        $data = $request->request->all();
-        $amount = floatval($data['amount']) * 100; // Convert to cents for Stripe (TND)
-        $orderId = $data['order_id'];
+public function createCheckoutSession(Request $request, UrlGeneratorInterface $urlGenerator, OrderRepository $orderRepository): JsonResponse
+{
+    $data = $request->request->all();
+    $amount = floatval($data['amount']); // Amount in TND
+    $orderId = $data['order_id'];
 
-        // Validate order_id
-        if (!$orderId) {
-            return new JsonResponse(['error' => 'Order ID is required'], 400);
-        }
-
-        // Log the amount for debugging
-        error_log("Creating Stripe session with amount: {$amount} TND (in cents), order_id: {$orderId}");
-
-        // Set Stripe API key
-        \Stripe\Stripe::setApiKey($_ENV['STRIPE_SECRET_KEY']);
-
-        try {
-            $session = \Stripe\Checkout\Session::create([
-                'payment_method_types' => ['card'],
-                'line_items' => [[
-                    'price_data' => [
-                        'currency' => 'tnd',
-                        'product_data' => ['name' => 'Order #' . $orderId],
-                        'unit_amount' => $amount,
-                    ],
-                    'quantity' => 1,
-                ]],
-                'mode' => 'payment',
-                'success_url' => $urlGenerator->generate('aya_order_confirm', ['id' => $orderId], UrlGeneratorInterface::ABSOLUTE_URL),
-                'cancel_url' => $urlGenerator->generate('aya_order_cancelled', [], UrlGeneratorInterface::ABSOLUTE_URL),
-                'client_reference_id' => $orderId,
-            ]);
-
-            return new JsonResponse(['id' => $session->id]);
-        } catch (\Stripe\Exception\ApiErrorException $e) {
-            return new JsonResponse(['error' => $e->getMessage()], 500);
-        }
+    // Validate order_id
+    if (!$orderId) {
+        return new JsonResponse(['error' => 'Order ID is required'], 400);
     }
+
+    // Validate amount against the order's total price
+    $order = $orderRepository->find($orderId);
+    if (!$order) {
+        return new JsonResponse(['error' => 'Order not found'], 404);
+    }
+
+    $expectedAmount = $order->getTotalPrice();
+    if (abs($amount - $expectedAmount) > 0.01) { // Allow for small floating-point differences
+        error_log("Amount mismatch: Expected {$expectedAmount} TND, but got {$amount} TND for order {$orderId}");
+        return new JsonResponse(['error' => 'Amount mismatch'], 400);
+    }
+
+    $amountInCents = $amount * 100; // Convert to cents for Stripe (TND)
+
+    // Log the amount for debugging
+    error_log("Creating Stripe session with amount: {$amountInCents} cents (TND), order_id: {$orderId}");
+
+    // Set Stripe API key
+    \Stripe\Stripe::setApiKey($_ENV['STRIPE_SECRET_KEY']);
+
+    try {
+        $session = \Stripe\Checkout\Session::create([
+            'payment_method_types' => ['card'],
+            'line_items' => [[
+                'price_data' => [
+                    'currency' => 'tnd',
+                    'product_data' => ['name' => 'Order #' . $orderId],
+                    'unit_amount' => $amountInCents,
+                ],
+                'quantity' => 1,
+            ]],
+            'mode' => 'payment',
+            'success_url' => $urlGenerator->generate('aya_order_confirm', ['id' => $orderId], UrlGeneratorInterface::ABSOLUTE_URL),
+            'cancel_url' => $urlGenerator->generate('aya_order_cancelled', [], UrlGeneratorInterface::ABSOLUTE_URL),
+            'client_reference_id' => $orderId,
+        ]);
+
+        return new JsonResponse(['id' => $session->id]);
+    } catch (\Stripe\Exception\ApiErrorException $e) {
+        return new JsonResponse(['error' => $e->getMessage()], 500);
+    }
+}
     #[Route('/webhook/stripe', name: 'stripe_webhook', methods: ['POST'])]
     public function stripeWebhook(
         Request $request,

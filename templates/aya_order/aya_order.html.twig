@@ -175,147 +175,103 @@ console.log('Initial Total Loaded:', initialTotal);
 togglePaymentMethod(initialTotal);
 
 confirmButton.addEventListener('click', function (event) {
-event.preventDefault(); // 🔥 Bloquer tout au clic sur "Confirm Order"
+  event.preventDefault();
 
-const finalTotal = parseFloat(document.getElementById('final_total_field').value) || 0;
-const initialTotal = parseFloat(sessionStorage.getItem('initial_total') || 0) || 0; // Original total before reductions
-const walletUsed = parseFloat(sessionStorage.getItem('wallet_used') || 0) || 0; // Use the applied wallet credit
+  const finalTotal = parseFloat(document.getElementById('final_total_field').value) || 0;
+  const initialTotal = parseFloat(sessionStorage.getItem('initial_total') || 0) || 0;
+  const walletUsed = parseFloat(sessionStorage.getItem('wallet_used') || 0) || 0;
 
-if (walletUsed >= finalTotal) {
-Swal.fire({icon: 'success', title: 'Wallet Payment!', text: 'Your order will be fully paid with your Wallet Credit.', confirmButtonColor: '#6b336e'}).then(() => {
-sessionStorage.setItem('payment_mode', 'wallet_only');
+  // CAS 1: paiement 100% wallet
+  if (walletUsed >= finalTotal) {
+    Swal.fire({
+      icon: 'success',
+      title: 'Paid with Wallet',
+      text: 'Your order has been fully paid using your wallet credit.',
+      confirmButtonColor: '#6b336e'
+    }).then(() => {
+      postOrder({ use_wallet: true, amount: finalTotal }, data => {
+        window.location.href = `/aya/order/confirm/${data.order_id}`;
+      });
+    });
 
-// Prepare form data
-const form = document.getElementById('order_form');
-const formData = new FormData(form);
-formData.append('aya_order[payment_method_hidden]', 'wallet_only');
-// Ensure payment method is set
+  // CAS 2: paiement partiel wallet + stripe
+   } else if (walletUsed > 0) {
+            Swal.fire({
+                title: 'Partial Wallet Payment',
+                text: `You used ${walletUsed.toFixed(2)} TND from your wallet. Remaining ${(finalTotal).toFixed(2)} TND will be charged with Stripe.`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Wallet + Stripe',
+                cancelButtonText: 'Pay All with Stripe',
+                confirmButtonColor: '#6b336e',
+                cancelButtonColor: '#6b336e'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Wallet + Stripe: Utiliser finalTotal directement, car il contient déjà le total après déduction
+                    postOrder({ use_wallet: true, amount: finalTotal }, data => startStripe(finalTotal, data.order_id));
+                } else {
+                    // Full Stripe: Passer le total initial
+                    postOrder({ use_wallet: false, amount: initialTotal }, data => startStripe(initialTotal, data.order_id));
+                }
+            });
 
-// Submit form data via fetch
-fetch('/aya/order/new', {
-method: 'POST',
-body: formData,
-headers: {
-'X-Requested-With': 'XMLHttpRequest' // Indicate this is an AJAX request
-}
-}).then(response => response.json()).then(data => {
-if (data.success && data.order_id) { // Redirect to the confirmation page with the order ID
-window.location.href = `/aya/order/confirm/${
-data.order_id
-}`;
-} else { // Handle errors (e.g., form validation errors)
-const errorMessage = data.errors ? data.errors.join(' ') : 'Failed to place order.';
-showAlert('error', 'Error', errorMessage);
-}
-}).catch(error => {
-console.error('Form submission error:', error);
-showAlert('error', 'Error', 'An error occurred while placing the order.');
+  // CAS 3: paiement 100% stripe
+  } else {
+    Swal.fire({
+      icon: 'info',
+      title: 'Full Stripe Payment',
+      text: 'You will be redirected to Stripe to pay the full amount.',
+      confirmButtonColor: '#6b336e'
+    }).then(() => {
+      postOrder({ use_wallet: false, amount: initialTotal }, data => startStripe(initialTotal, data.order_id));
+    });
+  }
 });
-});
-} else {
-Swal.fire({
-title: 'Partial Wallet Payment',
-text: "Your Wallet Credit is not enough. Choose how you want to pay:",
-icon: 'warning',
-showCancelButton: true,
-confirmButtonText: 'Wallet + Stripe',
-cancelButtonText: 'Pay All with Stripe',
-confirmButtonColor: '#6b336e',
-cancelButtonColor: '#6b336e'
-}).then((result) => {
-if (result.isConfirmed) { // Wallet + Stripe: Use the final total (after reductions)
-const amountToPay = finalTotal;
+function postOrder(payload, onSuccess) {
+  fetch('/aya/order/confirm-wallet-stripe', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({
+      address: document.querySelector('#aya_order_exact_address').value,
+      event_date: document.querySelector('#aya_order_event_date').value,
+      ...payload
+    })
+  })
+  .then(response => {
+    if (!response.ok) {
+      // on lit le JSON d’erreur ou on renvoie un message par défaut
+      return response.json()
+        .then(errJson => { throw new Error(errJson.message || 'Server error'); })
+        .catch(() => { throw new Error('Server error'); });
+    }
+    return response.json();
+  })
+  .then(data => {
+    if (data.success) {
+      onSuccess(data);
+    } else {
+      showAlert('error','Error', data.message || 'Order creation failed.');
+    }
+  })
+  .catch(err => {
+    // on affiche maintenant le vrai message d’erreur
+    showAlert('error','Error', err.message);
+  });
+}
 
-fetch('/aya/order/confirm-wallet-stripe', {
-method: 'POST',
-headers: {
-'Content-Type': 'application/json'
-},
-body: JSON.stringify(
-{
-amount: amountToPay,
-address: document.querySelector('#aya_order_exact_address').value,
-event_date: document.querySelector('#aya_order_event_date').value,
-payment_method: 'Stripe',
-use_wallet: true // Indicate wallet credit should be used
-}
-)
-}).then(response => response.json()).then(data => {
-if (data.success && data.order_id) {
-fetch('/create-checkout-session', {
-method: 'POST',
-headers: {
-'Content-Type': 'application/x-www-form-urlencoded'
-},
-body: new URLSearchParams(
-{amount: amountToPay, order_id: data.order_id}
-)
-}).then(response => response.json()).then(session => {
-if (session.id) {
-stripe.redirectToCheckout({sessionId: session.id});
-} else {
-showAlert('error', 'Error', 'Stripe session creation failed. Please try again.');
-}
-}).catch(error => {
-console.error('Stripe session error:', error);
-showAlert('error', 'Error', 'An error occurred with Stripe. Please try again.');
-});
-} else {
-showAlert('error', 'Error', data.message || 'Failed to create order with Wallet + Stripe.');
-}
-}).catch(error => {
-console.error('Order creation error:', error);
-showAlert('error', 'Error', 'An error occurred while creating the order.');
-});
-} else if (result.dismiss === Swal.DismissReason.cancel) { // Pay All with Stripe: Use the initial total (before reductions)
-const amountToPay = initialTotal;
 
-// Create an order first
-fetch('/aya/order/confirm-wallet-stripe', {
-method: 'POST',
-headers: {
-'Content-Type': 'application/json'
-},
-body: JSON.stringify(
-{
-amount: amountToPay,
-address: document.querySelector('#aya_order_exact_address').value,
-event_date: document.querySelector('#aya_order_event_date').value,
-payment_method: 'Stripe',
-use_wallet: false // No wallet credit should be used
+function startStripe(amount, orderId) {
+  fetch('/create-checkout-session', {
+    method: 'POST',
+    headers: {'Content-Type':'application/x-www-form-urlencoded'},
+    body: new URLSearchParams({ amount, order_id: orderId })
+  })
+  .then(r => r.json())
+  .then(s => s.id 
+    ? stripe.redirectToCheckout({ sessionId: s.id }) 
+    : showAlert('error','Error','Stripe session failed.')
+  );
 }
-)
-}).then(response => response.json()).then(data => {
-if (data.success && data.order_id) {
-fetch('/create-checkout-session', {
-method: 'POST',
-headers: {
-'Content-Type': 'application/x-www-form-urlencoded'
-},
-body: new URLSearchParams(
-{amount: amountToPay, order_id: data.order_id}
-)
-}).then(response => response.json()).then(session => {
-if (session.id) {
-stripe.redirectToCheckout({sessionId: session.id});
-} else {
-showAlert('error', 'Error', 'Stripe session creation failed. Please try again.');
-}
-}).catch(error => {
-console.error('Stripe session error:', error);
-showAlert('error', 'Error', 'An error occurred with Stripe. Please try again.');
-});
-} else {
-showAlert('error', 'Error', data.message || 'Failed to create order with Stripe.');
-}
-}).catch(error => {
-console.error('Order creation error:', error);
-showAlert('error', 'Error', 'An error occurred while creating the order.');
-});
-}
-});
-}
-});
 });
 
 // 🔥 Fonctions utilitaires

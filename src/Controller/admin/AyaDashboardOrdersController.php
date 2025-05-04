@@ -6,6 +6,8 @@ use Doctrine\DBAL\Connection;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Process\Process;
+use Symfony\Component\Process\Exception\ProcessFailedException;
 
 class AyaDashboardOrdersController extends AbstractController
 {
@@ -75,7 +77,8 @@ class AyaDashboardOrdersController extends AbstractController
         $performance = $marchOrders > 0 ? (($aprilOrders - $marchOrders) / $marchOrders) * 100 : 0;
 
         // Predicted sales for the next month
-        $nextMonthPrediction = $this->predictNextMonthSales($ordersPerMonth);
+        $nextMonthPrediction = $this->predictNextMonthSalesFromPython();
+
 
         return $this->render('admin/ayaDashboardOrders.html.twig', [
             'totalOrders' => $totalOrders,
@@ -90,13 +93,21 @@ class AyaDashboardOrdersController extends AbstractController
         ]);
     }
 
-    private function predictNextMonthSales(array $ordersPerMonth): float
-    {
-        // Simple prediction based on the average of previous months
-        $validMonths = array_filter($ordersPerMonth, fn($month) => $month > 0);
-        $averageSales = array_sum($validMonths) / count($validMonths);
-        $prediction = $averageSales * 1.1;  // Increase by 10% for prediction
+    private function predictNextMonthSalesFromPython(): string
+{
+    $projectDir = $this->getParameter('kernel.project_dir'); // racine du projet
+    $scriptPath = $projectDir . '/src/ai/ai_model.py';        // chemin absolu
 
-        return round($prediction, 2);
+    $process = new Process(['python', $scriptPath]);
+    $process->run();
+
+    if (!$process->isSuccessful()) {
+        return 'Erreur Python : ' . $process->getErrorOutput();
     }
+
+    return trim($process->getOutput());
+}
+
+    
+    
 }
