@@ -12,7 +12,7 @@ class CurrencyConverter
     public function __construct(HttpClientInterface $httpClient)
     {
         $this->httpClient = $httpClient;
-        #$this->accessKey = 'be9767d355afe1f2cea6c2cbe61c81db'; // 🔥 Remplacer par ta vraie access_key obtenue sur exchangerate.host
+        $this->accessKey = 'be9767d355afe1f2cea6c2cbe61c81db'; // 🔥 Remplacer par ta vraie access_key obtenue sur exchangerate.host
     }
 
     public function convert(float $amount, string $targetCurrency): float

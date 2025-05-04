@@ -11,12 +11,12 @@
 				<div
 					class="col-md-4">
 					{#{% if event.imageFilename %}
-					                    <img src="{{ asset('uploads/' ~ event.imageFilename) }}" alt="{{ event.name }}" class="img-fluid rounded">
-					                {% elseif base64Image is defined and base64Image %}
-					                    <img src="data:image/jpeg;base64,{{ base64Image }}" alt="{{ event.name }}" class="img-fluid rounded">
-					                {% else %}
-					                    <p>No image available</p>
-					                {% endif %}#}
+										                    <img src="{{ asset('uploads/' ~ event.imageFilename) }}" alt="{{ event.name }}" class="img-fluid rounded">
+										                {% elseif base64Image is defined and base64Image %}
+										                    <img src="data:image/jpeg;base64,{{ base64Image }}" alt="{{ event.name }}" class="img-fluid rounded">
+										                {% else %}
+										                    <p>No image available</p>
+										                {% endif %}#}
 					{% if event.base64Image %}
 						<img src="data:image/jpeg;base64,{{ event.base64Image }}" alt="{{ event.name }}" class="img-fluid rounded">
 					{% elseif event.imageFilename %}
@@ -67,6 +67,14 @@
 						{{ include('admin/event_admin/delete_formEventAdmin.html.twig')|raw }}
 
 					</div>
+					{% if event.frameVrLink %}
+						<a href="{{ event.frameVrLink }}" target="_blank" class="btn btn-outline-success mt-3">
+							🌟 View Client's 3D Room (FrameVR)
+						</a>
+					{% else %}
+						<p class="text-muted mt-3">No FrameVR room link provided by the client yet.</p>
+					{% endif %}
+
 				</div>
 			</div>
 		</div>

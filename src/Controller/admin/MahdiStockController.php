@@ -329,6 +329,11 @@ public function afficheFournisseur(
         'notifications' => $notifications
     ]);
 }
+#[Route('/admin/baseFournisseur', name: 'baseFournisseur')]
+    public function mahdi(): Response
+    {
+        return $this->render('/admin/baseFournisseur.html.twig');
+    }
 
 
 

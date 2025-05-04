@@ -1,0 +1,36 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}3D Event Room{% endblock %}
+{% block stylesheets %}
+	{{ parent() }}
+	<style>
+		nav.fh5co-nav {
+			background-color: #cebec9 !important;
+			padding: 1px 0 !important;
+			max-height: 170px !important;
+		}
+        .aya-cart-wrapper {
+			padding: 30px;
+			margin-top: 120px;
+		}
+		
+	</style>
+{% endblock %}
+{% block content %}
+<div class="aya-cart-wrapper container mt-5 text-center">
+    <h2>🖼️ Your 3D Event Space</h2>
+    {#<p>Customize your space for {{ app.user.username }}!</p>#}
+
+    <div style="position: relative; padding-top: 56.25%;">
+        <iframe 
+            src="{{ frameUrl }}?key={{ apiKey }}" 
+            style="position: absolute; top:0; left:0; width:100%; height:100%; border:0;"
+            allowfullscreen
+            allow="xr-spatial-tracking; microphone; camera; fullscreen"
+            loading="lazy">
+        </iframe>
+    </div>
+
+    <a href="{{ path('app_events') }}" class="btn btn-secondary mt-4">⬅️ Back to Events</a>
+</div>
+{% endblock %}

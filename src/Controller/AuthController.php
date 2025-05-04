@@ -2,9 +2,12 @@
 
 namespace App\Controller;
 
-
+  
 
 use App\Entity\User;
+use Symfony\Component\Security\Http\Authentication\UserAuthenticatorInterface;
+use Symfony\Component\Security\Core\User\UserInterface;
+use App\Security\AuthAuthenticator; 
 use Symfony\Component\HttpFoundation\JsonResponse;
 use App\Form\AdminRegisterFormType;
 use App\Form\AuthFormType;
@@ -54,12 +57,13 @@ class AuthController extends AbstractController
     
 
     
-   /* #[Route('/login', name: 'login')]
+    #[Route('/login', name: 'login')]
     public function login(
         Request $request,
         SessionInterface $session,
         EntityManagerInterface $entityManager,
         UserPasswordHasherInterface $passwordHasher
+        
     ): Response {
         $form = $this->createForm(AuthFormType::class);
         $form->handleRequest($request);
@@ -74,9 +78,8 @@ class AuthController extends AbstractController
     
             // Récupérer la réponse du reCAPTCHA
             $recaptchaResponse = $request->get('g-recaptcha-response');
-            $secretKey = '6LcibOYqAAAAAD978kowbYusB7LoAv6f4QLLGZKZ'; // Votre clé secrète
+            $secretKey = $this->getParameter('recaptcha_secret_key');
     
-            // Créer un client HTTP pour interroger Google reCAPTCHA
             $httpClient = HttpClient::create();
             $response = $httpClient->request('POST', 'https://www.google.com/recaptcha/api/siteverify', [
                 'query' => [
@@ -88,125 +91,54 @@ class AuthController extends AbstractController
             $data = $response->toArray();
     
             if (!$data['success']) {
-                // Si reCAPTCHA échoue, ajouter une erreur au formulaire
                 $form->get('email')->addError(new FormError('La validation reCAPTCHA a échoué. Veuillez réessayer.'));
                 return $this->render('auth/login.html.twig', [
                     'form' => $form->createView(),
+                    'recaptcha_site_key' => $this->getParameter('recaptcha_site_key'),
+                    
                 ]);
             }
     
-            // Continuez avec votre logique d'authentification
+            // ✅ Authentification
             if ($user && $passwordHasher->isPasswordValid($user, $plainPassword)) {
-                // Authentification réussie
+               
+                // ✅ Sauvegarder les données en session
                 $session->set('user_id', $user->getIdUser());
                 $session->set('username', $user->getUsername());
-                // Ajoutez les autres informations nécessaires
+                $session->set('email', $user->getEmail());
+                $session->set('first_name', $user->getFirstName());
+                $session->set('last_name', $user->getLastName());
+                $session->set('phone', $user->getNumTel());
+                $session->set('img', $user->getImgPath());
+                $session->set('role', $user->getRole());
     
-                return $this->redirectToRoute('homepage');
+                // ✅ Redirection selon rôle
+                switch ($user->getRole()) {
+                    case 'ADMIN':
+                        return $this->redirectToRoute('app_user_index'); // 🔥 Admin Dashboard
+                    case 'CLIENT':
+                        return $this->redirectToRoute('app_home'); // 🔥 Profil Client
+                    case 'FOURNISSEUR':
+                        return $this->redirectToRoute('baseFournisseur'); // 🔥 Profil Fournisseur
+                    default:
+                        return $this->redirectToRoute('homepage'); // 🔥 Page par défaut
+                }
             }
     
-            // Si les informations sont incorrectes
+            // ❌ Sinon, email ou mot de passe incorrect
             $form->get('email')->addError(new FormError('Email ou mot de passe incorrect.'));
         }
     
         return $this->render('auth/login.html.twig', [
             'form' => $form->createView(),
+            'recaptcha_site_key' => $this->getParameter('recaptcha_site_key'),
         ]);
-    }*/
-    #[Route('/login', name: 'login')]
-public function login(
-    Request $request,
-    SessionInterface $session,
-    EntityManagerInterface $entityManager,
-    UserPasswordHasherInterface $passwordHasher
-): Response {
-    $form = $this->createForm(AuthFormType::class);
-    $form->handleRequest($request);
-
-    if ($form->isSubmitted() && $form->isValid()) {
-        $submittedUser = $form->getData();
-
-        $email = $submittedUser->getEmail();
-        $plainPassword = $submittedUser->getPassword();
-
-        $user = $entityManager->getRepository(User::class)->findOneBy(['email' => $email]);
-
-        // Check if the email field is empty
-        if (empty($email)) {
-            $form->get('email')->addError(new FormError('L\'email ne peut pas être vide.'));
-        }
-
-        // Check if the password field is empty
-        if (empty($plainPassword)) {
-            $form->get('password')->addError(new FormError('Le mot de passe ne peut pas être vide.'));
-        }
-
-        // Check if the email is valid
-        if ($user) {
-            if (!$passwordHasher->isPasswordValid($user, $plainPassword)) {
-                $form->get('password')->addError(new FormError('Mot de passe incorrect.'));
-            }
-        } else {
-            $form->get('email')->addError(new FormError('L\'email n\'est pas enregistré.'));
-        }
-
-        // Check if the account is blocked
-        if ($user && $user->isBlocked()) {
-            $now = new \DateTime();
-            if ($user->getBlockEndDate() !== null && $user->getBlockEndDate() > $now) {
-                $form->get('email')->addError(new FormError('Votre compte est bloqué jusqu\'au ' . $user->getBlockEndDate()->format('d/m/Y H:i')));
-                return $this->render('auth/login.html.twig', [
-                    'form' => $form->createView(),
-                ]);
-            }
-
-            // Unblocking account if the block date is expired
-            $user->setBlocked(false);
-            $user->setBlockEndDate(null);
-            $entityManager->flush();
-        }
-
-        // If the form is valid and there are no errors
-        if ($form->isValid() && !$user->isBlocked()) {
-            // Set session variables for the authenticated user
-            $session->set('user_id', $user->getIdUser());
-            $session->set('username', $user->getUsername());
-            $session->set('email', $user->getEmail());
-            $session->set('first_name', $user->getFirstName());
-            $session->set('last_name', $user->getLastName());
-            $session->set('phone', $user->getNumTel());
-            $session->set('img', $user->getImgPath());
-
-            // Redirect based on user role
-            switch ($user->getRole()) {
-                case 'ADMIN':
-                    return $this->redirectToRoute('app_user_index');
-                case 'CLIENT':
-                    return $this->redirectToRoute('app_home');
-                case 'FOURNISSEUR':
-                    return $this->redirectToRoute('baseFournisseur');
-                default:
-                    return $this->redirectToRoute('homepage');
-            }
-        }
-        
-        // If the form is invalid, stay on the same page with error messages
-        if (!$form->isValid()) {
-            $form->get('email')->addError(new FormError('Veuillez vérifier les champs et réessayer.'));
-        }
     }
-
-    return $this->render('auth/login.html.twig', [
-        'form' => $form->createView(),
-    ]);
-}
-
-    
     
     
     
     #[Route('/register', name: 'user_register')]
-public function register1(Request $request, EntityManagerInterface $entityManager): Response
+public function register1(Request $request, EntityManagerInterface $entityManager ): Response
 {
     $user = new User();
     $form = $this->createForm(InscriptionFormType::class, $user);
@@ -233,6 +165,16 @@ public function register1(Request $request, EntityManagerInterface $entityManage
             $entityManager->persist($user);
             $entityManager->flush();
             dump($form->getErrors(true, false));
+
+
+
+            
+
+
+
+
+
+
             return $this->redirectToRoute('login'); // ✅ route correcte
         }
       
@@ -388,6 +330,15 @@ public function testSession(SessionInterface $session): Response
 {
     dd($session->all());
 }
+
+
+
+
+
+
+
+
+
 
 
 

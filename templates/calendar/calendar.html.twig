@@ -1,0 +1,223 @@
+{% extends 'base.html.twig' %}
+
+{% block stylesheets %}
+	{{ parent() }}
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css">
+	<style>
+		nav.fh5co-nav {
+			background-color: #cebec9 !important;
+			padding: 1px 0 !important;
+			max-height: 170px !important;
+		}
+		.aya-cart-wrapper {
+			padding: 30px;
+			margin-top: 120px;
+		}
+		.container-calendar {
+			max-width: 1000px;
+			margin: auto;
+			background: white;
+			padding: 20px;
+			border-radius: 12px;
+			box-shadow: 0 0 12px rgba(0, 0, 0, 0.1);
+		}
+
+		#calendar {
+			max-width: 100%;
+		}
+		.legend {
+			margin-top: 20px;
+			text-align: center;
+		}
+
+		.legend span {
+			display: inline-block;
+			width: 15px;
+			height: 15px;
+			border-radius: 4px;
+			margin-right: 6px;
+		}
+		.fc-toolbar-title {
+			color: #6b336e;
+			font-size: 1.6rem;
+			font-weight: bold;
+		}
+		.fc .fc-button {
+			background-color: #99707E; /* Mountbatten Pink */
+			border: none;
+			color: white;
+			font-weight: bold;
+			padding: 6px 12px;
+			border-radius: 8px;
+			transition: background-color 0.3s ease;
+		}
+
+		.fc .fc-button:hover {
+			background-color: #533C56; /* English Violet */
+		}
+
+		.fc .fc-button-primary:not(:disabled).fc-button-active,
+		.fc .fc-button-primary:not(:disabled):active {
+			background-color: #533C56 !important; /* Active: English Violet */
+			color: white;
+			box-shadow: none;
+		}
+
+		.fc .fc-button-primary:focus {
+			box-shadow: none;
+		}
+		
+		.toolbar-wrapper {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			flex-wrap: wrap;
+			margin-bottom: 20px;
+			gap: 10px;
+		}
+
+		#filterBar {
+			display: flex;
+			gap: 10px;
+		}
+
+		#filterBar input,
+		#filterBar select {
+			padding: 6px;
+			border-radius: 6px;
+			border: 1px solid #bca2bf;
+		}
+		.btn {
+			background-color: #99707E;
+			color: white;
+			padding: 8px 16px;
+			border-radius: 8px;
+			text-decoration: none;
+			font-weight: bold;
+			transition: background-color 0.3s ease;
+		}
+
+		.btn:hover {
+			background-color: #533C56;
+		}
+		/*.export-buttons {
+			text-align: center;
+			margin-bottom: 20px;
+			display: flex;
+			justify-content: center;
+			gap: 15px;
+		}*/
+	</style>
+{% endblock %}
+
+{% block javascripts %}
+	{{ parent() }}
+	{#<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>#}
+	<script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
+{% endblock %}
+{% block content %}
+	<div class="aya-cart-wrapper">
+		<div class="container-calendar">
+			<div class="toolbar-wrapper">
+				<div id="filterBar">
+					<input type="text" id="searchTitle" placeholder="Search by title">
+					<select id="searchStatus">
+						<option value="">All</option>
+						<option value="booked">Booked</option>
+						<option value="not_booked">Not Booked</option>
+					</select>
+				</div>
+
+				{#ICS:permettre aux clients de télécharger leur planning depuis le calendrier et export pdf#}
+				<div class="export-buttons">
+					<a href="{{ path('calendar_export_ics') }}" class="btn btn-primary" download>
+						📥 Export ICS
+					</a>
+					<a href="{{ path('calendar_export_pdf') }}" class="btn btn-primary">
+						🖨️ Export PDF
+					</a>
+				</div>
+			</div>
+
+
+			<div id="calendar"></div>
+			{# 👇 Légende ajoutée ici #}
+			<div class="legend">
+				<span style="background:#2ecc71;"></span>
+				Not Booked
+				<span style="background:#e74c3c;"></span>
+				Booked
+			</div>
+		</div>
+	</div>
+
+	<script>
+		document.addEventListener('DOMContentLoaded', function () {
+const calendarEl = document.getElementById('calendar');
+const calendar = new FullCalendar.Calendar(calendarEl, {
+initialView: 'dayGridMonth',
+height: 'auto',
+headerToolbar: {
+left: 'prev,next today',
+center: 'title',
+right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek'
+},
+events: function (fetchInfo, successCallback, failureCallback) {
+$.ajax({
+url: "{{ path('calendar_search') }}",
+type: 'GET',
+data: {
+title: $('#searchTitle').val(),
+status: $('#searchStatus').val()
+},
+success: function (data) {
+successCallback(data);
+},
+error: function () {
+failureCallback();
+}
+});
+},
+eventClick: function (info) {
+if (info.event.url) {
+window.open(info.event.url, '_blank');
+info.jsEvent.preventDefault();
+}
+},
+// 👇 Ajoute ici le handler de clic sur une date vide :
+	dateClick: function(info) {
+		window.location.href = '/events/new?date=' + info.dateStr;
+	}
+});
+
+calendar.render();
+
+// 🔁 Rafraîchir les events à chaque changement
+$('#searchTitle, #searchStatus').on('input change', function () {
+calendar.refetchEvents();
+});
+});
+	</script>
+
+{% endblock %}
+
+{#la page details s'affiche et pas d'ouverture dans un nouvel onglet#}
+{#{% block content %}
+	<div class="aya-cart-wrapper">
+		<div class="container-calendar">
+			<div id="calendar"></div>
+		</div>
+	</div>
+
+	<script>
+		document.addEventListener('DOMContentLoaded', function () {
+const calendarEl = document.getElementById('calendar');
+const calendar = new FullCalendar.Calendar(calendarEl, {
+initialView: 'dayGridMonth',
+height: 'auto',
+events: '{{ path('calendar_load') }}'
+});
+calendar.render();
+});
+	</script>
+{% endblock %}#}

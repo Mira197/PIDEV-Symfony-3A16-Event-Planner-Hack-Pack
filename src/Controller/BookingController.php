@@ -9,11 +9,14 @@ use App\Entity\User;
 use App\Form\BookingType;
 use App\Repository\BookingRepository;
 use App\Repository\LocationRepository;
+use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Knp\Snappy\Pdf;
 
 #[Route('/bookings')]
 class BookingController extends AbstractController
@@ -24,12 +27,21 @@ class BookingController extends AbstractController
         Event $event,
         EntityManagerInterface $em,
         LocationRepository $locationRepo,
-        BookingRepository $bookingRepo
+        BookingRepository $bookingRepo,
+        SessionInterface $session,
+        UserRepository $userRepository
     ): Response {
-        //session : $user = $this->getUser();
-        $user = $this->getUser() ?? $em->getRepository(User::class)->find(49);
+        //user statique
+        //$user = $this->getUser() ?? $em->getRepository(User::class)->find(49);
 
-        if ($event->getUser() !== $user) {
+        /*if ($event->getUser() !== $user) {
+            throw $this->createAccessDeniedException('You are not allowed to book for this event.');
+        }*/
+        //session
+        $userId = $session->get('user_id');
+        $user = $userRepository->find($userId);
+
+        if (!$user || $event->getUser() !== $user) {
             throw $this->createAccessDeniedException('You are not allowed to book for this event.');
         }
 
@@ -78,9 +90,32 @@ class BookingController extends AbstractController
     }
 
     #[Route('/my-bookings', name: 'booking_list', methods: ['GET'])]
-    public function myBookings(EntityManagerInterface $em): Response
+    public function myBookings(EntityManagerInterface $em, SessionInterface $session, UserRepository $userRepository): Response
     {
-        $user = $this->getUser() ?? $em->getRepository(User::class)->find(49);
+        //user statique
+        //$user = $this->getUser() ?? $em->getRepository(User::class)->find(49);
+
+        //session
+        /*$userId = $session->get('user_id');
+        $user = $userRepository->find($userId);
+
+        if (!$user) {
+            throw $this->createAccessDeniedException('Please log in to view your bookings.');
+        }*/
+
+        $userId = $session->get('user_id');
+        // Redirige s'il n'est pas connecté
+        if (!$userId) {
+            $this->addFlash('error', 'Please log in to view your bookings.');
+            return $this->redirectToRoute('login');
+        }
+
+        $user = $userRepository->find($userId);
+        if (!$user) {
+            $this->addFlash('error', 'User not found.');
+            return $this->redirectToRoute('login');
+        }
+
         $events = $em->getRepository(Event::class)->findBy(['user' => $user]);
         $bookings = $em->getRepository(Booking::class)->findBy(['event' => $events]);
 
@@ -102,12 +137,19 @@ class BookingController extends AbstractController
     }
 
     #[Route('/{id}/edit', name: 'booking_edit', methods: ['GET', 'POST'])]
-    public function edit(Request $request, Booking $booking, EntityManagerInterface $em): Response
+    public function edit(Request $request, Booking $booking, EntityManagerInterface $em, SessionInterface $session, UserRepository $userRepository): Response
     {
-        //session : $user = $this->getUser();
-        $user = $this->getUser() ?? $em->getRepository(User::class)->find(49);
+        //user statique
+        //$user = $this->getUser() ?? $em->getRepository(User::class)->find(49);
 
-        if ($booking->getEvent()->getUser() !== $user) {
+        /*if ($booking->getEvent()->getUser() !== $user) {
+            throw $this->createAccessDeniedException('You are not allowed to edit this booking.');
+        }*/
+        //session
+        $userId = $session->get('user_id');
+        $user = $userRepository->find($userId);
+
+        if (!$user || $booking->getEvent()->getUser() !== $user) {
             throw $this->createAccessDeniedException('You are not allowed to edit this booking.');
         }
 
@@ -144,12 +186,19 @@ class BookingController extends AbstractController
     }
 
     #[Route('/{id}', name: 'booking_delete', methods: ['POST'])]
-    public function delete(Request $request, Booking $booking, EntityManagerInterface $em): Response
+    public function delete(Request $request, Booking $booking, EntityManagerInterface $em, SessionInterface $session, UserRepository $userRepository): Response
     {
-        //session : $user = $this->getUser();
-        $user = $this->getUser() ?? $em->getRepository(User::class)->find(49);
+        //user statique
+        //$user = $this->getUser() ?? $em->getRepository(User::class)->find(49);
 
-        if ($booking->getEvent()->getUser() !== $user) {
+        /*if ($booking->getEvent()->getUser() !== $user) {
+            throw $this->createAccessDeniedException('You are not allowed to delete this booking.');
+        }*/
+        //session
+        $userId = $session->get('user_id');
+        $user = $userRepository->find($userId);
+
+        if (!$user || $booking->getEvent()->getUser() !== $user) {
             throw $this->createAccessDeniedException('You are not allowed to delete this booking.');
         }
 
@@ -160,6 +209,33 @@ class BookingController extends AbstractController
         }
 
         return $this->redirectToRoute('booking_list', [], Response::HTTP_SEE_OTHER);
+    }
+
+    #[Route('/{id}/download', name: 'booking_download', methods: ['GET'])]
+    public function downloadPdf(Booking $booking, Pdf $knpSnappyPdf): Response
+    {
+        $eventImage = null;
+        $locationImage = null;
+
+        if ($booking->getEvent()->getImageData()) {
+            $eventImage = base64_encode(stream_get_contents($booking->getEvent()->getImageData()));
+        }
+
+        if ($booking->getLocation()->getImageData()) {
+            $locationImage = base64_encode(stream_get_contents($booking->getLocation()->getImageData()));
+        }
+        $html = $this->renderView('booking/pdfBooking.html.twig', [
+            'booking' => $booking,
+            'eventImage' => $eventImage,
+            'locationImage' => $locationImage,
+        ]);
+
+        $pdfContent = $knpSnappyPdf->getOutputFromHtml($html);
+
+        return new Response($pdfContent, 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="booking-details.pdf"'
+        ]);
     }
 
 

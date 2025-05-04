@@ -1,0 +1,433 @@
+{% extends 'admin/baseAdmin.html.twig' %}
+
+{% block title %}Statistics Dashboard{% endblock %}
+
+{% block section %}
+
+  <section class="section">
+    <div class="container-fluid">
+      
+      <div class="title-wrapper pt-30">
+        <div class="row align-items-center">
+          <div class="col-md-6">
+            <div class="title">
+              <h2>Statistics Dashboard</h2>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row mt-4">
+        <div class="col-xl-3 col-lg-4 col-sm-6">
+          <div class="icon-card mb-30">
+            <div class="icon success">
+              <i class="lni lni-calendar"></i>
+            </div>
+            <div class="content">
+              <h6 class="mb-10">Total Events</h6>
+              <h3 class="text-bold mb-10">{{ totalEvents }}</h3>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-xl-3 col-lg-4 col-sm-6">
+          <div class="icon-card mb-30">
+            <div class="icon primary">
+              <i class="lni lni-map"></i>
+            </div>
+            <div class="content">
+              <h6 class="mb-10">Total Locations</h6>
+              <h3 class="text-bold mb-10">{{ totalLocations }}</h3>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-xl-3 col-lg-4 col-sm-6">
+          <div class="icon-card mb-30">
+            <div class="icon warning">
+              <i class="lni lni-ticket"></i>
+            </div>
+            <div class="content">
+              <h6 class="mb-10">Total Bookings</h6>
+              <h3 class="text-bold mb-10">{{ totalBookings }}</h3>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-xl-3 col-lg-4 col-sm-6">
+          <div class="icon-card mb-30">
+            <div class="icon danger">
+              <i class="lni lni-pie-chart"></i>
+            </div>
+            <div class="content">
+              <h6 class="mb-10">Occupation Rate</h6>
+              <h3 class="text-bold mb-10">{{ occupationRate }}%</h3>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row mt-4">
+        <div class="col-lg-6">
+          <div class="card-style mb-30">
+            <div class="title d-flex justify-content-between">
+              <h6 class="text-medium mb-30">Events Status</h6>
+            </div>
+            <div style="height: 300px; width: 100%; position: relative;">
+            <canvas id="eventsChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row mt-4">
+  <div class="col-lg-6">
+    <div class="card-style mb-30">
+      <div class="title d-flex justify-content-between">
+        <h6 class="text-medium mb-30">Monthly Bookings</h6>
+      </div>
+      <div style="height: 300px; width: 100%; position: relative;">
+      <canvas id="monthlyBookingsChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-6">
+    <div class="card-style mb-30">
+      <div class="title d-flex justify-content-between">
+        <h6 class="text-medium mb-30">Top 5 Locations</h6>
+      </div>
+      <div style="height: 300px; width: 100%; position: relative;">
+        <canvas id="topLocationsChart"></canvas>
+        </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="row mt-4">
+  <div class="col-lg-6">
+    <div class="card-style mb-30">
+      <div class="title d-flex justify-content-between">
+        <h6 class="text-medium mb-30">Price Distribution</h6>
+      </div>
+      <div style="height: 300px; width: 100%; position: relative;">
+        <canvas id="priceDistributionChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-6">
+    <div class="card-style mb-30">
+      <div class="title d-flex justify-content-between">
+        <h6 class="text-medium mb-30">Capacity Distribution</h6>
+      </div>
+      <div style="height: 300px; width: 100%; position: relative;">
+        <canvas id="capacityDistributionChart"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row mt-4">
+  <div class="col-lg-6">
+    <div class="card-style mb-30">
+      <div class="title d-flex justify-content-between">
+        <h6 class="text-medium mb-30">Bookings Status</h6>
+      </div>
+      <div style="height: 300px; width: 100%; position: relative;">
+        <canvas id="bookingsStatusChart"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+    </div>
+  </section>
+{% endblock %}
+{% block javascripts %}
+{{ parent() }}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  const ctx = document.getElementById('eventsChart').getContext('2d');
+  const eventsChart = new Chart(ctx, {
+  type: 'doughnut',
+  data: {
+    labels: ['Booked', 'Not Booked'],
+    datasets: [{
+      label: 'Events',
+      data: [{{ eventsBooked }}, {{ eventsNotBooked }}],
+      backgroundColor: ['#4CAF50', '#F44336'],
+      hoverOffset: 4
+    }]
+  },
+  options: {
+    animation: {
+      duration: 0 // ✅ Pas d'animation = stable
+    },
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: 'top'
+      }
+    }
+  }
+});
+
+  // Monthly Bookings (bar)
+  const monthlyCtx = document.getElementById('monthlyBookingsChart').getContext('2d');
+const monthlyBookingsChart = new Chart(monthlyCtx, {
+  type: 'bar',
+  data: {
+    labels: [
+    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+    ],
+    datasets: [{
+      label: 'Bookings',
+      data: {{ bookingsPerMonth|json_encode()|raw }},
+      backgroundColor: 'rgba(74, 108, 247, 0.7)',
+      borderColor: 'rgba(74, 108, 247, 1)',
+      borderWidth: 1,
+      borderRadius: 5,
+      barThickness: 30
+    }]
+  },
+  options: {
+    animation: {
+      duration: 0 // ✅ Pas d'animation = stable
+    },
+    responsive: true,
+    maintainAspectRatio: false,
+    scales: {
+      x: {
+        title: {
+          display: true,
+          text: 'Month'
+        },
+        grid: {
+          display: false
+        }
+      },
+      y: {
+        title: {
+          display: true,
+          text: 'Bookings'
+        },
+        beginAtZero: true,
+        ticks: {
+          stepSize: 1
+        }
+      }
+    },
+    plugins: {
+      legend: {
+        display: false
+      }
+    }
+  }
+});
+// Top 5 Locations (bar)
+const topLocationsCtx = document.getElementById('topLocationsChart').getContext('2d');
+const topLocationsChart = new Chart(topLocationsCtx, {
+  type: 'bar',
+  data: {
+    labels: {{ topLocations|map(location => location.locationName)|json_encode()|raw }},
+    datasets: [{
+      label: 'Number of Bookings',
+      data: {{ topLocations|map(location => location.bookingsCount)|json_encode()|raw }},
+      backgroundColor: 'rgba(102, 51, 153, 0.7)',
+      borderColor: 'rgba(102, 51, 153, 1)',
+      borderWidth: 1,
+      borderRadius: 5,
+      barThickness: 30
+    }]
+  },
+  options: {
+    animation: {
+      duration: 0
+    },
+    responsive: true,
+    maintainAspectRatio: false,
+    scales: {
+      x: {
+        title: {
+          display: true,
+          text: 'Location'
+        },
+         ticks: {
+      maxRotation: 0,  // ✅ Incliner seulement de 20°
+      minRotation: 0,
+      font: {
+        size: 10        // ✅ Réduire la taille du texte
+      }
+    },
+        grid: {
+          display: false
+        }
+      },
+      y: {
+        title: {
+          display: true,
+          text: 'Number of Bookings'
+        },
+        beginAtZero: true,
+        ticks: {
+          stepSize: 1
+        }
+      }
+    },
+    plugins: {
+      legend: {
+        display: false
+      },
+      title: {
+        display: true,
+        text: 'Most Popular Locations'
+      }
+    }
+  }
+});
+
+// Price Distribution Chart
+const priceCtx = document.getElementById('priceDistributionChart').getContext('2d');
+const priceDistributionChart = new Chart(priceCtx, {
+  type: 'bar',
+  data: {
+    labels: {{ priceDistribution|map(item => item.priceRange)|json_encode()|raw }},
+    datasets: [{
+      label: 'Number of Locations',
+      data: {{ priceDistribution|map(item => item.count)|json_encode()|raw }},
+      backgroundColor: 'rgba(102, 51, 153, 0.7)',
+      borderColor: 'rgba(102, 51, 153, 1)',
+      borderWidth: 1,
+      borderRadius: 5
+    }]
+  },
+  options: {
+    animation: {
+      duration: 0
+    },
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        display: false
+      },
+      title: {
+        display: true,
+        text: 'Location Price Distribution'
+      }
+    },
+    scales: {
+      x: {
+        title: {
+          display: true,
+          text: 'Price Range (DT)'
+        },
+        grid: {
+          display: false
+        }
+      },
+      y: {
+        title: {
+          display: true,
+          text: 'Number of Locations'
+        },
+        beginAtZero: true,
+        ticks: {
+          stepSize: 1
+        }
+      }
+    }
+  }
+});
+
+// Capacity Distribution Chart
+const capacityCtx = document.getElementById('capacityDistributionChart').getContext('2d');
+const capacityDistributionChart = new Chart(capacityCtx, {
+  type: 'bar',
+  data: {
+    labels: {{ capacityDistribution|map(item => item.capacityRange)|json_encode()|raw }},
+    datasets: [{
+      label: 'Number of Locations',
+      data: {{ capacityDistribution|map(item => item.count)|json_encode()|raw }},
+      backgroundColor: 'rgba(102, 51, 153, 0.7)',
+      borderColor: 'rgba(102, 51, 153, 1)',
+      borderWidth: 1,
+      borderRadius: 5
+    }]
+  },
+  options: {
+    animation: {
+      duration: 0
+    },
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        display: false
+      },
+      title: {
+        display: true,
+        text: 'Location Capacity Distribution'
+      }
+    },
+    scales: {
+      x: {
+        title: {
+          display: true,
+          text: 'Capacity Range'
+        },
+        grid: {
+          display: false
+        }
+      },
+      y: {
+        title: {
+          display: true,
+          text: 'Number of Locations'
+        },
+        beginAtZero: true,
+        ticks: {
+          stepSize: 1
+        }
+      }
+    }
+  }
+});
+
+// Bookings Status (doughnut)
+const bookingsStatusCtx = document.getElementById('bookingsStatusChart').getContext('2d');
+const bookingsStatusChart = new Chart(bookingsStatusCtx, {
+  type: 'doughnut',
+  data: {
+    labels: ['Upcoming', 'In Progress', 'Completed'],
+    datasets: [{
+      label: 'Bookings Status',
+      data: [{{ upcomingBookings }}, {{ inProgressBookings }}, {{ completedBookings }}],
+      backgroundColor: ['#36A2EB', '#FFCE56', '#4CAF50'],
+      hoverOffset: 4
+    }]
+  },
+  options: {
+    animation: {
+      duration: 0
+    },
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: 'top'
+      }
+    }
+  }
+});
+
+
+
+</script>
+
+{% endblock %}

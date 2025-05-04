@@ -90,4 +90,25 @@ class UserRepository extends ServiceEntityRepository
             ->getQuery()
             ->getOneOrNullResult(); // Renvoyer un seul utilisateur ou null
     }
+
+
+
+
+
+
+
+
+
+
+public function findByUsernameDQL(string $username):array
+    {
+        return $this->getEntityManager()
+            ->createQuery('
+                SELECT u
+                FROM App\Entity\User u
+                WHERE u.username LIKE :username
+            ')
+            ->setParameter('username', '%' . $username . '%')
+            ->getResult();
+    }
 }

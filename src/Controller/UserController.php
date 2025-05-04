@@ -396,11 +396,7 @@ public function saisirDuree(
 
 
 
-    #[Route('/baseFournisseur', name: 'baseFournisseur')]
-    public function afficheFournisseur(): Response
-    {
-        return $this->render('admin/baseFournisseur.html.twig');
-    }
+
 
 
 
@@ -445,7 +441,7 @@ public function saisirDuree(
     
         if ($imageFile && in_array($imageFile->getMimeType(), ['image/jpeg', 'image/png', 'image/webp'])) {
             $fileName = uniqid() . '.' . $imageFile->guessExtension();
-            $imageFile->move($this->getParameter('uploads_directory'), $fileName);
+            $imageFile->move($this->getParameter('profile_uploads_directory'), $fileName);
     
             $user->setImgPath($fileName);
             $em->flush();
@@ -474,5 +470,27 @@ public function deleteUser(int $idUser, EntityManagerInterface $em): Response
     $this->addFlash('success', 'User deleted successfully.');
     return $this->redirectToRoute('app_user_index');
 }
+
+
+
+
+
+#[Route('/search-by-username', name: 'search_by_username')]
+public function searchByUsername(Request $request, UserRepository $userRepository): Response
+{
+    $username = $request->query->get('username');
+
+    // Si aucun nom d'utilisateur n'est soumis, on affiche tous les utilisateurs
+    if ($username) {
+        $users = $userRepository->findByUsernameDQL($username);
+    } else {
+        $users = $userRepository->findAll();
+    }
+
+    return $this->render('admin/listAdmins.html.twig', [
+        'users' => $users,
+    ]);
+}
+
 
 }

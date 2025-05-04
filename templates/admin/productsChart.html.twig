@@ -1,20 +1,96 @@
-{{ importmap() }}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Charts</title>
 
-{% block stylesheets %}
+    {{ importmap() }}
+
+    <!-- Fallback: Include Chart.js via CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
     <style>
         body {
-            background-color: #ffffff !important; /* Blanc */
+            background-color: #ffffff;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
         }
+
         section {
-            background-color: #ffffff !important; /* Blanc */
+            background-color: #ffffff;
+            min-height: 100vh;
+            padding-top: 50px;
+        }
+
+        .menu-toggle-btn {
+            margin: 15px;
+        }
+
+        .back-btn {
+            background-color: #5A426E;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 12px;
+            font-size: 16px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .back-btn:hover {
+            background-color: #99707E;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+
+        .chart-card {
+            max-width: 800px;
+            margin: 0 auto 40px auto;
+            padding: 2rem;
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.07);
+        }
+
+        .chart-card.supplier-card,
+        .chart-card.stock-card {
+            max-width: 1000px;
+        }
+
+        .chart-card h2 {
+            text-align: center;
+            color: #533C56;
+            margin-bottom: 1.5rem;
+            font-weight: 600;
+        }
+
+        .chart-container {
+            position: relative;
+            width: 100%;
+            height: 400px;
+        }
+
+        .text-muted {
+            text-align: center;
+            color: #6c757d;
+        }
+
+        canvas {
+            width: 100% !important;
+            height: 100% !important;
         }
     </style>
-{% endblock %}
-
-{% block section %}
-
-<section style="background-color: white; min-height: 100vh; padding-top: 50px;">
-    <div class="menu-toggle-btn" style="margin: 15px;">
+</head>
+<body>
+    <section>
+        <div class="menu-toggle-btn" style="margin: 15px;">
         <a href="javascript:history.back()" class="btn btn-primary" style="
             background-color: #5A426E;
             color: white;
@@ -28,37 +104,131 @@
             ← Back
         </a>
     </div>
-    </div>
-    <div class="container">
-        <div class="card shadow-sm p-4" style="max-width: 800px; margin: auto;">
-            <h2 class="text-center mb-4">📊 Products per Category</h2>
-            <div style="position: relative; width: 100%; height: 400px;">
-                <div data-controller="symfony--ux-chartjs--chart" style="width: 100%; height: 400px;">
-                    {{ render_chart(chart) }}
-                </div>
+
+        <div class="container">
+            <!-- Chart 1: Products per Category -->
+            <div class="chart-card">
+                <h2>📊 Products per Category</h2>
+                {% set data = chart.data.datasets[0].data %}
+                {% set hasData = data|length > 0 and data|reduce((carry, item) => carry + (item|number_format(0)), 0) > 0 %}
+                {% if hasData %}
+                    <div class="chart-container">
+                        <canvas id="productsPerCategoryChart"></canvas>
+                    </div>
+                {% else %}
+                    <p class="text-muted">No data available for Products per Category.</p>
+                {% endif %}
+            </div>
+
+            <!-- Chart 2: Products by Price Range -->
+            <div class="chart-card">
+                <h2>💲 Products by Price Range</h2>
+                {% set data = priceChart.data.datasets[0].data %}
+                {% set hasData = data|length > 0 and data|reduce((carry, item) => carry + (item|number_format(0)), 0) > 0 %}
+                {% if hasData %}
+                    <div class="chart-container">
+                        <canvas id="productsByPriceRangeChart"></canvas>
+                    </div>
+                {% else %}
+                    <p class="text-muted">No data available for Products by Price Range.</p>
+                {% endif %}
+            </div>
+
+            <!-- Chart 3: Supplier Stock Available vs Minimum -->
+            <div class="chart-card supplier-card">
+                <h2>🏢 Supplier Stock Comparison</h2>
+                {% set hasData = supplierChart.data.datasets[0].data|length > 0 or supplierChart.data.datasets[1].data|length > 0 %}
+                {% if hasData %}
+                    <div class="chart-container">
+                        <canvas id="supplierStockChart"></canvas>
+                    </div>
+                {% else %}
+                    <p class="text-muted">No data available for Supplier Stock Comparison.</p>
+                {% endif %}
+            </div>
+
+            <!-- Chart 4: Stock Available per Product -->
+            <div class="chart-card stock-card">
+                <h2>📦 Stock Available per Product</h2>
+                {% set data = stockPerProductChart.data.datasets[0].data %}
+                {% set hasData = data|length > 0 and data|reduce((carry, item) => carry + (item|number_format(0)), 0) > 0 %}
+                {% if hasData %}
+                    <div class="chart-container">
+                        <canvas id="stockPerProductChart"></canvas>
+                    </div>
+                {% else %}
+                    <p class="text-muted">No data available for Stock Available per Product.</p>
+                {% endif %}
             </div>
         </div>
-    </div>
-    <!-- Chart 2: Products by Price Range -->
-    <div class="card shadow-sm p-4 mb-5" style="max-width: 800px; margin: auto;">
-        <h2 class="text-center mb-4">💲 Products by Price Range</h2>
-        <div style="position: relative; width: 100%; height: 400px;">
-            {{ render_chart(priceChart) }}
-        </div>
-    </div>
-<!-- Chart 3: Supplier Stock Available vs Minimum -->
-<div class="card shadow-sm p-4 mb-5" style="max-width: 1000px; margin: auto;">
-    <h2 class="text-center mb-4">🏢 Supplier Stock Comparison</h2>
-    <div style="position: relative; width: 100%; height: 400px;">
-        {{ render_chart(supplierChart) }}
-    </div>
-</div>
-<!-- Chart 4: Stock Available per Product -->
-<div class="card shadow-sm p-4 mb-5" style="max-width: 1000px; margin: auto;">
-    <h2 class="text-center mb-4">📦 Stock Available per Product</h2>
-    <div style="position: relative; width: 100%; height: 400px;">
-        {{ render_chart(stockPerProductChart) }}
-    </div>
-</div>
-</section>
-{% endblock %}
+    </section>
+
+    <!-- Pass chart data to JavaScript -->
+    <script>
+        // Chart data passed from controller
+        const productsPerCategoryData = {{ chart.data|json_encode|raw }};
+        const productsPerCategoryOptions = {{ chart.options|json_encode|raw }};
+        const productsByPriceRangeData = {{ priceChart.data|json_encode|raw }};
+        const productsByPriceRangeOptions = {{ priceChart.options|json_encode|raw }};
+        const supplierStockData = {{ supplierChart.data|json_encode|raw }};
+        const supplierStockOptions = {{ supplierChart.options|json_encode|raw }};
+        const stockPerProductData = {{ stockPerProductChart.data|json_encode|raw }};
+        const stockPerProductOptions = {{ stockPerProductChart.options|json_encode|raw }};
+
+        // Debugging: Log data to console
+        console.log('Products per Category Data:', productsPerCategoryData);
+        console.log('Products by Price Range Data:', productsByPriceRangeData);
+        console.log('Supplier Stock Data:', supplierStockData);
+        console.log('Stock per Product Data:', stockPerProductData);
+
+        document.addEventListener('DOMContentLoaded', function () {
+            // Chart 1: Products per Category
+            if (productsPerCategoryData.labels.length > 0) {
+                const ctx1 = document.getElementById('productsPerCategoryChart').getContext('2d');
+                new Chart(ctx1, {
+                    type: 'bar',
+                    data: productsPerCategoryData,
+                    options: productsPerCategoryOptions
+                });
+            }
+
+            // Chart 2: Products by Price Range
+            if (productsByPriceRangeData.labels.length > 0) {
+                const ctx2 = document.getElementById('productsByPriceRangeChart').getContext('2d');
+                new Chart(ctx2, {
+                    type: 'doughnut',
+                    data: productsByPriceRangeData,
+                    options: productsByPriceRangeOptions
+                });
+            }
+
+            // Chart 3: Supplier Stock Comparison
+            if (supplierStockData.labels.length > 0) {
+                const ctx3 = document.getElementById('supplierStockChart').getContext('2d');
+                new Chart(ctx3, {
+                    type: 'bar',
+                    data: supplierStockData,
+                    options: supplierStockOptions
+                });
+            }
+
+            // Chart 4: Stock Available per Product
+            if (stockPerProductData.labels.length > 0) {
+                const ctx4 = document.getElementById('stockPerProductChart').getContext('2d');
+                new Chart(ctx4, {
+                    type: 'bar',
+                    data: stockPerProductData,
+                    options: stockPerProductOptions
+                });
+            }
+
+            // Debugging: Check if Chart.js is loaded
+            if (typeof Chart === 'undefined') {
+                console.error('Chart.js is not loaded.');
+            } else {
+                console.log('Chart.js is loaded successfully.');
+            }
+        });
+    </script>
+</body>
+</html>

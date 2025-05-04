@@ -1,0 +1,125 @@
+{% extends 'admin/baseAdmin.html.twig' %}
+
+{% block head %}
+{{ parent() }}
+<style>
+.admin-mui-wrapper {
+    min-height: 600px;
+    width: 700px;
+    padding: 20px;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+     margin-top: 40px; 
+}
+.admin-todo-title {
+    text-align: center; 
+    margin-bottom: 20px; 
+    font-size: 28px; 
+}
+.admin-filters {
+    justify-content: center;
+    margin-bottom: 20px;
+    display: flex;
+    gap: 10px;
+}
+input[type="text"] {
+    padding: 8px;
+    width: 300px;
+    border-radius: 10px;
+    border: 1px solid #ccc;
+}
+button {
+    padding: 8px 12px;
+    border: none;
+    background-color: #6b336e;
+    color: white;
+    border-radius: 10px;
+}
+.admin-todo-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.todo-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #f9f9f9;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    cursor: grab;
+    transition: background 0.2s ease;
+}
+.todo-item.dragging {
+    background: #ececec;
+}
+.task-title {
+    flex: 2;
+}
+.task-status {
+    flex: 1;
+    text-align: center;
+}
+.task-actions {
+    flex: 1;
+    text-align: right;
+}
+.task-actions a {
+    margin: 0 5px;
+    text-decoration: none;
+}
+</style>
+{% endblock %}
+
+
+{% block section %}
+<section class="section">
+  <div class="container-fluid d-flex justify-content-center">
+    <div class="admin-mui-wrapper">
+        <h2 class="admin-todo-title">📝 Admin To-Do List</h2>
+
+        <div class="admin-filters" style="margin-bottom: 20px;">
+            <form method="POST" action="{{ path('admin_todo_add') }}">
+                <input type="text" name="title" placeholder="New Task..." required>
+                <button type="submit">Add</button>
+            </form>
+        </div>
+
+        <!-- ✅ On utilise une liste flex au lieu d'une table -->
+        <div id="todo-list" class="admin-todo-list">
+            {% for task in tasks %}
+                <div class="todo-item">
+                    <div class="task-title">
+                        {% if task.isDone %}
+                            <del>{{ task.title }}</del>
+                        {% else %}
+                            {{ task.title }}
+                        {% endif %}
+                    </div>
+                    <div class="task-status">
+                        {% if task.isDone %}
+                            <span style="color: green;">✅ Done</span>
+                        {% else %}
+                            <span style="color: orange;">⏳ In Progress</span>
+                        {% endif %}
+                    </div>
+                    <div class="task-actions">
+                        <a href="{{ path('admin_todo_toggle', {index: loop.index0}) }}">✅</a>
+                        <a href="{{ path('admin_todo_delete', {index: loop.index0}) }}">❌</a>
+                    </div>
+                </div>
+            {% else %}
+                <div class="todo-item">
+                    No tasks yet.
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+
+

@@ -5,10 +5,18 @@
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
 
-    uploads_directory: '%kernel.project_dir%/public/uploads/profile_images'
+
+    uploads_directory: '%kernel.project_dir%/public/uploads'
+    profile_uploads_directory: '%kernel.project_dir%/public/uploads/profile_images'
+
     # ✅ Stripe Configuration
     stripe_secret_key: '%env(STRIPE_SECRET_KEY)%'
     stripe_public_key: '%env(STRIPE_PUBLIC_KEY)%'
+
+    #uploads_directory: '%kernel.project_dir%/public/uploads/profile_images'
+    recaptcha_site_key: '%env(RECAPTCHA_SITE_KEY)%'
+    recaptcha_secret_key: '%env(RECAPTCHA_SECRET_KEY)%'
+
 
 services:
     # default configuration for services in *this* file

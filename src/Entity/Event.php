@@ -183,10 +183,24 @@ class Event
 
     #[ORM\OneToMany(targetEntity: Booking::class, mappedBy: 'event')]
     private Collection $bookings;
+    #[ORM\Column(name: "frame_vr_link", type: "string", nullable: true)]
+    private ?string $frameVrLink = null;
 
     public function __construct()
     {
         $this->bookings = new ArrayCollection();
+    }
+    // Getter
+    public function getFrameVrLink(): ?string
+    {
+        return $this->frameVrLink;
+    }
+
+    // Setter
+    public function setFrameVrLink(?string $frameVrLink): self
+    {
+        $this->frameVrLink = $frameVrLink;
+        return $this;
     }
 
     /**
