@@ -20,3 +20,4 @@ def predict_sales(mois_suivant=13):
 if __name__ == '__main__':
     sales_prediction = predict_sales()
     print(f"{sales_prediction}")
+

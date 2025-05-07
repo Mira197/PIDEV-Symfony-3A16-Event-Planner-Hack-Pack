@@ -14,7 +14,7 @@ use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 class AyaQRCodeController extends AbstractController
 {
     private $builder;
-    private $orderRepository;  
+    private $orderRepository;
 
     public function __construct(BuilderInterface $builder, OrderRepository $orderRepository)
     {
