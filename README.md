@@ -66,8 +66,8 @@ The platform provides 5 main management modules:
 ### 5. Forum Management
 
 - 💬 **User-generated discussions** – users can create and publish topics to initiate conversations within the community.
-- 💡 **Reply and engagement system** with upvotes, likes, and threaded responses to encourage interaction.
-- 🔍 **Filtering by category and popularity** to help users explore trending or relevant discussions.
+- 🚨 **Bad words detection system** to automatically detect offensive language in posts and comments.
+- 🗑️ **Automatic removal of flagged content** – publications reported by users are reviewed and deleted if necessary.
 - 🚩 **Report system** allowing users to flag inappropriate or abusive content for review.
 - 🧠 **Sentiment analysis** on forum replies to detect tone and help moderators identify potential conflicts or negativity.
 - 📊 **Forum statistics** showing activity trends such as number of topics, most active users, and most liked replies.
@@ -153,11 +153,11 @@ The platform provides 5 main management modules:
 6. **Install wkhtmltopdf (for PDF generation)**:
    Download the Windows 64-bit installer from :
     👉 https://wkhtmltopdf.org/downloads.html
-### 👥 Top Contributors
+<!-- ### 👥 Top Contributors
 
 <a href="https://github.com/Mira197/PIDEV-Symfony-3A16-Event-Planner-Hack-Pack/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=Mira197/PIDEV-Symfony-3A16-Event-Planner-Hack-Pack" alt="Top Contributors" />
-</a>
+</a>-->
 
 
 ## Acknowledgments
