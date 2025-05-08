@@ -153,11 +153,12 @@ The platform provides 5 main management modules:
 6. **Install wkhtmltopdf (for PDF generation)**:
    Download the Windows 64-bit installer from :
     👉 https://wkhtmltopdf.org/downloads.html
-<!--### Top contributors:
+### 👥 Top Contributors
 
 <a href="https://github.com/Mira197/PIDEV-Symfony-3A16-Event-Planner-Hack-Pack/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=Mira197/PIDEV-Symfony-3A16-Event-Planner-Hack-Pack" alt="Top Contributors" />
-</a> -->
+</a>
+
 
 ## Acknowledgments
 This project was completed under the guidance of [Professor: Mme Ameni Rommene]
